@@ -1,0 +1,26 @@
+fileFormatVersion: 2
+guid: db66a028391fc1743b0b8d5bb6f1db49
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 94073015eacc34c1d8fc6786e43d60ca, type: 3}
+  baseLanguageID: 
+  stringIDs:
+  - John-John.Start-0
+  - John-John.Start-1
+  - John-John.Start-2
+  - John-John.Start-3
+  - John-John.Start-4
+  - John-John.Start-5
+  - John-John.Start-6
+  - John-John.Start-7
+  - John-John.Start-8
+  compilationStatus: 1
+  isSuccesfullyCompiled: 1
+  compilationErrorMessage: 
+  baseLanguage: {instanceID: 0}
+  localizations: []

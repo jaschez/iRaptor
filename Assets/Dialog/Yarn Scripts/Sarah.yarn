@@ -1,0 +1,15 @@
+title: Sarah.Start
+tags: 
+colorID: 0
+position: 233,-616
+---
+<<SetSpeaker Sarah>>
+Hola {$name}
+->Como estas?<<if $fiesta eq 0>>
+    Bien, todo genial.
+    John va a hacer una fiesta, podrias preguntarle.
+->Al final ire a la fiesta<<if $fiesta eq 1>>
+    <<SetSpeaker Sarah happy>>
+    Buah, fenomeno.
+->Ey
+===

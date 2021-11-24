@@ -1,0 +1,24 @@
+title: Start
+tags: 
+colorID: 0
+position: 393,-624
+---
+Hola, mirame.
+Soy verde, y me cago en tu mamasita
+[[Joder que duro no?|si]]
+[[Me cago yo|no]]
+===
+title: si
+tags: 
+colorID: 0
+position: 223,-304
+---
+Ahi ta
+===
+title: no
+tags: 
+colorID: 0
+position: 507,-302
+---
+A tu mama no le gusto eso
+===
