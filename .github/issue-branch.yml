@@ -1,0 +1,6 @@
+autoCloseIssue: true
+prefix: S25112021
+defaultBranch: S25112021
+copyIssueDescriptionToPR: true
+copyIssueLabelsToPR: true
+copyIssueAssigneeToPR: true
