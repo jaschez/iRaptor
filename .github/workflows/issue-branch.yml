@@ -21,15 +21,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           silent: true
-          branchName: ${{steps.date.output.date}}
+          branchName: "S${{steps.date.output.date}}"
       - name: Create Issue Branch
         uses: robvanderleek/create-issue-branch@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           autoCloseIssue: true
-          prefix: S${{steps.date.output.date}}
-          defaultBranch: S${{steps.date.output.date}}
+          prefix: "S${{steps.date.output.date}}"
+          defaultBranch: "S${{steps.date.output.date}}"
           copyIssueDescriptionToPR: true
           copyIssueLabelsToPR: true
           copyIssueAssigneeToPR: true
