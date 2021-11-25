@@ -19,8 +19,6 @@ jobs:
         uses: robvanderleek/create-issue-branch@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          silent: true
           branchName: 'S${{steps.date.output.date}}'
       - name: Create Issue Branch
         uses: robvanderleek/create-issue-branch@main
