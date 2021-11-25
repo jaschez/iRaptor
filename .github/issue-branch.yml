@@ -1,5 +1,5 @@
 autoCloseIssue: true
-defaultBranch: "25112021"
+defaultBranch: "origin/25112021"
 copyIssueDescriptionToPR: true
 copyIssueLabelsToPR: true
 copyIssueAssigneeToPR: true
