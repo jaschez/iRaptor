@@ -1,5 +1,5 @@
 autoCloseIssue: true
-branchName: 'S25112021-issue-${issue.number}-${issue.title}'
+branchName: 'S25112021-${issue.title}-issue-${issue.number}'
 defaultBranch: S25112021
 copyIssueDescriptionToPR: true
 copyIssueLabelsToPR: true
