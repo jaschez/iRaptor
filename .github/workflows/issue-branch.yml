@@ -2,6 +2,10 @@ on:
   # The issues event below is only needed for the default (auto) mode,
   # you can remove it otherwise
   issues:
+    defaultBranch: ${{ steps.date.outputs.date }}
+    copyIssueDescriptionToPR: true
+    copyIssueLabelsToPR: true
+    copyIssueAssigneeToPR: true
     types: [ assigned ]
   pull_request:
     types: [ closed ]
