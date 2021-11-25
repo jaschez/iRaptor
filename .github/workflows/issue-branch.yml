@@ -15,13 +15,23 @@ jobs:
       - name: Get current date
         id: date
         run: echo "::set-output name=date::$(date +'%d%m%Y')"
+      - uses: actions/checkout@v2
+        with:
+          ref: "master"
+      - run: |
+          git config --local user.email "github@organization.com"
+          git config --local user.name "GitHub Actions"
+      - run: |
+          git checkout -b RC-${{ steps.todays-date.outputs.date }}
+          git push --set-upstream origin \
+            SPRINT-${{steps.date.output.date}}
       - name: Create Issue Branch
         uses: robvanderleek/create-issue-branch@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           autoCloseIssue: true
-          defaultBranch: ${{steps.date.output.date}}
+          defaultBranch: SPRINT-${{steps.date.output.date}}
           copyIssueDescriptionToPR: true
           copyIssueLabelsToPR: true
           copyIssueAssigneeToPR: true
