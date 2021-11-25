@@ -1,5 +1,8 @@
 autoCloseIssue: true
-defaultBranch: "{{ labels.0 }}"
+defaultBranch:
+- uses: ajilraju/actions-date@v0.1
+  with:
+    args: date +%d%m%Y
 copyIssueDescriptionToPR: true
 copyIssueLabelsToPR: true
 copyIssueAssigneeToPR: true
