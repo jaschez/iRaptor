@@ -1,8 +1,5 @@
 autoCloseIssue: true
-defaultBranch:
-- uses: ajilraju/actions-date@v0.1
-  with:
-    args: date +%d%m%Y
+defaultBranch: "25112021"
 copyIssueDescriptionToPR: true
 copyIssueLabelsToPR: true
 copyIssueAssigneeToPR: true
