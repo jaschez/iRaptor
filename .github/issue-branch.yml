@@ -1,6 +1,6 @@
 autoCloseIssue: true
 branches:
-  -label: enhancement
+  - label: enhancement
     prefix: S25112021/
 branchName: 'issue-${issue.number}-${issue.title}'
 defaultBranch: S25112021
