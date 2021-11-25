@@ -4,7 +4,7 @@ branches:
     prefix: S25112021/
   - label: undef
     prefix: undef/
-branchName: 'issue-${issue.number}-${issue.title}'
+branchName: 'issue-${issue.number}'
 defaultBranch: S25112021
 copyIssueDescriptionToPR: true
 copyIssueLabelsToPR: true
