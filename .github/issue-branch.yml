@@ -1,16 +1,6 @@
-steps:
-  - uses: bhowell2/github-substring-action
-    id: one
-    with:
-      value: ${issue.milestones.created_at}
-      length_from_start: 10
-  - uses: mad9000/actions-find-and-replace-string@2
-    with:
-      source: ${steps.one.outputs.substring}
-      find: '-'
-      replace: '' 
 autoCloseIssue: true
-defaultBranch: ${steps.one.outputs.substring}
+defaultBranch:
+  -run: echo date +%d%m%Y
 copyIssueDescriptionToPR: true
 copyIssueLabelsToPR: true
 copyIssueAssigneeToPR: true
