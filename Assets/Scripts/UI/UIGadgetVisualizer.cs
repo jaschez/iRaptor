@@ -7,21 +7,21 @@ public class UIGadgetVisualizer : MonoBehaviour
 {
     public GameObject unitPrefab;
 
-    Transform origin;
+    RectTransform origin;
 
     List<Slider> units;
 
     List<Slider> unitsCooldown;
 
-    public float width;
     public float offset;
+    float width;
 
     int maxUses;
     int currentUses;
 
     private void Start()
     {
-
+        
     }
 
     public void Init(int currentUses, int maxUses)
@@ -29,7 +29,9 @@ public class UIGadgetVisualizer : MonoBehaviour
         units = new List<Slider>();
         unitsCooldown = new List<Slider>();
 
-        origin = GetComponent<Transform>();
+        origin = GetComponent<RectTransform>();
+
+        width = origin.sizeDelta.x - maxUses * offset;
 
         this.currentUses = currentUses;
         this.maxUses = maxUses;
@@ -45,9 +47,8 @@ public class UIGadgetVisualizer : MonoBehaviour
             Slider slider = unit.GetComponent<Slider>();
             Slider sliderC;
 
-
             rt.localPosition = Vector2.right * (width / maxUses) * i;
-            rt.sizeDelta = new Vector2((width / maxUses) - offset, rt.sizeDelta.y);
+            rt.sizeDelta = new Vector2((width / maxUses) - offset, origin.sizeDelta.y);
 
             unitCooldown = Instantiate(unit, transform);
             unitCooldown.transform.GetChild(0).gameObject.SetActive(false);
@@ -103,7 +104,7 @@ public class UIGadgetVisualizer : MonoBehaviour
 
     void SendRanOutMsg()
     {
-        UIVisualizer.GetInstance().PopUp(PopUpType.Info, "RAN OUT", PlayerModule.GetInstance().transform, .4f, 14, 4, 2);
+        UIVisualizer.GetInstance().PopUp(PopUpType.Info, "RAN OUT", PlayerModule.GetInstance().transform, .4f, 25, 4, 2);
         SoundManager.Play(Sounds.RunOut, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
     }
 
@@ -177,7 +178,7 @@ public class UIGadgetVisualizer : MonoBehaviour
 
         SoundManager.Play(Sounds.Pump, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
 
-        UIVisualizer.GetInstance().PopUp(PopUpType.Info, "PUMPED!", player.transform, .3f, 12, 2, 1);
+        UIVisualizer.GetInstance().PopUp(PopUpType.Info, "PUMPED!", player.transform, .3f, 22, 2, 1);
 
         while (Time.time < lerpTime)
         {
