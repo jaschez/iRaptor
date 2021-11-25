@@ -1,0 +1,5 @@
+autoCloseIssue: true
+defaultBranch: "{{ labels.0 }}"
+copyIssueDescriptionToPR: true
+copyIssueLabelsToPR: true
+copyIssueAssigneeToPR: true
