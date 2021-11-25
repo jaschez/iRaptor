@@ -1,8 +1,11 @@
+steps:
+  - uses: bhowell2/github-substring-action
+    id: one
+    with:
+      value: ${issue.milestones.created_at}
+      length_from_start: 10
 autoCloseIssue: true
-defaultBranch:
-- uses: ajilraju/actions-date@v0.1
-  with:
-    args: date +%d%m%Y
+defaultBranch: ${steps.one.outputs.substring}
 copyIssueDescriptionToPR: true
 copyIssueLabelsToPR: true
 copyIssueAssigneeToPR: true
