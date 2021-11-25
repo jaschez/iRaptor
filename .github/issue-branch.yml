@@ -1,5 +1,10 @@
 autoCloseIssue: true
-defaultBranch: "origin/25112021"
+defaultBranch:
+- name: Get current time
+    uses: 1466587594/get-current-time@v2
+    id: current-time
+    with:
+      format: DDMMYYYY
 copyIssueDescriptionToPR: true
 copyIssueLabelsToPR: true
 copyIssueAssigneeToPR: true
