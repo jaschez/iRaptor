@@ -1,6 +1,0 @@
--run: echo "DATE=$(echo date '+%d%m%Y')" >> $GITHUB_ENV
-autoCloseIssue: true
-defaultBranch: $DATE
-copyIssueDescriptionToPR: true
-copyIssueLabelsToPR: true
-copyIssueAssigneeToPR: true
