@@ -1,9 +1,5 @@
 autoCloseIssue: true
-defaultBranch:
-  -run: echo date +%d%m%Y
-copyIssueDescriptionToPR: true
-copyIssueLabelsToPR: true
-copyIssueAssigneeToPR: true
+defaultBranch: ${{ steps.date.outputs.date }}
 copyIssueDescriptionToPR: true
 copyIssueLabelsToPR: true
 copyIssueAssigneeToPR: true
