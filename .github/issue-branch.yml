@@ -1,2 +1,1 @@
-autoCloseIssue: true
 branchName: 'S${%SPRINT_DATE}'
