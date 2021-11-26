@@ -1,6 +1,2 @@
 autoCloseIssue: true
-branchName: 'S25112021-${issue.title}-issue-${issue.number}'
-defaultBranch: S25112021
-copyIssueDescriptionToPR: true
-copyIssueLabelsToPR: true
-copyIssueAssigneeToPR: true
+branchName: 'S${%SPRINT_DATE}'
