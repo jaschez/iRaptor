@@ -120,6 +120,17 @@ public class UIVisualizer : MonoBehaviour
             gadgetVisualizer.AddUse();
         }
 
+        if (eventType == PlayerModule.PlayerEvent.RechargedGadgetUse)
+        {
+
+            if (player.GetGadgetUnits() == player.GetMaxGadgetUnits())
+            {
+                CamManager.GetInstance().ShakeQuake(4, 2f, false);
+            }
+
+            gadgetVisualizer.AddUse();
+        }
+
         if (eventType == PlayerModule.PlayerEvent.SpentGadgetUse)
         {
 

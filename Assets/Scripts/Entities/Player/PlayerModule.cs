@@ -131,6 +131,11 @@ public class PlayerModule : Entity
         SendEvent(PlayerEvent.SpentGadgetUse, currentGadgetUses);
     }
 
+    public void NotifyGadgetRecharge(int currentGadgetUses)
+    {
+        SendEvent(PlayerEvent.RechargedGadgetUse, currentGadgetUses);
+    }
+
     public int GetCarbonUnits()
     {
         return carbonUnits;
@@ -191,6 +196,7 @@ public class PlayerModule : Entity
 
         public static readonly PlayerEvent AddedCU = new PlayerEvent("AddedCU");
         public static readonly PlayerEvent AddedGadgetUse = new PlayerEvent("AddedDash");
+        public static readonly PlayerEvent RechargedGadgetUse = new PlayerEvent("RechargedDash");
         public static readonly PlayerEvent SpentGadgetUse = new PlayerEvent("SpentDash");
         public static readonly PlayerEvent BuffActivation = new PlayerEvent("BuffActivation");
         public static readonly PlayerEvent BuffExtension = new PlayerEvent("BuffExtension");
