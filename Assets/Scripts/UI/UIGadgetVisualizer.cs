@@ -12,6 +12,9 @@ public class UIGadgetVisualizer : MonoBehaviour
     List<Slider> units;
 
     List<Slider> unitsCooldown;
+    Color origUnitColor;
+
+    Vector2 origUnitSize;
 
     public float offset;
     float width;
@@ -32,6 +35,9 @@ public class UIGadgetVisualizer : MonoBehaviour
         origin = GetComponent<RectTransform>();
 
         width = origin.sizeDelta.x - maxUses * offset;
+
+        origUnitColor = unitPrefab.GetComponent<Slider>().fillRect.GetComponent<Image>().color;
+        origUnitSize = unitPrefab.GetComponent<Slider>().fillRect.sizeDelta;
 
         this.currentUses = currentUses;
         this.maxUses = maxUses;
@@ -126,12 +132,20 @@ public class UIGadgetVisualizer : MonoBehaviour
                     unitsCooldown[i - 1].value = 1;
                 }
             }
+
+            if (currentUses == maxUses)
+            {
+                StartCoroutine(RefuelAnimation());
+            }
         }
     }
 
     IEnumerator SpentAnimation(int useIndex)
     {
         float animTime = Time.time + .2f;
+
+        units[useIndex].fillRect.GetComponent<Image>().color = origUnitColor;
+        units[useIndex].fillRect.sizeDelta = origUnitSize;
 
         while (animTime > Time.time)
         {
@@ -163,22 +177,19 @@ public class UIGadgetVisualizer : MonoBehaviour
         }
 
         unitsCooldown[currentUses - 1].value = 0;
+    }
 
+    IEnumerator RefuelAnimation()
+    {
         RectTransform rt = units[currentUses - 1].fillRect;
 
         float lerpTime = Time.time + .5f;
         Vector2 origSize = rt.sizeDelta;
 
         Image unitImg = rt.GetComponent<Image>();
-        Color origUnitColor = unitImg.color;
-        Color lerpColor = new Color (.8f, .8f, .8f, 1);
 
         rt.sizeDelta += Vector2.up * 200;
         unitImg.color = Color.white;
-
-        SoundManager.Play(Sounds.Pump, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
-
-        UIVisualizer.GetInstance().PopUp(PopUpType.Info, "PUMPED!", player.transform, .3f, 22, 2, 1);
 
         while (Time.time < lerpTime)
         {

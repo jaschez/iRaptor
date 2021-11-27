@@ -13,10 +13,13 @@ public abstract class Gadget : MonoBehaviour
 
     private int _gadgetUnits = 0;
 
-    protected float cooldown = .5f;
+    protected float cooldown = .3f;
+    protected float rechargeCooldown = .2f;
     protected float finishCooldownTime = 0;
+    protected float rechargeCooldownTime = 0;
 
     protected bool canUse = true;
+    protected bool exhausted = false;
 
     //Propiedad que gestiona los usos disponibles del gadget
     protected int gadgetUnits
@@ -52,19 +55,39 @@ public abstract class Gadget : MonoBehaviour
     {
         if (Controls.GetDashKeyDown())
         {
-            if (gadgetUnits >= spentPerUse && canUse) {
+            if (gadgetUnits >= spentPerUse && canUse && !exhausted) {
                 Use();
             }
             else
             {
-                if (gadgetUnits < spentPerUse && canUse) {
+                if (exhausted) {
                     UIVisualizer.GetInstance().PopUp(PopUpType.Bad, "No energy", transform, .6f, 25);
                     SoundManager.Play(Sounds.NoEnergy, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
                 }
 
                 CamManager.GetInstance().ShakeSingle(5f);
             }
-        }    
+        }
+
+        if (gadgetUnits < maxGadgetUnits) {
+            if (finishCooldownTime < Time.time)
+            {
+                if (rechargeCooldownTime < Time.time)
+                {
+                    rechargeCooldownTime = Time.time + rechargeCooldown;
+                    
+                    AddGadgetUnit();
+                    playerModule.NotifyGadgetRecharge(gadgetUnits);
+
+                    if (gadgetUnits == maxGadgetUnits && exhausted)
+                    {
+                        UIVisualizer.GetInstance().PopUp(PopUpType.Info, "DASH RELOADED!", transform, Color.yellow, 1);
+                        SoundManager.Play(Sounds.Pump, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
+                        exhausted = false;
+                    }
+                }
+            }
+        }
     }
 
     protected abstract void Use();
