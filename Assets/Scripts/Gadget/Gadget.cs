@@ -61,7 +61,7 @@ public abstract class Gadget : MonoBehaviour
             else
             {
                 if (exhausted) {
-                    UIVisualizer.GetInstance().PopUp(PopUpType.Bad, "No energy", transform, .6f, 15);
+                    UIVisualizer.GetInstance().PopUp(PopUpType.Bad, "No energy", transform, .6f, 25);
                     SoundManager.Play(Sounds.NoEnergy, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
                 }
 
