@@ -1,1 +1,2 @@
 branchName: 'S${%SPRINT_DATE}'
+defaultBranch: 'development'
