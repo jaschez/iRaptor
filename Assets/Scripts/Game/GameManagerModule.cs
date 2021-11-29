@@ -187,8 +187,8 @@ public class GameManagerModule : MonoBehaviour
 
     void LoadUpgradeScene()
     {
-        sceneState = SceneState.Upgrade;
-        SceneManager.LoadScene("Upgrade");
+        //sceneState = SceneState.Upgrade;
+        SceneManager.LoadScene(1);
     }
 
     public static GameManagerModule GetInstance()
