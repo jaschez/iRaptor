@@ -14,7 +14,6 @@ public class DashGadget : Gadget
     SpriteRenderer sr;
 
     float duration = .04f;
-    float thrust = 70;
 
     float maxDistance = 70;
 
@@ -65,9 +64,16 @@ public class DashGadget : Gadget
     protected override void Use()
     {
         finishCooldownTime = Time.time + cooldown;
+        rechargeCooldownTime = finishCooldownTime + rechargeCooldown;
+
         SpendUse();
 
         SoundManager.Play(Sounds.Dash, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
+
+        if (GetUsesLeft() == 0)
+        {
+            exhausted = true;
+        }
 
 
         if (Vector2.Distance(destPosition, transform.position) > maxDistance * 2)
@@ -76,9 +82,6 @@ public class DashGadget : Gadget
         }
 
         StartCoroutine(DashCoroutine());
-
-            /*UIVisualizer.GetInstance().PopUp(PopUpType.Bad, "Unreachable", transform, Color.white, .8f, 15);
-            CamManager.GetInstance().ShakeSingle(5f);*/
     }
 
     Vector3 CalculateDashPoint(float maxDist)

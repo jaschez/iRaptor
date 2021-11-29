@@ -7,21 +7,24 @@ public class UIGadgetVisualizer : MonoBehaviour
 {
     public GameObject unitPrefab;
 
-    Transform origin;
+    RectTransform origin;
 
     List<Slider> units;
 
     List<Slider> unitsCooldown;
+    Color origUnitColor;
 
-    public float width;
+    Vector2 origUnitSize;
+
     public float offset;
+    float width;
 
     int maxUses;
     int currentUses;
 
     private void Start()
     {
-
+        
     }
 
     public void Init(int currentUses, int maxUses)
@@ -29,7 +32,12 @@ public class UIGadgetVisualizer : MonoBehaviour
         units = new List<Slider>();
         unitsCooldown = new List<Slider>();
 
-        origin = GetComponent<Transform>();
+        origin = GetComponent<RectTransform>();
+
+        width = origin.sizeDelta.x - maxUses * offset;
+
+        origUnitColor = unitPrefab.GetComponent<Slider>().fillRect.GetComponent<Image>().color;
+        origUnitSize = unitPrefab.GetComponent<Slider>().fillRect.sizeDelta;
 
         this.currentUses = currentUses;
         this.maxUses = maxUses;
@@ -45,9 +53,8 @@ public class UIGadgetVisualizer : MonoBehaviour
             Slider slider = unit.GetComponent<Slider>();
             Slider sliderC;
 
-
             rt.localPosition = Vector2.right * (width / maxUses) * i;
-            rt.sizeDelta = new Vector2((width / maxUses) - offset, rt.sizeDelta.y);
+            rt.sizeDelta = new Vector2((width / maxUses) - offset, origin.sizeDelta.y);
 
             unitCooldown = Instantiate(unit, transform);
             unitCooldown.transform.GetChild(0).gameObject.SetActive(false);
@@ -103,7 +110,7 @@ public class UIGadgetVisualizer : MonoBehaviour
 
     void SendRanOutMsg()
     {
-        UIVisualizer.GetInstance().PopUp(PopUpType.Info, "RAN OUT", PlayerModule.GetInstance().transform, .4f, 14, 4, 2);
+        UIVisualizer.GetInstance().PopUp(PopUpType.Info, "RAN OUT", PlayerModule.GetInstance().transform, .4f, 25, 4, 2);
         SoundManager.Play(Sounds.RunOut, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
     }
 
@@ -125,12 +132,20 @@ public class UIGadgetVisualizer : MonoBehaviour
                     unitsCooldown[i - 1].value = 1;
                 }
             }
+
+            if (currentUses == maxUses)
+            {
+                StartCoroutine(RefuelAnimation());
+            }
         }
     }
 
     IEnumerator SpentAnimation(int useIndex)
     {
         float animTime = Time.time + .2f;
+
+        units[useIndex].fillRect.GetComponent<Image>().color = origUnitColor;
+        units[useIndex].fillRect.sizeDelta = origUnitSize;
 
         while (animTime > Time.time)
         {
@@ -162,22 +177,19 @@ public class UIGadgetVisualizer : MonoBehaviour
         }
 
         unitsCooldown[currentUses - 1].value = 0;
+    }
 
+    IEnumerator RefuelAnimation()
+    {
         RectTransform rt = units[currentUses - 1].fillRect;
 
         float lerpTime = Time.time + .5f;
         Vector2 origSize = rt.sizeDelta;
 
         Image unitImg = rt.GetComponent<Image>();
-        Color origUnitColor = unitImg.color;
-        Color lerpColor = new Color (.8f, .8f, .8f, 1);
 
         rt.sizeDelta += Vector2.up * 200;
         unitImg.color = Color.white;
-
-        SoundManager.Play(Sounds.Pump, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
-
-        UIVisualizer.GetInstance().PopUp(PopUpType.Info, "PUMPED!", player.transform, .3f, 12, 2, 1);
 
         while (Time.time < lerpTime)
         {
