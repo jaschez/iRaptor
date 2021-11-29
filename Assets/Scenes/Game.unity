@@ -10146,8 +10146,8 @@ MonoBehaviour:
   smoothness: 3
   enemyNumber: 10
   lootNumber: 4
-  seed: 942294285
-  randomSeed: 1
+  seed: 1817120594
+  randomSeed: 0
   connectCaves: 1
 --- !u!4 &1558074469
 Transform:

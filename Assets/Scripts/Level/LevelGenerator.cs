@@ -101,9 +101,9 @@ public class LevelGenerator : MonoBehaviour
         foreach (Vector2 c in mapInfo.GetEggCoords())
         {
             Instantiate(eggPrefab, new Vector3(c.x + 0.5f, c.y + 0.5f, 1) * 16, Quaternion.identity);
-        }
+        }*/
 
-        Instantiate(exitPrefab, new Vector3(mapInfo.ExitPos.x + 0.5f, mapInfo.ExitPos.y + 0.5f, 1) * 16, Quaternion.identity);*/
+        Instantiate(exitPrefab, new Vector3(mapInfo.ExitPos.x + 0.5f, mapInfo.ExitPos.y + 0.5f, 1) * 16, Quaternion.identity);
     }
 
     private void OnDrawGizmos()

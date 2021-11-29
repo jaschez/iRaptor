@@ -32,14 +32,6 @@ public class DungeonGenerator
 
     public int seed = 0;
 
-    /*void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.G))
-        {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        }
-    }*/
-
     public MapInfo CreateMap()
     {
 
@@ -56,21 +48,19 @@ public class DungeonGenerator
         SetMapBounds();
 
         GenerateTiles();
-        /*
 
-    public Coord PlayerCoord;
-
-    public List<Coord> enemyCoords;
-    public List<Coord> lootCoords;
-    public List<Coord> eggCoords;*/
-
+        Room[] roomsByUniformity;
         Room firstRoom = rooms[0];
+        
         List<Coord> loots = new List<Coord>();
         List<Coord> enemies = new List<Coord>();
         Coord player;
+        Coord exit;
+
+        int bossRoom = rooms.Count - 1;
 
         //Place loot points
-        Room[] roomsByUniformity = rooms.OrderBy(room => room.interestingPoints.Count).ToArray();   //Order by uniformity
+        roomsByUniformity = rooms.OrderBy(room => room.interestingPoints.Count).ToArray();   //Order by uniformity
 
         int placedLoot = 0;
 
@@ -93,6 +83,10 @@ public class DungeonGenerator
 
         player = RoomToWorldCoord(firstRoom.startPoints[1], firstRoom);
 
+        //Place Exit Coord
+
+        exit = RoomToWorldCoord(rooms[bossRoom].floorCoords[Random.Range(0, rooms[bossRoom].floorCoords.Count)], rooms[bossRoom]);
+
         //Place enemy Coords
 
         foreach (Room room in rooms)
@@ -114,7 +108,8 @@ public class DungeonGenerator
             map = dungeonMap,
             lootCoords = loots,
             PlayerCoord = player,
-            enemyCoords = enemies
+            enemyCoords = enemies,
+            ExitPos = exit
         };
 
 
@@ -726,6 +721,7 @@ public struct MapInfo
     public int mapSeed;
 
     public Coord PlayerCoord;
+    public Coord ExitPos;
 
     public List<Room> rooms;
     public List<Corridor> corridors;
