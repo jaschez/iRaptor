@@ -1,1 +1,1 @@
-branchName: 'S${{env.SPRINT_DATE}}'
+branchName: 'S${%SPRINT_DATE}'
