@@ -13,7 +13,7 @@ jobs:
     - name: Set Sprint date value
       run: |
         today=$(date +'%d%m%Y')
-        echo "SPRINT_DATE=S$today" >> $GITHUB_ENV
+        echo "SPRINT_DATE=$today" >> $GITHUB_ENV
     - name: Create Issue Branch
       uses: robvanderleek/create-issue-branch@main
       env:
