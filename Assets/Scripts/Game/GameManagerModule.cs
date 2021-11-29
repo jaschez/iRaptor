@@ -104,7 +104,7 @@ public class GameManagerModule : MonoBehaviour
     void InitNextLevel()
     {
 
-        levelSeed = Random.Range(int.MinValue, int.MaxValue);
+        levelSeed = levelSeeds[currentLevel];
 
         player = (PlayerModule)PlayerModule.GetInstance();
         camManager = CamManager.GetInstance();
