@@ -93,32 +93,27 @@ public class DashGadget : Gadget
 
         //Si resulta que en el lugar de reaparición existe un obstáculo o no es una coordenada válida,
         //se deberá buscar el último punto de colisión válido para reaparecer ahí
-        if (true)//Physics2D.OverlapCircle(auxPos, 3f))
+        //if (Physics2D.OverlapCircle(auxPos, 3f))
+
+        //Usaremos esta opción en caso de que favorezca a la movilidad:
+
+        // - Encontrar todos los puntos de colisión
+        // - Iterar hasta encontrar el punto más lejano que se encuentre dentro de una cueva conocida
+        /*RaycastHit2D[] rays = Physics2D.RaycastAll(transform.position, orientation, maxDist, collisionMask);
+        System.Array.Sort(rays, (x, y) => x.distance.CompareTo(y.distance));*/
+
+        //Habrá que tener esto en cuenta
+        // - (Si la cueva mencionada es conocida, habrá que activar su trigger de entrada o salida, ya que
+        // reaparecer ahí es como si hubiera entrado en la cueva)
+
+        RaycastHit2D ray = Physics2D.Raycast(transform.position, orientation, maxDist, collisionMask);
+
+        if (ray.point != Vector2.zero)
         {
-
-            //Usaremos esta opción en caso de que favorezca a la movilidad:
-
-            // - Encontrar todos los puntos de colisión
-            // - Iterar hasta encontrar el punto más lejano que se encuentre dentro de una cueva conocida
-            // - (Si la cueva mencionada es conocida, habrá que activar su trigger de entrada o salida, ya que
-            // reaparecer ahí es como si hubiera entrado en la cueva)
-
-            /*RaycastHit2D[] rays = Physics2D.RaycastAll(transform.position, orientation, maxDist, collisionMask);
-            System.Array.Sort(rays, (x, y) => x.distance.CompareTo(y.distance));*/
-
-            RaycastHit2D ray = Physics2D.Raycast(transform.position, orientation, maxDist, collisionMask);
-
-            if (ray.point != Vector2.zero)
-            {
-                //Necesitamos que exista cierto offset, ya que no podemos situar el punto de reaparición
-                //justo donde el rayo choca, ya que existe la posibilidad de que el jugador se encuentre
-                //en una esquina y, por accidente, la atraviese debido a la escasez de pared entre dos muros.
-                finalPos = ray.point - orientation * 8;
-            }
-            else
-            {
-                finalPos = auxPos;
-            }
+            //Necesitamos que exista cierto offset, ya que no podemos situar el punto de reaparición
+            //justo donde el rayo choca, ya que existe la posibilidad de que el jugador se encuentre
+            //en una esquina y, por accidente, la atraviese debido a la escasez de pared entre dos muros.
+            finalPos = ray.point - orientation * 8;
         }
         else
         {
