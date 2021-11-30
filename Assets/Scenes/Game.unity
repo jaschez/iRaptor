@@ -8858,7 +8858,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   collisionMask:
     serializedVersion: 2
-    m_Bits: 3895
+    m_Bits: 2871
   crosshair: {fileID: 8750968181633511047, guid: 3140893911c378c478130ffa9eb97915,
     type: 3}
 --- !u!114 &1131685210
