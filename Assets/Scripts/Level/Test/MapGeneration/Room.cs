@@ -18,6 +18,8 @@ public class Room
     public int gameWidth { get; private set; }
     public int gameHeight { get; private set; }
 
+    //Lista de salas enlazadas, el primer valor corresponde con el indice de la sala enlazada a esta,
+    // el segundo corresponde al indice de pasadizo en la lista de MapInfo
     public List<int> linkedRooms { get; private set; }
 
     public int maxLoot { get; private set; } = 1;
@@ -31,7 +33,7 @@ public class Room
     public int distanceFromStart = 0;
 
     public List<Coord> floorCoords { get; private set; }
-    public List<Coord> entries { get; private set; }
+    public List<Entry> entries { get; private set; }
     public List<Coord> startPoints { get; private set; }
     public List<Coord> scaledStartPoints { get; private set; }
     public List<Coord> lootPoints { get; private set; }
@@ -66,7 +68,7 @@ public class Room
 
         linkedRooms = new List<int>();
         floorCoords = new List<Coord>();
-        entries = new List<Coord>();
+        entries = new List<Entry>();
         startPoints = new List<Coord>();
         scaledStartPoints = new List<Coord>();
         lootPoints = new List<Coord>();
@@ -151,7 +153,7 @@ public class Room
 
         if (startPoints.Count == 1)
         {
-            AddEntry(new Coord((left + right) / 2, (top + bottom) / 2));
+            AddEntry(new Coord((left + right) / 2, (top + bottom) / 2), EntryType.Central);
         }
 
         //Later, we scale the points to a smaller room format
@@ -520,11 +522,33 @@ public class Room
         linkedRooms.Add(index);
     }
 
-    public void AddEntry(Coord c)
+    public void AddEntry(Coord c, EntryType e, int linkedCorridor = -1)
     {
-        entries.Add(c);
+        entries.Add(new Entry(c, e, linkedCorridor));
 
         Coord localCoord = new Coord(c.x - worldPos.x, Mathf.Abs(c.y - worldPos.y));
         startPoints.Add(localCoord);
+    }
+
+    public struct Entry
+    {
+        public Coord coord;
+        public EntryType type;
+
+        public int linkedCorridorIndex;
+
+        public Entry(Coord c, EntryType e, int linkedCorridor)
+        {
+            coord = c;
+            type = e;
+            linkedCorridorIndex = linkedCorridor;
+        }
+    }
+
+    public enum EntryType
+    {
+        Horizontal,
+        Vertical,
+        Central
     }
 }

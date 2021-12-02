@@ -11,6 +11,8 @@ public class Minimap : MonoBehaviour
 
     private LevelManager levelManager;
 
+    private Texture2D mapTexture;
+
     private MapInfo minimapInfo;
 
     private RectTransform rect;
@@ -18,6 +20,11 @@ public class Minimap : MonoBehaviour
     private Transform player;
 
     private Vector2 mapPos;
+
+    Color[] colourMap;
+
+    int width;
+    int height;
 
     float imgWidth = 0;
     float imgHeight = 0;
@@ -32,9 +39,23 @@ public class Minimap : MonoBehaviour
         rect = minimapImg.rectTransform;
     }
 
+    void Initialize()
+    {
+        width = minimapInfo.width;
+        height = minimapInfo.height;
+
+        imgWidth = width * 3;
+        imgHeight = height * 3;
+
+        mapTexture = new Texture2D(width, height);
+        mapTexture.filterMode = FilterMode.Point;
+
+        colourMap = new Color[width * height];
+    }
+
     void Update()
     {
-        if (Controls.GetMoveKey())
+        if (Controls.GetMoveKey())//Debe arreglarse
         {
             if (minimapInfo.map != null && player != null) {
                 UpdateMapPosition(player.position);
@@ -44,19 +65,6 @@ public class Minimap : MonoBehaviour
 
     public void DrawMapInfo(MapInfo mapInfo)
     {
-        minimapInfo = mapInfo;
-
-        int width = mapInfo.width;
-        int height = mapInfo.height;
-
-        imgWidth = width * 3;
-        imgHeight = height * 3;
-
-        Texture2D texture = new Texture2D(width, height);
-
-        texture.filterMode = FilterMode.Point;
-
-        Color[] colourMap = new Color[width * height];
 
         for (int y = 0; y < height; y++)
         {
@@ -82,17 +90,77 @@ public class Minimap : MonoBehaviour
             colourMap[c.y * width + c.x] = Color.magenta;
 
         }
-        /*
-        foreach (Coord c in mapInfo.enemyCoords)
+
+        mapTexture.SetPixels(colourMap);
+        mapTexture.Apply();
+
+        Sprite sprite = Sprite.Create(mapTexture, new Rect(0, 0, width, height), Vector2.zero, 1);
+        minimapImg.sprite = sprite;
+
+        minimapImg.rectTransform.sizeDelta = new Vector2(imgWidth, imgHeight);
+
+        minimapImg.preserveAspect = true;
+
+        UpdateMapPosition(player.position);
+    }
+
+    public void UpdateMapRegion(Room room)
+    {
+        int[,] map = room.gameMap;
+
+        int roomWidth = room.gameWidth;
+        int roomHeight = room.gameHeight;
+
+        int colorIndex;
+
+        Coord worldPos = room.GetWorldPosition();
+
+        for (int y = 0; y < roomHeight; y++)
         {
-            colourMap[c.y * width + c.x] = Color.red;
+            for (int x = 0; x < roomWidth; x++)
+            {
+                colorIndex = (y - worldPos.y) * width + x + worldPos.x;
 
-        }*/
+                // Debemos comparar un estado desde el mapa con el de la habitación
+                // Si hay una pared y son iguales, se coloca el color pared, en caso
+                // contrario, es celda vacía.
 
-        texture.SetPixels(colourMap);
-        texture.Apply();
+                if (minimapInfo.map[x + worldPos.x, y - worldPos.y] == 1) //Pared
+                {
+                    colourMap[colorIndex] = new Color(.8f, .8f, .8f);
+                }
+                else if (map[x, y] == 2) //Suelo
+                {
+                    colourMap[colorIndex] = new Color(.2f, .2f, .2f);
+                }
+                else
+                {
+                    colourMap[colorIndex] = new Color(0, 0, 0, 0);
+                }
+            }
+        }
 
-        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, width, height), Vector2.zero, 1);
+        foreach (Room.Entry entry in room.entries)
+        {
+            if (entry.type != Room.EntryType.Central) {
+                Corridor corridor = minimapInfo.corridors[entry.linkedCorridorIndex];
+
+                foreach (Coord c in corridor.Coords)
+                {
+                    colourMap[-c.y * width + c.x] = new Color(.8f, .8f, .8f);
+                }
+            }
+        }
+
+        foreach (Coord c in room.lootPoints)
+        {
+            colourMap[(c.y - worldPos.y) * width + c.x + worldPos.x] = Color.magenta;
+        }
+
+        mapTexture.SetPixels(colourMap);
+        mapTexture.Apply();
+
+        Sprite sprite = Sprite.Create(mapTexture, new Rect(0, 0, width, height), Vector2.zero, 1);
         minimapImg.sprite = sprite;
 
         minimapImg.rectTransform.sizeDelta = new Vector2(imgWidth, imgHeight);
@@ -109,7 +177,7 @@ public class Minimap : MonoBehaviour
         rect.localPosition = -mapPos;
     }
 
-    public void GenerateMinimap()
+    public void Generate()
     {
         levelManager = LevelManager.GetInstance();
 
@@ -130,7 +198,9 @@ public class Minimap : MonoBehaviour
             yield return null;
         }
 
-        DrawMapInfo(minimapInfo);
+        //DrawMapInfo(minimapInfo);
+        Initialize();
+        UpdateMapRegion(minimapInfo.rooms[0]);
     }
 
     public static Minimap GetInstance()

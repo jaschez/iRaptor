@@ -71,7 +71,7 @@ public class UIVisualizer : MonoBehaviour
         gadgetVisualizer.Init(player.GetGadgetUnits(), player.GetMaxGadgetUnits());
 
         minimap = Minimap.GetInstance();
-        minimap.GenerateMinimap();
+        minimap.Generate();
 
         StartCoroutine("UpdateHealthBar");
         StartCoroutine("UpdateMaxHealthBar");
