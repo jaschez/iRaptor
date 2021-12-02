@@ -415,10 +415,15 @@ public class DungeonGenerator
         Coord pointA = new Coord();
         Coord pointB = new Coord();
 
+        Room.EntryType typeA;
+        Room.EntryType typeB;
+
         //Generate corridor points between rooms
 
         if (roomA.OverlapsValueX(roomB.left, roomB.right))
         {
+            typeA = Room.EntryType.Horizontal;
+            typeB = Room.EntryType.Horizontal;
 
             int overlapMinX = Mathf.Max(roomA.left, roomB.left);
             int overlapMaxX = Mathf.Min(roomA.right - 1, roomB.right - 1);
@@ -445,6 +450,9 @@ public class DungeonGenerator
         }
         else if (roomA.OverlapsValueY(roomB.bottom, roomB.top))
         {
+            typeA = Room.EntryType.Vertical;
+            typeB = Room.EntryType.Vertical;
+
             int overlapMinY = Mathf.Max(roomA.bottom + 1, roomB.bottom + 1);
             int overlapMaxY = Mathf.Min(roomA.top, roomB.top);
 
@@ -475,6 +483,9 @@ public class DungeonGenerator
 
             if (Random.Range(0, 10) > 5)
             {
+                typeA = Room.EntryType.Vertical;
+                typeB = Room.EntryType.Horizontal;
+
                 //Esquina con forma 1
                 if (roomA.left > roomB.left)
                 {
@@ -504,6 +515,9 @@ public class DungeonGenerator
             }
             else
             {
+                typeA = Room.EntryType.Horizontal;
+                typeB = Room.EntryType.Vertical;
+
                 //Esquina con forma 2
                 if (roomB.left > roomA.left)
                 {
@@ -533,8 +547,8 @@ public class DungeonGenerator
             }
         }
 
-        roomA.AddEntry(pointA);
-        roomB.AddEntry(pointB);
+        roomA.AddEntry(pointA, typeA, corridors.Count);
+        roomB.AddEntry(pointB, typeB, corridors.Count);
 
         Corridor newCorridor = new Corridor(pointA, pointB);
         newCorridor.Generate();

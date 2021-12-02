@@ -56,6 +56,10 @@ public class LevelGenerator : MonoBehaviour
         /*Tile floor2 = Resources.Load("floor2", typeof(Tile)) as Tile;
         Tile floor3 = Resources.Load("floor3", typeof(Tile)) as Tile;*/
 
+        GameObject lootParent = new GameObject("Loot");
+        GameObject enemyParent = new GameObject("Enemies");
+        GameObject triggerParent = new GameObject("EntryRooms");
+
         Vector3Int position;
 
         int[,] map = mapInfo.map;
@@ -86,14 +90,50 @@ public class LevelGenerator : MonoBehaviour
         //Capa de recompensas
         foreach (Coord c in mapInfo.lootCoords)
         {
-            Instantiate(lootPrefab, CoordToVect(c, mapInfo.tileSize), Quaternion.identity);
+            Instantiate(lootPrefab, CoordToVect(c, mapInfo.tileSize), Quaternion.identity).transform.SetParent(lootParent.transform);
         }
 
         
         //Capa de enemigos
         foreach (Coord c in mapInfo.enemyCoords)
         {
-            Instantiate(enemyPrefab, CoordToVect(c, mapInfo.tileSize), Quaternion.identity);
+            Instantiate(enemyPrefab, CoordToVect(c, mapInfo.tileSize), Quaternion.identity).transform.SetParent(enemyParent.transform); ;
+        }
+
+
+        //Capa de triggers de entrada a las habitaciones
+
+        foreach (Room room in mapInfo.rooms){
+            foreach (Room.Entry roomEntry in room.entries)
+            {
+                if (roomEntry.type != Room.EntryType.Central) {
+                    GameObject trigger = new GameObject("EntryRoom");
+
+                    BoxCollider2D col;
+
+                    Coord worldPos = mapInfo.rooms[0].GetWorldPosition();
+                    Coord entry = roomEntry.coord;
+
+                    col = trigger.AddComponent<BoxCollider2D>();
+                    trigger.AddComponent<EntryTrigger>().Initialize(room);
+
+                    trigger.transform.position = new Vector3(worldPos.x + entry.x + .5f, -worldPos.y - entry.y + .5f, 1) * mapInfo.tileSize;//CoordToVect(new Coord(worldPos.x+entry.x,-entry.y), mapInfo.tileSize);
+
+                    if (roomEntry.type == Room.EntryType.Vertical)
+                    {
+                        col.size = Vector2.one + Vector2.up * 6;
+                    }
+                    else
+                    {
+                        col.size = Vector2.one + Vector2.right * 6;
+                    }
+
+                    col.size *= mapInfo.tileSize;
+                    col.isTrigger = true;
+
+                    trigger.transform.SetParent(triggerParent.transform);
+                }
+            }
         }
 
         /*

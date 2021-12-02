@@ -8858,7 +8858,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   collisionMask:
     serializedVersion: 2
-    m_Bits: 3895
+    m_Bits: 2871
   crosshair: {fileID: 8750968181633511047, guid: 3140893911c378c478130ffa9eb97915,
     type: 3}
 --- !u!114 &1131685210
@@ -10146,8 +10146,8 @@ MonoBehaviour:
   smoothness: 3
   enemyNumber: 10
   lootNumber: 4
-  seed: 1817120594
-  randomSeed: 0
+  seed: 1756874617
+  randomSeed: 1
   connectCaves: 1
 --- !u!4 &1558074469
 Transform:
