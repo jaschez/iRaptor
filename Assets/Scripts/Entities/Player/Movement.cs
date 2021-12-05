@@ -9,9 +9,13 @@ public class Movement : MonoBehaviour
     [HideInInspector]
     public Rigidbody2D rb;
 
-    //public GameObject crosshair;
+    [SerializeField] GameObject interactSign;
 
     public ParticleSystem trailParticle;
+
+    Interactable objectInteractable;
+    Interactable selectedInteractable;
+    int selectedInteractableID = -1;
 
     Vector2 playerOrientation;
     Vector2 lastPlayerOrientation;
@@ -53,6 +57,7 @@ public class Movement : MonoBehaviour
         KeyCode move = KeyCode.Z;
         KeyCode attack = KeyCode.X;
         KeyCode dash = KeyCode.O;
+        KeyCode interact = KeyCode.E;
         KeyCode aim = KeyCode.P;
 
         /* Inicializa los controles una vez comienza el juego (basado en un archivo externo para evitar
@@ -60,7 +65,7 @@ public class Movement : MonoBehaviour
          * los propietarios)
          */
 
-        Controls.SetupControls(joystickAxis, move, attack, dash, aim);
+        Controls.SetupControls(joystickAxis, move, attack, dash, aim, interact);
 
         playerVelocity = acceleration * 50;
     }
@@ -69,6 +74,46 @@ public class Movement : MonoBehaviour
     {
         Pitch();
         Move();
+        Interaction();
+    }
+
+    private void OnTriggerEnter2D(Collider2D collider)
+    {
+        if (collider.TryGetComponent(out objectInteractable))
+        {
+            selectedInteractable = objectInteractable;
+            selectedInteractableID = collider.GetHashCode();
+
+            interactSign.SetActive(true);
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collider)
+    {
+        if (selectedInteractable != null)
+        {
+            if (collider.GetHashCode() == selectedInteractableID)
+            {
+                selectedInteractable = null;
+                selectedInteractableID = -1;
+
+                interactSign.SetActive(false);
+            }
+        }
+    }
+
+    //Gestiona las interacciones con los objetos
+    void Interaction()
+    {
+        if (selectedInteractable != null)
+        {
+            interactSign.transform.position = transform.position + Vector3.up * 12;
+
+            if (Controls.GetInteractKeyDown())
+            {
+                selectedInteractable.Interact();
+            }
+        }
     }
 
     //Controla la orientacion del jugador

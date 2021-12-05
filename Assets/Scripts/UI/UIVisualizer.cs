@@ -105,6 +105,18 @@ public class UIVisualizer : MonoBehaviour
             cuPopUp.UpdateValue(param);
         }
 
+        if (eventType == PlayerModule.PlayerEvent.SpentCU)
+        {
+            cuText.text = player.GetCarbonUnits().ToString();
+            PopUp(PopUpType.Info, "Chest purchased", player.transform, Color.cyan, 1);
+        }
+
+        if (eventType == PlayerModule.PlayerEvent.InsufficientCU)
+        {
+            cuText.text = player.GetCarbonUnits().ToString();
+            PopUp(PopUpType.Info, "Insufficient carbon units", player.transform, Color.white, 1, 25, 6, 0);
+        }
+
         if (eventType == PlayerModule.PlayerEvent.AddedGadgetUse)
         {
             string msg;

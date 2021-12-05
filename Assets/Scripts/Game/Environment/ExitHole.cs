@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ExitHole : MonoBehaviour
+public class ExitHole : MonoBehaviour, Interactable
 {
 
     SpriteRenderer sr;
@@ -36,36 +36,8 @@ public class ExitHole : MonoBehaviour
         sr.color = new Color(sr.color.r, sr.color.g, sr.color.b, 1f);
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    public void Interact()
     {
-
-        Entity entity = other.GetComponent<Entity>();
-
-        if (entity){
-
-            if (entity.GetEntityType() == EntityType.Player)
-            {
-
-                if (levelCleared)
-                {
-                    canExit = true;
-                }
-            }
-        }
-    }
-
-    private void OnTriggerStay2D(Collider2D other)
-    {
-
-        if (Input.GetKeyDown(KeyCode.E) && canExit)
-        {
-            OnExitEnter?.Invoke();
-        }
-    }
-
-    private void OnTriggerExit2D(Collider2D other)
-    {
-
-        canExit = false;
+        OnExitEnter?.Invoke();
     }
 }

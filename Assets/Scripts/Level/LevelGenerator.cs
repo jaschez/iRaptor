@@ -16,8 +16,10 @@ public class LevelGenerator : MonoBehaviour
     public GameObject[] drops;
 
     public GameObject player;
+    public GameObject npc;
     public GameObject enemyPrefab;
     public GameObject lootPrefab;
+    public GameObject chestPrefab;
     public GameObject eggPrefab;
     public GameObject exitPrefab;
 
@@ -44,6 +46,8 @@ public class LevelGenerator : MonoBehaviour
 
         player.transform.position = playerPos;
 
+        npc.transform.position = CoordToVect(mapInfo.PlayerCoord, mapInfo.tileSize);
+
         LoadLevelFromMap(mapInfo);
 
         return mapInfo;
@@ -57,6 +61,7 @@ public class LevelGenerator : MonoBehaviour
         Tile floor3 = Resources.Load("floor3", typeof(Tile)) as Tile;*/
 
         GameObject lootParent = new GameObject("Loot");
+        GameObject chestParent = new GameObject("Chests");
         GameObject enemyParent = new GameObject("Enemies");
         GameObject triggerParent = new GameObject("EntryRooms");
 
@@ -85,6 +90,12 @@ public class LevelGenerator : MonoBehaviour
                     tilemap.SetTile(position, wall);
                 }
             }
+        }
+
+        //Capa de cofres
+        foreach (Coord c in mapInfo.chestCoords)
+        {
+            Instantiate(chestPrefab, CoordToVect(c, mapInfo.tileSize), Quaternion.identity).transform.SetParent(chestParent.transform);
         }
 
         //Capa de recompensas

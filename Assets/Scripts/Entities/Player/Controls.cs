@@ -8,6 +8,7 @@ public class Controls
     static private Axis joyAxis;
     static private KeyCode move;
     static private KeyCode attack;
+    static private KeyCode interact;
     static private KeyCode dash;
     static private KeyCode aim;
 
@@ -15,13 +16,14 @@ public class Controls
     static private bool triggerUp = true;
 
     //Actualiza o inicializa los controles para el juego
-    public static void SetupControls(Axis axis, KeyCode mov, KeyCode att, KeyCode das, KeyCode ai)
+    public static void SetupControls(Axis axis, KeyCode mov, KeyCode att, KeyCode das, KeyCode ai, KeyCode inter)
     {
         joyAxis = axis;
         attack = att;
         move = mov;
         dash = das;
         aim = ai;
+        interact = inter;
     }
 
     //TODO: Actualiza los controles desde un archivo
@@ -50,6 +52,22 @@ public class Controls
     public static bool GetAttackKeyDown()
     {
         return Input.GetKeyDown(attack) || Input.GetButtonDown("Fire");
+    }
+
+    //Detección para tecla INTERACT
+    public static bool GetInteractKey()
+    {
+        return Input.GetKey(interact);
+    }
+
+    public static bool GetInteractKeyUp()
+    {
+        return Input.GetKeyUp(interact);
+    }
+
+    public static bool GetInteractKeyDown()
+    {
+        return Input.GetKeyDown(interact);
     }
 
     //Detección para tecla MOVE

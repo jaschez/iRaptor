@@ -10,13 +10,12 @@ public class PlayerModule : Entity
     private Gadget gadget;
 
     Dictionary<int, int> buffUses;
-
     List<int> currentBuffs;
 
     private int _carbonUnits = 0;
 
     //Propiedad que gestiona las unidades de carbono disponibles del jugador
-    private int carbonUnits
+    private int CarbonUnits
     {
         get
         {
@@ -65,7 +64,7 @@ public class PlayerModule : Entity
 
     void Update()
     {
-
+        
     }
 
     //Método que devuelve la instancia actual del jugador
@@ -76,7 +75,7 @@ public class PlayerModule : Entity
 
     public PlayerState SavePlayerState()
     {
-        PlayerState playerState = new PlayerState(GetHP(), carbonUnits, gadget.GetUsesLeft(), buffUses);
+        PlayerState playerState = new PlayerState(GetHP(), CarbonUnits, gadget.GetUsesLeft(), buffUses);
 
         return playerState;
     }
@@ -84,7 +83,7 @@ public class PlayerModule : Entity
     public void LoadPlayerState(PlayerState playerState)
     {
         LoadHealth(playerState.hp);
-        carbonUnits = playerState.carbonUnits;
+        CarbonUnits = playerState.carbonUnits;
         gadget.SetUsesLeft(playerState.gadgetUses);
         buffUses.Clear();
         currentBuffs.Clear() ;
@@ -109,14 +108,24 @@ public class PlayerModule : Entity
 
     public void AddCarbonUnits(int cu)
     {
-        carbonUnits += cu;
+        CarbonUnits += cu;
 
         SendEvent(PlayerEvent.AddedCU, cu);
     }
 
-    public void SpendCarbonUnits(int cu)
+    public bool SpendCarbonUnits(int cu)
     {
-        carbonUnits -= cu;
+        if (CarbonUnits >= cu) {
+            CarbonUnits -= cu;
+            SendEvent(PlayerEvent.SpentCU, cu);
+
+            return true;
+        }
+        else
+        {
+            SendEvent(PlayerEvent.InsufficientCU, cu);
+            return false;
+        }
     }
 
     public void AddGadgetUnit()
@@ -138,7 +147,7 @@ public class PlayerModule : Entity
 
     public int GetCarbonUnits()
     {
-        return carbonUnits;
+        return CarbonUnits;
     }
 
     public int GetGadgetUnits()
@@ -195,6 +204,8 @@ public class PlayerModule : Entity
     {
 
         public static readonly PlayerEvent AddedCU = new PlayerEvent("AddedCU");
+        public static readonly PlayerEvent SpentCU = new PlayerEvent("SpentCU");
+        public static readonly PlayerEvent InsufficientCU = new PlayerEvent("InsufficientCU");
         public static readonly PlayerEvent AddedGadgetUse = new PlayerEvent("AddedDash");
         public static readonly PlayerEvent RechargedGadgetUse = new PlayerEvent("RechargedDash");
         public static readonly PlayerEvent SpentGadgetUse = new PlayerEvent("SpentDash");

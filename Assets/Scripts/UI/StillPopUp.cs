@@ -34,13 +34,9 @@ public class StillPopUp : MonoBehaviour
     {
         msgValue += value;
 
-        //if (animEnded)
-        //{
         StopAllCoroutines();
         StartCoroutine(PopUp());
 
-            //animEnded = false;
-        //}
     }
 
     IEnumerator PopUp()
