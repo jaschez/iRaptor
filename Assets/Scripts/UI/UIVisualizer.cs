@@ -114,7 +114,7 @@ public class UIVisualizer : MonoBehaviour
         if (eventType == PlayerModule.PlayerEvent.InsufficientCU)
         {
             cuText.text = player.GetCarbonUnits().ToString();
-            PopUp(PopUpType.Info, "Insufficient carbon units", player.transform, Color.white, 1, 25, 6, 0);
+            PopUp(PopUpType.Info, "INSUFFICIENT CU", player.transform, Color.white, 1, 25, 6, 0);
         }
 
         if (eventType == PlayerModule.PlayerEvent.AddedGadgetUse)

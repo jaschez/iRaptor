@@ -101,6 +101,11 @@ public class GameManagerModule : MonoBehaviour
         LevelManager.OnLevelLeft -= AdvanceLevel;
     }
 
+    public string GetGameSeed()
+    {
+        return seed.ToString("X4");
+    }
+
     void InitNextLevel()
     {
 
@@ -136,9 +141,11 @@ public class GameManagerModule : MonoBehaviour
 
         if (cursor && camComponent)
         {
-            cursorPosition = camComponent.ScreenToWorldPoint(Input.mousePosition);
-            cursorPosition.z = 1;
-            cursor.transform.position = cursorPosition;
+            if (Controls.IsAllowed()) {
+                cursorPosition = camComponent.ScreenToWorldPoint(Input.mousePosition);
+                cursorPosition.z = 1;
+                cursor.transform.position = cursorPosition;
+            }
         }
         else
         {
