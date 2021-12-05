@@ -370,14 +370,3 @@ public class MapGenerator
 
 
 }
-
-/*public struct Coord
-{
-    public int x, y;
-
-    public Coord(int _x, int _y)
-    {
-        x = _x;
-        y = _y;
-    }
-}*/

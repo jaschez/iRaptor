@@ -8,26 +8,40 @@ public class Controls
     static private Axis joyAxis;
     static private KeyCode move;
     static private KeyCode attack;
+    static private KeyCode interact;
     static private KeyCode dash;
     static private KeyCode aim;
 
     static private bool trigger = false;
     static private bool triggerUp = true;
 
+    static private bool enabled = true;
+
     //Actualiza o inicializa los controles para el juego
-    public static void SetupControls(Axis axis, KeyCode mov, KeyCode att, KeyCode das, KeyCode ai)
+    public static void SetupControls(Axis axis, KeyCode mov, KeyCode att, KeyCode das, KeyCode ai, KeyCode inter)
     {
         joyAxis = axis;
         attack = att;
         move = mov;
         dash = das;
         aim = ai;
+        interact = inter;
     }
 
     //TODO: Actualiza los controles desde un archivo
     public static void ReadControlsFromFile()
     {
 
+    }
+
+    public static void AllowControls(bool enable)
+    {
+        enabled = enable;
+    }
+
+    public static bool IsAllowed()
+    {
+        return enabled;
     }
 
     //Funciones de deteccion de teclas y ejes de joystick
@@ -39,36 +53,54 @@ public class Controls
     //Detección para tecla ATTACK
     public static bool GetAttackKey()
     {
-        return Input.GetKey(attack) || Input.GetButton("Fire");
+        return (Input.GetKey(attack) || Input.GetButton("Fire")) && enabled;
     }
 
     public static bool GetAttackKeyUp()
     {
-        return Input.GetKeyUp(attack);
+        return Input.GetKeyUp(attack) && enabled;
     }
 
     public static bool GetAttackKeyDown()
     {
-        return Input.GetKeyDown(attack) || Input.GetButtonDown("Fire");
+        return (Input.GetKeyDown(attack) || Input.GetButtonDown("Fire")) && enabled;
+    }
+
+    //Detección para tecla INTERACT
+    public static bool GetInteractKey()
+    {
+        return Input.GetKey(interact) && enabled;
+    }
+
+    public static bool GetInteractKeyUp()
+    {
+        return Input.GetKeyUp(interact) && enabled;
+    }
+
+    public static bool GetInteractKeyDown()
+    {
+        return Input.GetKeyDown(interact) && enabled;
     }
 
     //Detección para tecla MOVE
     public static bool GetMoveKey()
     {
-        return Input.GetKey(move) || Input.GetAxisRaw("Boost") != 0 || GetJoystick2X() != 0 || GetJoystick2Y() != 0;
+        return (Input.GetKey(move) || Input.GetAxisRaw("Boost") != 0 || GetJoystick2X() != 0 || GetJoystick2Y() != 0) && enabled;
     }
 
     public static bool GetMoveKeyUp()
     {
-
-        if ((Input.GetAxis("Boost") != 0) || GetJoystick2X() == 0 && GetJoystick2Y() == 0 && !triggerUp)
+        if (enabled)
         {
-            triggerUp = true;
-            return true;
-        }
-        else if (Input.GetAxis("Boost") != 0 || GetJoystick2X() != 0 || GetJoystick2Y() != 0)
-        {
-            triggerUp = false;
+            if ((Input.GetAxis("Boost") != 0) || GetJoystick2X() == 0 && GetJoystick2Y() == 0 && !triggerUp)
+            {
+                triggerUp = true;
+                return true;
+            }
+            else if (Input.GetAxis("Boost") != 0 || GetJoystick2X() != 0 || GetJoystick2Y() != 0)
+            {
+                triggerUp = false;
+            }
         }
 
         return false;
@@ -78,49 +110,55 @@ public class Controls
 
     public static bool GetMoveKeyDown()
     {
-        if ((Input.GetAxis("Boost") != 0 || GetJoystick2X() != 0 || GetJoystick2Y() != 0) && !trigger)
-        {
-            trigger = true;
-            return true;
-        }
-        else if(Input.GetAxis("Boost") == 0 && GetJoystick2X() == 0 && GetJoystick2Y() == 0)
-        {
-            trigger = false;
-        }
+        if (enabled) {
+            if ((Input.GetAxis("Boost") != 0 || GetJoystick2X() != 0 || GetJoystick2Y() != 0) && !trigger)
+            {
+                trigger = true;
+                return true;
+            }
+            else if (Input.GetAxis("Boost") == 0 && GetJoystick2X() == 0 && GetJoystick2Y() == 0)
+            {
+                trigger = false;
+            }
 
-        return Input.GetKeyDown(move);
+            return Input.GetKeyDown(move);
+        }
+        else
+        {
+            return false;
+        }
     }
 
     //Detección para tecla DASH
     public static bool GetDashKey()
     {
-        return Input.GetKey(dash) || Input.GetButton("Dash");
+        return (Input.GetKey(dash) || Input.GetButton("Dash")) && enabled;
     }
 
     public static bool GetDashKeyUp()
     {
-        return Input.GetKeyUp(dash);
+        return Input.GetKeyUp(dash) && enabled;
     }
 
     public static bool GetDashKeyDown()
     {
-        return Input.GetKeyDown(dash) || Input.GetButtonDown("Dash");
+        return (Input.GetKeyDown(dash) || Input.GetButtonDown("Dash")) && enabled;
     }
 
     //Detección para tecla AIM
     public static bool GetAimKey()
     {
-        return Input.GetKey(aim);
+        return Input.GetKey(aim) && enabled;
     }
 
     public static bool GetAimKeyUp()
     {
-        return Input.GetKeyUp(aim);
+        return Input.GetKeyUp(aim) && enabled;
     }
 
     public static bool GetAimKeyDown()
     {
-        return Input.GetKeyDown(aim);
+        return Input.GetKeyDown(aim) && enabled;
     }
 
     //Detección para ejes de joystick
@@ -128,14 +166,16 @@ public class Controls
     {
         int value = 0;
 
-        if (Input.GetKey(joyAxis.left) || Input.GetAxis("Horizontal1") <= -.1f)
-        {
-            value += 1;
-        }
-        
-        if (Input.GetKey(joyAxis.right) || Input.GetAxis("Horizontal1") >= .1f)
-        {
-            value -= 1;
+        if (enabled) {
+            if (Input.GetKey(joyAxis.left) || Input.GetAxis("Horizontal1") <= -.1f)
+            {
+                value += 1;
+            }
+
+            if (Input.GetKey(joyAxis.right) || Input.GetAxis("Horizontal1") >= .1f)
+            {
+                value -= 1;
+            }
         }
 
         return value;
@@ -145,14 +185,17 @@ public class Controls
     {
         int value = 0;
 
-        if (Input.GetKey(joyAxis.up) || Input.GetAxisRaw("Vertical1") >= .1f)
+        if (enabled)
         {
-            value += 1;
-        }
+            if (Input.GetKey(joyAxis.up) || Input.GetAxisRaw("Vertical1") >= .1f)
+            {
+                value += 1;
+            }
 
-        if (Input.GetKey(joyAxis.down) || Input.GetAxisRaw("Vertical1") <= -.1f)
-        {
-            value -= 1;
+            if (Input.GetKey(joyAxis.down) || Input.GetAxisRaw("Vertical1") <= -.1f)
+            {
+                value -= 1;
+            }
         }
 
         return value;

@@ -26,6 +26,8 @@ public class DungeonGenerator
 
     int maxLoot = 3;
 
+    int maxChests = 2;
+
     int tileSize = 16;
 
     public bool randomSeed = true;
@@ -51,8 +53,15 @@ public class DungeonGenerator
 
         Room[] roomsByUniformity;
         Room firstRoom = rooms[0];
-        
+
+        /*PARA AÑADIR NUEVO ELEMENTO GENERABLE:
+            -Indicar elemento como atributo junto con el resto de abajo
+            -Definir su método de aparición
+            -Incluir la lista de nuevos elementos ya ubicados en el mapInfo
+        */
+
         List<Coord> loots = new List<Coord>();
+        List<Coord> chests = new List<Coord>();
         List<Coord> enemies = new List<Coord>();
         Coord player;
         Coord exit;
@@ -60,6 +69,8 @@ public class DungeonGenerator
         int bossRoom = rooms.Count - 1;
 
         //Place loot points
+        //Deberá cambiarse para que muestre el umbral de interés de distintas zonas en base a la densidad de paredes que posee,
+        // y compararlas con el resto.
         roomsByUniformity = rooms.OrderBy(room => room.interestingPoints.Count).ToArray();   //Order by uniformity
 
         int placedLoot = 0;
@@ -77,6 +88,19 @@ public class DungeonGenerator
 
                 placedLoot++;
             }
+        }
+
+        //Place Chest Coords
+
+        Room selectedChestRoom;
+        Coord selectedChestCoord;
+
+        for (int i = 0; i < maxChests; i++)
+        {
+            selectedChestRoom = rooms[Random.Range(0, rooms.Count)];
+            selectedChestCoord = selectedChestRoom.floorCoords[Random.Range(0, selectedChestRoom.floorCoords.Count)];
+
+            chests.Add(RoomToWorldCoord(selectedChestCoord, selectedChestRoom));
         }
 
         //Place Player Coord
@@ -107,6 +131,7 @@ public class DungeonGenerator
             mapSeed = seed,
             map = dungeonMap,
             lootCoords = loots,
+            chestCoords = chests,
             PlayerCoord = player,
             enemyCoords = enemies,
             ExitPos = exit
@@ -542,8 +567,6 @@ public class DungeonGenerator
                     pointA.y = roomA.top;
                     pointB.y = roomB.bottom + 4;
                 }
-
-                //pointB.y = Random.Range(roomB.top, roomB.bottom);
             }
         }
 
@@ -742,6 +765,7 @@ public struct MapInfo
 
     public List<Coord> enemyCoords;
     public List<Coord> lootCoords;
+    public List<Coord> chestCoords;
     public List<Coord> eggCoords;
 }
 
