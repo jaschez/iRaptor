@@ -60,10 +60,13 @@ public class LevelGenerator : MonoBehaviour
         /*Tile floor2 = Resources.Load("floor2", typeof(Tile)) as Tile;
         Tile floor3 = Resources.Load("floor3", typeof(Tile)) as Tile;*/
 
-        GameObject lootParent = new GameObject("Loot");
-        GameObject chestParent = new GameObject("Chests");
-        GameObject enemyParent = new GameObject("Enemies");
-        GameObject triggerParent = new GameObject("EntryRooms");
+        GameObject roomParent;
+        GameObject lootParent;
+        GameObject chestParent;
+        GameObject enemyParent;
+
+        GameObject roomsParent = new GameObject("Rooms");
+        GameObject triggerParent = new GameObject("EntryRooms"); ;
 
         Vector3Int position;
 
@@ -92,32 +95,32 @@ public class LevelGenerator : MonoBehaviour
             }
         }
 
-        //Capa de cofres
-        foreach (Coord c in mapInfo.chestCoords)
+        foreach (Room room in mapInfo.rooms)
         {
-            Instantiate(chestPrefab, CoordToVect(c, mapInfo.tileSize), Quaternion.identity).transform.SetParent(chestParent.transform);
-        }
+            roomParent = new GameObject("Room" + room.GetId());
+            lootParent = new GameObject("Loot");
+            chestParent = new GameObject("Chests");
+            enemyParent = new GameObject("Enemies");
 
-        //Capa de recompensas
-        foreach (Coord c in mapInfo.lootCoords)
-        {
-            Instantiate(lootPrefab, CoordToVect(c, mapInfo.tileSize), Quaternion.identity).transform.SetParent(lootParent.transform);
-        }
+            //Capa de enemigos
+            InstantiateObjectList(room.enemyCoords, room.GetWorldPosition(), enemyPrefab, enemyParent);
 
-        
-        //Capa de enemigos
-        foreach (Coord c in mapInfo.enemyCoords)
-        {
-            Instantiate(enemyPrefab, CoordToVect(c, mapInfo.tileSize), Quaternion.identity).transform.SetParent(enemyParent.transform); ;
-        }
+            //Capa de cofres
+            InstantiateObjectList(room.chestPoints, room.GetWorldPosition(), chestPrefab, chestParent);
 
+            //Capa de recompensas
+            InstantiateObjectList(room.lootPoints, room.GetWorldPosition(), lootPrefab, lootParent);
 
-        //Capa de triggers de entrada a las habitaciones
+            enemyParent.transform.SetParent(roomParent.transform);
+            chestParent.transform.SetParent(roomParent.transform);
+            lootParent.transform.SetParent(roomParent.transform);
+            roomParent.transform.SetParent(roomsParent.transform);
 
-        foreach (Room room in mapInfo.rooms){
+            //Capa de triggers de entrada a las habitaciones
             foreach (Room.Entry roomEntry in room.entries)
             {
-                if (roomEntry.type != Room.EntryType.Central) {
+                if (roomEntry.type != Room.EntryType.Central)
+                {
                     GameObject trigger = new GameObject("EntryRoom");
 
                     BoxCollider2D col;
@@ -126,9 +129,9 @@ public class LevelGenerator : MonoBehaviour
                     Coord entry = roomEntry.coord;
 
                     col = trigger.AddComponent<BoxCollider2D>();
-                    trigger.AddComponent<EntryTrigger>().Initialize(room);
+                    trigger.AddComponent<EntryTrigger>().Initialize(room, roomParent);
 
-                    trigger.transform.position = new Vector3(worldPos.x + entry.x + .5f, -worldPos.y - entry.y + .5f, 1) * mapInfo.tileSize;//CoordToVect(new Coord(worldPos.x+entry.x,-entry.y), mapInfo.tileSize);
+                    trigger.transform.position = new Vector3(worldPos.x + entry.x + .5f, -worldPos.y - entry.y + .5f, 1) * mapInfo.tileSize;
 
                     if (roomEntry.type == Room.EntryType.Vertical)
                     {
@@ -147,14 +150,20 @@ public class LevelGenerator : MonoBehaviour
             }
         }
 
-        /*
-        //Capa de generadores
-        foreach (Vector2 c in mapInfo.GetEggCoords())
-        {
-            Instantiate(eggPrefab, new Vector3(c.x + 0.5f, c.y + 0.5f, 1) * 16, Quaternion.identity);
-        }*/
-
         Instantiate(exitPrefab, new Vector3(mapInfo.ExitPos.x + 0.5f, mapInfo.ExitPos.y + 0.5f, 1) * 16, Quaternion.identity);
+    }
+
+    void InstantiateObjectList(List<Coord> objList, Coord origin, GameObject instantiable, GameObject parentTo = null)
+    {
+        foreach (Coord objCoord in objList)
+        {
+            Coord c = objCoord;
+
+            c.x += origin.x;
+            c.y -= origin.y;
+
+            Instantiate(instantiable, CoordToVect(c, mapInfo.tileSize), Quaternion.identity).transform.SetParent(parentTo.transform);
+        }
     }
 
     private void OnDrawGizmos()

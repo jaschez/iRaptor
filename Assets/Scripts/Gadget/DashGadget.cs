@@ -57,8 +57,6 @@ public class DashGadget : Gadget
         destPosition = CalculateDashPoint(maxDistance);
 
         crosshairGO.transform.position = destPosition;
-
-        //crosshairGO.transform.position = Vector3.Lerp(crosshairGO.transform.position, destPosition, Time.fixedDeltaTime * 18);
     }
 
     protected override void Use()
@@ -74,12 +72,6 @@ public class DashGadget : Gadget
         {
             exhausted = true;
         }
-
-
-        /*if (Vector2.Distance(destPosition, transform.position) > maxDistance * 2)
-        {
-            destPosition = transform.position;
-        }*/
 
         StartCoroutine(DashCoroutine());
     }

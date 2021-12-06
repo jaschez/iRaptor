@@ -37,6 +37,7 @@ public class Room
     public List<Coord> startPoints { get; private set; }
     public List<Coord> scaledStartPoints { get; private set; }
     public List<Coord> lootPoints { get; private set; }
+    public List<Coord> chestPoints { get; private set; }
     public List<Coord> interestingPoints { get; private set; }
     public List<Coord> enemyCoords { get; private set; }
 
@@ -72,6 +73,7 @@ public class Room
         startPoints = new List<Coord>();
         scaledStartPoints = new List<Coord>();
         lootPoints = new List<Coord>();
+        chestPoints = new List<Coord>();
         enemyCoords = new List<Coord>();
 
         SetWorldPosition(pos);

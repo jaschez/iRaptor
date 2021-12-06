@@ -73,6 +73,20 @@ public class PlayerModule : Entity
         return instance;
     }
 
+    public void Lock()
+    {
+        Movement.GetInstance().Lock();
+        AttackModule.GetInstance().Lock();
+        gadget.Lock();
+    }
+
+    public void Unlock()
+    {
+        Movement.GetInstance().Unlock();
+        AttackModule.GetInstance().Unlock();
+        gadget.Unlock();
+    }
+
     public PlayerState SavePlayerState()
     {
         PlayerState playerState = new PlayerState(GetHP(), CarbonUnits, gadget.GetUsesLeft(), buffUses);
