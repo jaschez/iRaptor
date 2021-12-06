@@ -20,7 +20,7 @@ public class LevelGenerator : MonoBehaviour
     public GameObject enemyPrefab;
     public GameObject lootPrefab;
     public GameObject chestPrefab;
-    public GameObject eggPrefab;
+    public GameObject barrierPrefab;
     public GameObject exitPrefab;
 
     MapInfo mapInfo;
@@ -66,7 +66,10 @@ public class LevelGenerator : MonoBehaviour
         GameObject enemyParent;
 
         GameObject roomsParent = new GameObject("Rooms");
-        GameObject triggerParent = new GameObject("EntryRooms"); ;
+        GameObject triggerParent = new GameObject("EntryRooms");
+
+        //Se usará para crear las barreras de los pasadizos
+        List<Corridor> remainingCorridors = new List<Corridor>(mapInfo.corridors);
 
         Vector3Int position;
 
@@ -130,7 +133,6 @@ public class LevelGenerator : MonoBehaviour
 
                     col = trigger.AddComponent<BoxCollider2D>();
                     trigger.AddComponent<EntryTrigger>().Initialize(room, roomParent);
-
                     trigger.transform.position = new Vector3(worldPos.x + entry.x + .5f, -worldPos.y - entry.y + .5f, 1) * mapInfo.tileSize;
 
                     if (roomEntry.type == Room.EntryType.Vertical)
@@ -146,6 +148,26 @@ public class LevelGenerator : MonoBehaviour
                     col.isTrigger = true;
 
                     trigger.transform.SetParent(triggerParent.transform);
+
+                    Corridor corridor = mapInfo.corridors[roomEntry.linkedCorridorIndex];
+
+                    if (remainingCorridors.Contains(corridor))
+                    {
+                        int middleX = (corridor.PointA.x + corridor.PointB.x) / 2;
+                        int middleY = -(corridor.PointA.y + corridor.PointB.y) / 2;
+
+                        Vector3 barrierPos = CoordToVect(new Coord(middleX, middleY), mapInfo.tileSize);
+                        Quaternion barrierRotation = Quaternion.identity;
+
+                        if (roomEntry.type == Room.EntryType.Vertical)
+                        {
+                            barrierRotation = Quaternion.Euler(0,0,90);
+                        }
+
+                        Instantiate(barrierPrefab, barrierPos, barrierRotation);
+
+                        remainingCorridors.Remove(corridor);
+                    }
                 }
             }
         }
@@ -162,7 +184,7 @@ public class LevelGenerator : MonoBehaviour
             c.x += origin.x;
             c.y -= origin.y;
 
-            Instantiate(instantiable, CoordToVect(c, mapInfo.tileSize), Quaternion.identity).transform.SetParent(parentTo.transform);
+            Instantiate(instantiable, CoordToVect(c, mapInfo.tileSize), Quaternion.identity, parentTo.transform);
         }
     }
 
