@@ -106,10 +106,10 @@ public class LevelGenerator : MonoBehaviour
 
         
         //Capa de enemigos
-        foreach (Coord c in mapInfo.enemyCoords)
-        {
-            Instantiate(enemyPrefab, CoordToVect(c, mapInfo.tileSize), Quaternion.identity).transform.SetParent(enemyParent.transform); ;
-        }
+        //foreach (Coord c in mapInfo.enemyCoords)
+        //{
+            Instantiate(enemyPrefab, /*CoordToVect(c, mapInfo.tileSize)*/CoordToVect(mapInfo.PlayerCoord, mapInfo.tileSize), Quaternion.identity).transform.SetParent(enemyParent.transform); ;
+        //}
 
 
         //Capa de triggers de entrada a las habitaciones
