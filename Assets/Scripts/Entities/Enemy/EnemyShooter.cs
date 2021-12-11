@@ -15,9 +15,10 @@ public class EnemyShooter : Shooter
         autoStartFire = Time.time + Random.Range(0f, 2f);
     }
 
-    public void Init(float cooldown, int damage, bool automatic)
+    public void Init(float cooldown, float velocity, int damage, bool automatic)
     {
         this.cooldown = cooldown;
+        this.velocity = velocity;
         this.damage = damage;
         this.automatic = automatic;
     }

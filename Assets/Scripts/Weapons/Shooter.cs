@@ -14,6 +14,7 @@ public class Shooter : MonoBehaviour
     protected int damage = 1;
 
     protected float cooldown = 0.1f;
+    protected float velocity = 20;
     float cooldownFinishTime = 0;
 
     protected bool enemyBullet = true;
@@ -41,7 +42,7 @@ public class Shooter : MonoBehaviour
             }
             else
             {
-                position = transform.position + orientation * Vector2.up * 50;
+                position = transform.position + orientation * Vector2.up * 8;
             }
 
             GameObject projectile = pooler.Spawn("bullet", position, orientation);
@@ -50,7 +51,7 @@ public class Shooter : MonoBehaviour
 
             if (bulletModule != null)
             {
-                bulletModule.InitBullet(damage, enemyBullet);
+                bulletModule.InitBullet(velocity, damage, enemyBullet);
                 bulletModule.SetBuffState(buffIndexes);
             }
             else

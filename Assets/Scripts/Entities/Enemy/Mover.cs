@@ -16,7 +16,7 @@ public class Mover:MonoBehaviour
 
     public void Move(Vector2 dir)
     {
-        rb.velocity = Vector2.Lerp(rb.velocity, dir*velocity, Time.deltaTime * 5);
+        rb.velocity = Vector2.Lerp(rb.velocity, dir*velocity, Time.deltaTime * 10);
     }
 
     public void MoveTo(Vector2 pos)

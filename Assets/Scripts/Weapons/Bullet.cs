@@ -32,8 +32,9 @@ public class Bullet : MonoBehaviour, IPooledObject
     }
 
     //Método que inicializa los valores del proyectil una vez creado en la escena
-    public void InitBullet(int damage, bool enemyBullet)
+    public void InitBullet(float velocity, int damage, bool enemyBullet)
     {
+        this.velocity = velocity;
         this.damage = damage;
         this.enemyBullet = enemyBullet;
 
