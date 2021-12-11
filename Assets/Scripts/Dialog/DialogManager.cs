@@ -60,7 +60,7 @@ public class DialogManager : MonoBehaviour
     void Update()
     {
 
-        if (Input.GetMouseButtonDown(0))
+        if (Controls.GetAttackKeyDown())
         {
             if(IsInDialog())
                 dialogueUI.MarkLineComplete();

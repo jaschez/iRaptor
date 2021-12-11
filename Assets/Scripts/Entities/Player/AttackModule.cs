@@ -15,6 +15,8 @@ public class AttackModule : Shooter
     CamManager camManager;
     Movement movementManager;
 
+    bool locked = false;
+
 
     private void Awake()
     {
@@ -41,7 +43,7 @@ public class AttackModule : Shooter
 
     void Update()
     {
-        if (Controls.GetAttackKeyDown() && CanShoot())
+        if (Controls.GetAttackKeyDown() && CanShoot() && !locked)
         {
 
             SoundManager.Play(Sounds.Shoot, camManager.transform.position, camManager.transform);
@@ -62,6 +64,16 @@ public class AttackModule : Shooter
 
         camManager.ShakeSingle(5);
         camManager.Recoil();
+    }
+
+    public void Lock()
+    {
+        locked = true;
+    }
+
+    public void Unlock()
+    {
+        locked = false;
     }
 
     public static AttackModule GetInstance()
