@@ -9,9 +9,12 @@ public class Shooter : MonoBehaviour
 
     ObjectPooler pooler;
 
+    Vector3 position;
+
     protected int damage = 1;
 
     protected float cooldown = 0.1f;
+    protected float velocity = 20;
     float cooldownFinishTime = 0;
 
     protected bool enemyBullet = true;
@@ -23,14 +26,24 @@ public class Shooter : MonoBehaviour
 
     protected void Fire(int[] buffIndexes = null)
     {
+        Fire(transform.rotation, buffIndexes);
+    }
+
+    protected void Fire(Quaternion orientation, int[] buffIndexes = null)
+    {
 
         buffIndexes = buffIndexes ?? new int[0];
 
         if (Time.time > cooldownFinishTime) {
             cooldownFinishTime = Time.time + cooldown;
 
-            Quaternion orientation = transform.rotation;
-            Vector3 position = projectileStartingPos.position;
+            if (!enemyBullet) {
+                position = projectileStartingPos.position;
+            }
+            else
+            {
+                position = transform.position + orientation * Vector2.up * 8;
+            }
 
             GameObject projectile = pooler.Spawn("bullet", position, orientation);
 
@@ -38,7 +51,7 @@ public class Shooter : MonoBehaviour
 
             if (bulletModule != null)
             {
-                bulletModule.InitBullet(damage, enemyBullet);
+                bulletModule.InitBullet(velocity, damage, enemyBullet);
                 bulletModule.SetBuffState(buffIndexes);
             }
             else

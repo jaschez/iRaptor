@@ -28,6 +28,7 @@ public class AttackModule : Shooter
         base.Start();
 
         enemyBullet = false;
+        velocity = 600;
 
         player = (PlayerModule)PlayerModule.GetInstance();
         camManager = CamManager.GetInstance();
