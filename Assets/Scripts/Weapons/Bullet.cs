@@ -52,7 +52,7 @@ public class Bullet : MonoBehaviour, IPooledObject
         }
     }
 
-    void Update()
+    void FixedUpdate()
     {
         transform.Translate(orientation * velocity * Time.deltaTime);
     }

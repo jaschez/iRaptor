@@ -11142,7 +11142,7 @@ MonoBehaviour:
   enemyNumber: 10
   lootNumber: 4
   seed: 1770819294
-  randomSeed: 0
+  randomSeed: 1
   connectCaves: 1
 --- !u!4 &1558074469
 Transform:
