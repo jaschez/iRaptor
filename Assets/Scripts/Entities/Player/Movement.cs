@@ -26,7 +26,6 @@ public class Movement : MonoBehaviour
     float playerVelocity = 250;
     float acceleration = 4;//5
     float orientationAngle;
-
     float interactionCooldown = 1f;
     float interactionTime = 0;
 
@@ -130,7 +129,8 @@ public class Movement : MonoBehaviour
     //Controla la orientacion del jugador
     void Pitch()
     {
-        if (!locked) {
+        if (!locked)
+        {
             mousePos = cam.ScreenToWorldPoint(Input.mousePosition);
 
             joystickOrientation = mousePos - transform.position;
@@ -151,7 +151,6 @@ public class Movement : MonoBehaviour
     {
         if (Controls.GetMoveKeyDown() && !locked)
         {
-
             CamManager.GetInstance().ShakeQuake(5f, 1.5f, false);
 
             SoundManager.Play(Sounds.EngineStart, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
@@ -172,7 +171,8 @@ public class Movement : MonoBehaviour
             {
                 rb.velocity = Vector2.Lerp(rb.velocity, Vector2.zero, Time.deltaTime * acceleration);
             }
-            else{
+            else
+            {
                 rb.velocity = Vector2.Lerp(rb.velocity, Vector2.zero, Time.deltaTime * 20);
             }
 
@@ -209,6 +209,21 @@ public class Movement : MonoBehaviour
         transform.rotation = Quaternion.Euler(0, 0, 0);
     }
 
+    public void Lock()
+    {
+        locked = true;
+    }
+
+    public void Unlock()
+    {
+        locked = false;
+    }
+
+    public bool IsLocked()
+    {
+        return locked;
+    }
+
     public bool OnGround()
     {
         return Physics2D.OverlapCircle((Vector2)transform.position + Vector2.down * 8f, .3f);
@@ -239,20 +254,6 @@ public class Movement : MonoBehaviour
         return lastPlayerOrientation;
     }
 
-    public void Lock()
-    {
-        locked = true;
-    }
-
-    public void Unlock()
-    {
-        locked = false;
-    }
-
-    public bool IsLocked()
-    {
-        return locked;
-    }
     public bool JoystickDropped()
     {
         return joystickOrientation == Vector2.zero;

@@ -161,7 +161,7 @@ public class LevelGenerator : MonoBehaviour
 
                         if (roomEntry.type == Room.EntryType.Vertical)
                         {
-                            barrierRotation = Quaternion.Euler(0,0,90);
+                            barrierRotation = Quaternion.Euler(0, 0, 90);
                         }
 
                         Instantiate(barrierPrefab, barrierPos, barrierRotation);
