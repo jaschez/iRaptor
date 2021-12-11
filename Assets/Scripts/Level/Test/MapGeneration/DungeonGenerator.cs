@@ -61,7 +61,6 @@ public class DungeonGenerator
         */
 
         List<Coord> loots = new List<Coord>();
-        List<Coord> chests = new List<Coord>();
         List<Coord> enemies = new List<Coord>();
         Coord player;
         Coord exit;
@@ -100,7 +99,7 @@ public class DungeonGenerator
             selectedChestRoom = rooms[Random.Range(0, rooms.Count)];
             selectedChestCoord = selectedChestRoom.floorCoords[Random.Range(0, selectedChestRoom.floorCoords.Count)];
 
-            chests.Add(RoomToWorldCoord(selectedChestCoord, selectedChestRoom));
+            selectedChestRoom.chestPoints.Add(selectedChestCoord);
         }
 
         //Place Player Coord
@@ -131,7 +130,6 @@ public class DungeonGenerator
             mapSeed = seed,
             map = dungeonMap,
             lootCoords = loots,
-            chestCoords = chests,
             PlayerCoord = player,
             enemyCoords = enemies,
             ExitPos = exit
@@ -765,7 +763,6 @@ public struct MapInfo
 
     public List<Coord> enemyCoords;
     public List<Coord> lootCoords;
-    public List<Coord> chestCoords;
     public List<Coord> eggCoords;
 }
 

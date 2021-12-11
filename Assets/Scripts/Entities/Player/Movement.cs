@@ -26,8 +26,10 @@ public class Movement : MonoBehaviour
     float playerVelocity = 250;
     float acceleration = 4;//5
     float orientationAngle;
+    float interactionCooldown = 1f;
+    float interactionTime = 0;
 
-    bool startMode = true;
+    bool locked = false;
 
     Camera cam;
 
@@ -83,8 +85,6 @@ public class Movement : MonoBehaviour
         {
             selectedInteractable = objectInteractable;
             selectedInteractableID = collider.GetHashCode();
-
-            interactSign.SetActive(true);
         }
     }
 
@@ -107,11 +107,21 @@ public class Movement : MonoBehaviour
     {
         if (selectedInteractable != null)
         {
-            interactSign.transform.position = transform.position + Vector3.up * 12;
-
-            if (Controls.GetInteractKeyDown())
+            if (!locked)
             {
-                selectedInteractable.Interact();
+                interactSign.transform.position = transform.position + Vector3.up * 12;
+
+                if (interactionTime < Time.time)
+                {
+                    interactSign.SetActive(true);
+
+                    if (Controls.GetInteractKeyDown())
+                    {
+                        interactionTime = Time.time + interactionCooldown;
+                        selectedInteractable.Interact();
+                        interactSign.SetActive(false);
+                    }
+                }
             }
         }
     }
@@ -119,31 +129,28 @@ public class Movement : MonoBehaviour
     //Controla la orientacion del jugador
     void Pitch()
     {
-
-        mousePos = cam.ScreenToWorldPoint(Input.mousePosition);
-
-        joystickOrientation = mousePos - transform.position;
-
-        if (!JoystickDropped())
+        if (!locked)
         {
-            playerOrientation = joystickOrientation.normalized;
+            mousePos = cam.ScreenToWorldPoint(Input.mousePosition);
 
-            orientationAngle = Vector2.SignedAngle(Vector2.up, playerOrientation);
+            joystickOrientation = mousePos - transform.position;
 
-            transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(0, 0, orientationAngle), Time.deltaTime * 15);
+            if (!JoystickDropped())
+            {
+                playerOrientation = joystickOrientation.normalized;
+
+                orientationAngle = Vector2.SignedAngle(Vector2.up, playerOrientation);
+
+                transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(0, 0, orientationAngle), Time.deltaTime * 15);
+            }
         }
     }
 
     //Activa el movimiento si detecta pulsación de tecla
     void Move()
     {
-        if (Controls.GetMoveKeyDown())
+        if (Controls.GetMoveKeyDown() && !locked)
         {
-            if (startMode)
-            {
-                startMode = false;
-            }
-
             CamManager.GetInstance().ShakeQuake(5f, 1.5f, false);
 
             SoundManager.Play(Sounds.EngineStart, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
@@ -151,7 +158,7 @@ public class Movement : MonoBehaviour
             trailParticle.Play();
         }
 
-        if (Controls.GetMoveKey())
+        if (Controls.GetMoveKey() && !locked)
         {
             movementOrientation.x = -Controls.GetJoystick2X();
             movementOrientation.y = Controls.GetJoystick2Y();
@@ -160,7 +167,14 @@ public class Movement : MonoBehaviour
         }
         else
         {
-            rb.velocity = Vector2.Lerp(rb.velocity, Vector2.zero, Time.deltaTime * acceleration);
+            if (!locked)
+            {
+                rb.velocity = Vector2.Lerp(rb.velocity, Vector2.zero, Time.deltaTime * acceleration);
+            }
+            else
+            {
+                rb.velocity = Vector2.Lerp(rb.velocity, Vector2.zero, Time.deltaTime * 20);
+            }
 
             if (!trailParticle.isStopped)
             {
@@ -168,10 +182,13 @@ public class Movement : MonoBehaviour
             }
         }
 
-        if (Controls.GetMoveKeyUp())
+        if (Controls.GetMoveKeyUp() || locked)
         {
-            SoundManager.Play(Sounds.EngineOff, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
-            engineSound.Stop();
+            if (engineSound.isPlaying)
+            {
+                SoundManager.Play(Sounds.EngineOff, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
+                engineSound.Stop();
+            }
         }
 
 
@@ -185,12 +202,26 @@ public class Movement : MonoBehaviour
 
     public void SetStartMode()
     {
-        startMode = true;
         playerOrientation = Vector2.up;
         lastPlayerOrientation = playerOrientation;
 
         rb.velocity = Vector2.zero;
         transform.rotation = Quaternion.Euler(0, 0, 0);
+    }
+
+    public void Lock()
+    {
+        locked = true;
+    }
+
+    public void Unlock()
+    {
+        locked = false;
+    }
+
+    public bool IsLocked()
+    {
+        return locked;
     }
 
     public bool OnGround()

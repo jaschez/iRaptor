@@ -20,6 +20,7 @@ public abstract class Gadget : MonoBehaviour
 
     protected bool canUse = true;
     protected bool exhausted = false;
+    private bool locked = false;
 
     //Propiedad que gestiona los usos disponibles del gadget
     protected int gadgetUnits
@@ -53,7 +54,7 @@ public abstract class Gadget : MonoBehaviour
 
     protected virtual void Update()
     {
-        if (Controls.GetDashKeyDown())
+        if (Controls.GetDashKeyDown() && !locked)
         {
             if (gadgetUnits >= spentPerUse && canUse && !exhausted) {
                 Use();
@@ -88,6 +89,16 @@ public abstract class Gadget : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void Lock()
+    {
+        locked = true;
+    }
+
+    public void Unlock()
+    {
+        locked = false;
     }
 
     protected abstract void Use();

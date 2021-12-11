@@ -261,5 +261,6 @@ public enum EntityType
 {
     Player,
     Enemy,
-    Loot
+    Loot,
+    Barrier
 }

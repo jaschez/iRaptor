@@ -68,13 +68,20 @@ public class Bullet : MonoBehaviour, IPooledObject
         {
             if (!IsAttackingHimself(otherEntity))
             {
-                otherEntity.TakeDamage(damage);
+                if (!(enemyBullet && otherEntity.GetEntityType() == EntityType.Barrier))
+                {
+                    otherEntity.TakeDamage(damage);
 
-                ApplyDebuffs(otherEntity);
+                    ApplyDebuffs(otherEntity);
 
-                hitNumber++;
+                    hitNumber++;
 
-                if (hitNumber >= maxHitNumber)
+                    if (hitNumber >= maxHitNumber)
+                    {
+                        Impact();
+                    }
+                }
+                else
                 {
                     Impact();
                 }
