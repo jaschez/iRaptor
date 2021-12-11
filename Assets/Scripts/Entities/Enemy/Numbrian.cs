@@ -101,6 +101,7 @@ public class Numbrian : EnemyModule
 
     void Idle()
     {
+
         mover.Move(Vector2.zero);
 
         if (patrolIdle.TriggerState == null && alertIdle.TriggerState == null) {
