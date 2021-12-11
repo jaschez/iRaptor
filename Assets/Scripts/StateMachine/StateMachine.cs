@@ -31,6 +31,8 @@ public class StateMachine : MonoBehaviour
 
     IEnumerator DoState(State state)
     {
+        while (state == null) yield return null;
+
         StartState(state);
 
         if (state.AssignedAction != null)
@@ -73,6 +75,16 @@ public class StateMachine : MonoBehaviour
         }
 
         currentCoroutine = StartCoroutine(DoState(selectedState));
+    }
+
+    private void OnEnable()
+    {
+        currentCoroutine = StartCoroutine(DoState(currentState));
+    }
+
+    private void OnDisable()
+    {
+        StopAllCoroutines();
     }
 
     public enum States
