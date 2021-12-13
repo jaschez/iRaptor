@@ -43,6 +43,9 @@ public class Room
 
     Coord worldPos;
 
+    //Usado para el sistema de oleadas
+    public bool enemiesRemaining { get; private set; } = true;
+
     public int left { get; private set; }
     public int right { get; private set; }
     public int top { get; private set; }

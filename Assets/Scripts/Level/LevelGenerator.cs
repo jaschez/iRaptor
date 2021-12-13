@@ -60,6 +60,8 @@ public class LevelGenerator : MonoBehaviour
         /*Tile floor2 = Resources.Load("floor2", typeof(Tile)) as Tile;
         Tile floor3 = Resources.Load("floor3", typeof(Tile)) as Tile;*/
 
+        GameObject waveManObj;
+
         GameObject roomParent;
         GameObject lootParent;
         GameObject chestParent;
@@ -104,6 +106,10 @@ public class LevelGenerator : MonoBehaviour
             lootParent = new GameObject("Loot");
             chestParent = new GameObject("Chests");
             enemyParent = new GameObject("Enemies");
+
+            //Sistema de oleadas
+            waveManObj = new GameObject("WaveManager");
+            waveManObj.AddComponent<WaveManager>();
 
             //Capa de enemigos
             InstantiateObjectList(room.enemyCoords, room.GetWorldPosition(), enemyPrefab, enemyParent);

@@ -7,6 +7,8 @@ public abstract class EnemyModule : Entity
 
     private EnemyType enemyType;
 
+    WaveManager waveManager;
+
     protected int maxCarbonUnits = 5;
 
     protected bool damaged = false;
@@ -20,6 +22,8 @@ public abstract class EnemyModule : Entity
     {
         SetEntityType(EntityType.Enemy);
         InitEnemy();
+
+        waveManager = WaveManager.GetInstance();
 
         dropIndex = (int)DropType.CarbonUnit;
 
@@ -39,6 +43,8 @@ public abstract class EnemyModule : Entity
     {
 
         OnEnemyDead();
+
+        waveManager.AddBeatenEnemy();
 
         base.Die();
     }
