@@ -106,16 +106,16 @@ public class Minimap : MonoBehaviour
 
     public void UpdateMapRegion(Room room)
     {
-        int[,] map = room.gameMap;
+        //int[,] map = room.gameMap;
 
-        int roomWidth = room.gameWidth;
-        int roomHeight = room.gameHeight;
+        int roomWidth = room.Width;
+        int roomHeight = room.Height;
 
         int colorIndex;
 
-        Coord worldPos = room.GetWorldPosition();
+        Coord worldPos = room.Position;
 
-        for (int y = 0; y < roomHeight; y++)
+        /*for (int y = 0; y < roomHeight; y++)
         {
             for (int x = 0; x < roomWidth; x++)
             {
@@ -138,21 +138,25 @@ public class Minimap : MonoBehaviour
                     colourMap[colorIndex] = new Color(0, 0, 0, 0);
                 }
             }
+        }*/
+
+        foreach (Coord tile in room.Floor)
+        {
+            colorIndex = (tile.y - worldPos.y) * width + tile.x + worldPos.x;
+            colourMap[colorIndex] = new Color(.8f, .8f, .8f);
         }
 
-        foreach (Room.Entry entry in room.entries)
+        foreach (int corridorIndex in room.LinkedCorridors)
         {
-            if (entry.type != Room.EntryType.Central) {
-                Corridor corridor = minimapInfo.corridors[entry.linkedCorridorIndex];
+            Corridor corridor = minimapInfo.corridors[corridorIndex];
 
-                foreach (Coord c in corridor.Coords)
-                {
-                    colourMap[-c.y * width + c.x] = new Color(.8f, .8f, .8f);
-                }
+            foreach (Coord c in corridor.Coords)
+            {
+                colourMap[-c.y * width + c.x] = new Color(.8f, .8f, .8f);
             }
         }
 
-        foreach (Coord c in room.lootPoints)
+        foreach (Coord c in room.Loot)
         {
             colourMap[(c.y - worldPos.y) * width + c.x + worldPos.x] = Color.magenta;
         }

@@ -102,7 +102,7 @@ public class LevelGenerator : MonoBehaviour
 
         foreach (Room room in mapInfo.rooms)
         {
-            roomParent = new GameObject("Room" + room.GetId());
+            roomParent = new GameObject("Room" + room.ID);
             lootParent = new GameObject("Loot");
             chestParent = new GameObject("Chests");
             enemyParent = new GameObject("Enemies");
@@ -112,13 +112,13 @@ public class LevelGenerator : MonoBehaviour
             waveManObj.AddComponent<WaveManager>();
 
             //Capa de enemigos
-            InstantiateObjectList(room.enemyCoords, room.GetWorldPosition(), enemyPrefab, enemyParent);
+            //InstantiateObjectList(room.enemyCoords, room.GetWorldPosition(), enemyPrefab, enemyParent);
 
             //Capa de cofres
-            InstantiateObjectList(room.chestPoints, room.GetWorldPosition(), chestPrefab, chestParent);
+            InstantiateObjectList(room.Chest, room.Position, chestPrefab, chestParent);
 
             //Capa de recompensas
-            InstantiateObjectList(room.lootPoints, room.GetWorldPosition(), lootPrefab, lootParent);
+            InstantiateObjectList(room.Loot, room.Position, lootPrefab, lootParent);
 
             enemyParent.transform.SetParent(roomParent.transform);
             chestParent.transform.SetParent(roomParent.transform);
@@ -126,7 +126,7 @@ public class LevelGenerator : MonoBehaviour
             roomParent.transform.SetParent(roomsParent.transform);
 
             //Capa de triggers de entrada a las habitaciones
-            foreach (Room.Entry roomEntry in room.entries)
+            foreach (Room.Entry roomEntry in room.Entries)
             {
                 if (roomEntry.type != Room.EntryType.Central)
                 {
@@ -134,7 +134,7 @@ public class LevelGenerator : MonoBehaviour
 
                     BoxCollider2D col;
 
-                    Coord worldPos = mapInfo.rooms[0].GetWorldPosition();
+                    Coord worldPos = mapInfo.rooms[0].Position;
                     Coord entry = roomEntry.coord;
 
                     col = trigger.AddComponent<BoxCollider2D>();
@@ -155,7 +155,7 @@ public class LevelGenerator : MonoBehaviour
 
                     trigger.transform.SetParent(triggerParent.transform);
 
-                    Corridor corridor = mapInfo.corridors[roomEntry.linkedCorridorIndex];
+                    Corridor corridor = mapInfo.corridors[roomEntry.LinkedCorridor];
 
                     if (remainingCorridors.Contains(corridor))
                     {
@@ -202,7 +202,7 @@ public class LevelGenerator : MonoBehaviour
 
         if (mapInfo.rooms != null)
         {
-            foreach (Room r in mapInfo.rooms)
+            foreach (RoomGenerator r in mapInfo.debugRooms)
             {
                 if (r.GetId() >= 0)
                 {
@@ -217,7 +217,7 @@ public class LevelGenerator : MonoBehaviour
 
                     foreach (int iB in r.linkedRooms)
                     {
-                        Room roomB = mapInfo.rooms[iB];
+                        RoomGenerator roomB = mapInfo.debugRooms[iB];
 
                         Vector2 tlB = new Vector2(roomB.left, -roomB.top) * tileSize;
                         Vector2 trB = new Vector2(roomB.right, -roomB.top) * tileSize;

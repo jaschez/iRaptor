@@ -8,7 +8,6 @@ public class WaveManager : MonoBehaviour
 
     Room currentRoom;
 
-    int totalEnemies;
     int totalWaveEnemies;
     int totalWaves;
     int beatenEnemies;
@@ -33,12 +32,12 @@ public class WaveManager : MonoBehaviour
 
     public void UpdateRoom(Room room)
     {
-        if (room != currentRoom) {
+        if (room.ID != currentRoom.ID) {
             currentRoom = room;
+            totalWaves = room.Enemies.Count;
             beatenEnemies = 0;
-            totalEnemies = room.enemyCoords.Count;
 
-            if (room.enemiesRemaining) {
+            if (room.Type == Room.RoomType.Normal) {
                 StartNextWave();
             }
         }
@@ -63,6 +62,7 @@ public class WaveManager : MonoBehaviour
 
     void StartNextWave()
     {
+        totalWaveEnemies = currentRoom.Enemies[currentWave].Count;
         SpawnEnemies();
     }
 

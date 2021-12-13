@@ -10,9 +10,10 @@ public class DungeonGenerator
 
     int width, height;
 
+    List<RoomGenerator> generatedRooms;
     List<Room> rooms;
     List<Corridor> corridors;
-    List<Room> failedRooms;
+    List<RoomGenerator> failedRooms;
 
     Coord[] directions = { new Coord(1, 0), new Coord(-1, 0), new Coord(0, 1), new Coord(0, -1) };
 
@@ -48,7 +49,7 @@ public class DungeonGenerator
 
         GenerateMap();
         SetMapBounds();
-
+        rooms = ExportGenerators();
         GenerateTiles();
 
         Room[] roomsByUniformity;
@@ -61,7 +62,7 @@ public class DungeonGenerator
         */
 
         List<Coord> loots = new List<Coord>();
-        List<Coord> enemies = new List<Coord>();
+        List<List<Coord>> enemies = new List<List<Coord>>();
         Coord player;
         Coord exit;
 
@@ -70,7 +71,7 @@ public class DungeonGenerator
         //Place loot points
         //Deberá cambiarse para que muestre el umbral de interés de distintas zonas en base a la densidad de paredes que posee,
         // y compararlas con el resto.
-        roomsByUniformity = rooms.OrderBy(room => room.interestingPoints.Count).ToArray();   //Order by uniformity
+        roomsByUniformity = rooms.OrderBy(room => room.InterestingPlaces.Count).ToArray();   //Order by uniformity
 
         int placedLoot = 0;
 
@@ -78,9 +79,9 @@ public class DungeonGenerator
         {
             Room interestingRoom = roomsByUniformity[i];
 
-            if (interestingRoom.GetId() != 0) {
+            if (interestingRoom.ID != 0) {
 
-                foreach (Coord lootCoord in interestingRoom.lootPoints)
+                foreach (Coord lootCoord in interestingRoom.Loot)
                 {
                     loots.Add(RoomToWorldCoord(lootCoord, interestingRoom));
                 }
@@ -97,34 +98,36 @@ public class DungeonGenerator
         for (int i = 0; i < maxChests; i++)
         {
             selectedChestRoom = rooms[Random.Range(0, rooms.Count)];
-            selectedChestCoord = selectedChestRoom.floorCoords[Random.Range(0, selectedChestRoom.floorCoords.Count)];
+            selectedChestCoord = selectedChestRoom.Floor[Random.Range(0, selectedChestRoom.Floor.Count)];
 
-            selectedChestRoom.chestPoints.Add(selectedChestCoord);
+            selectedChestRoom.Chest.Add(selectedChestCoord);
         }
 
         //Place Player Coord
 
-        player = RoomToWorldCoord(firstRoom.startPoints[1], firstRoom);
+        player = RoomToWorldCoord(firstRoom.Floor[Random.Range(0, firstRoom.Floor.Count)], firstRoom);
 
         //Place Exit Coord
 
-        exit = RoomToWorldCoord(rooms[bossRoom].floorCoords[Random.Range(0, rooms[bossRoom].floorCoords.Count)], rooms[bossRoom]);
+        exit = RoomToWorldCoord(rooms[bossRoom].Floor[Random.Range(0, rooms[bossRoom].Floor.Count)], rooms[bossRoom]);
 
         //Place enemy Coords
 
-        foreach (Room room in rooms)
+        /*foreach (Room room in rooms)
         {
-            foreach (Coord c in room.enemyCoords)
+            enemies.Add(new List<Coord>());
+            foreach (Coord c in room.Enemies[0])
             {
-                enemies.Add(RoomToWorldCoord(c, room));
+                enemies[0].Add(RoomToWorldCoord(c, room));
             }
-        }
+        }*/
 
         MapInfo mapInfo = new MapInfo
         {
             width = width,
             height = height,
             tileSize = tileSize,
+            debugRooms = generatedRooms,
             rooms = rooms,
             corridors = corridors,
             mapSeed = seed,
@@ -135,21 +138,20 @@ public class DungeonGenerator
             ExitPos = exit
         };
 
-
         return mapInfo;
     }
 
     void GenerateMap()
     {
 
-        rooms = new List<Room>();
+        generatedRooms = new List<RoomGenerator>();
         corridors = new List<Corridor>();
-        failedRooms = new List<Room>();
+        failedRooms = new List<RoomGenerator>();
 
         int roomNum = Random.Range(minRooms, maxRooms + 1);
         int sameDir = 0;
 
-        Room lastRoom = null;
+        RoomGenerator lastRoom = null;
 
         Coord lastDir = new Coord();
 
@@ -191,7 +193,7 @@ public class DungeonGenerator
                 sameDir++;
             }
 
-            Room generated = GenerateRoom(dir, roomWidth, roomHeight, lastRoom, i, true);
+            RoomGenerator generated = GenerateRoom(dir, roomWidth, roomHeight, lastRoom, i, true);
 
             //If room is new and not created prevoiusly
             if (generated.GetId() == i)
@@ -207,15 +209,13 @@ public class DungeonGenerator
             lastRoom = generated;
         }
 
-        //TODO: Obtener la cueva de mayor distancia respecto al inicio
-
         int largestIndex = 0;
         int largestDistance = 0;
 
-        for (int index = 0; index < rooms.Count; index++)
+        for (int index = 0; index < generatedRooms.Count; index++)
         {
 
-            int dist = rooms[index].distanceFromStart;
+            int dist = generatedRooms[index].distanceFromStart;
 
             if(dist > largestDistance)
             {
@@ -225,7 +225,7 @@ public class DungeonGenerator
             }
         }
 
-        Room bossRoom = null;
+        RoomGenerator bossRoom = null;
 
         while (bossRoom == null)
         {
@@ -235,24 +235,35 @@ public class DungeonGenerator
             int width = Random.Range(10, 15);
             int height = Random.Range(10, 15);
 
-            bossRoom = GenerateRoom(direction, width, height, rooms[largestIndex], roomNum - 1, false, .85f);
+            bossRoom = GenerateRoom(direction, width, height, generatedRooms[largestIndex], roomNum - 1, false, .85f);
             //Y si nunca encuentra el sitio apropiado?
         }
 
-        foreach (Room r in rooms)
+        foreach (RoomGenerator r in generatedRooms)
         {
             r.CreateRoom();
         }
     }
 
-    Room GetNearestOverlappingRoom(Room evaluated)
+    List<Room> ExportGenerators()
+    {
+        List<Room> rooms = new List<Room>();
+
+        foreach(RoomGenerator generator in generatedRooms){
+            rooms.Add(generator.ExportRoom());
+        }
+
+        return rooms;
+    }
+
+    RoomGenerator GetNearestOverlappingRoom(RoomGenerator evaluated)
     {
 
-        Room nearest = null;
+        RoomGenerator nearest = null;
 
         float nearestDistance = int.MaxValue;
 
-        foreach (Room room in rooms)
+        foreach (RoomGenerator room in generatedRooms)
         {
             if (room.GetId() >= 0)
             {
@@ -278,14 +289,14 @@ public class DungeonGenerator
         return nearest;
     }
 
-    Room GenerateRoom(Coord dir, int roomWidth, int roomHeight, Room lastRoom, int id, bool linkIfOverlaps, float fillPerc = -1)
+    RoomGenerator GenerateRoom(Coord dir, int roomWidth, int roomHeight, RoomGenerator lastRoom, int id, bool linkIfOverlaps, float fillPerc = -1)
     {
         //Calculate spacing between rooms
 
         Coord roomPos = CalculateRoomPosition(dir, roomWidth, roomHeight, lastRoom);
 
-        Room newRoom = new Room(roomPos, roomWidth, roomHeight, scaleFactor, id, fillPerc);
-        Room overlapped = GetNearestOverlappingRoom(newRoom);
+        RoomGenerator newRoom = new RoomGenerator(roomPos, roomWidth, roomHeight, scaleFactor, id, fillPerc);
+        RoomGenerator overlapped = GetNearestOverlappingRoom(newRoom);
 
         if (overlapped == null)
         {
@@ -300,7 +311,7 @@ public class DungeonGenerator
 
             //newRoom.CreateRoom(); Debug purposes
 
-            rooms.Add(newRoom);
+            generatedRooms.Add(newRoom);
 
             return newRoom;
         }
@@ -344,7 +355,7 @@ public class DungeonGenerator
         }
     }
 
-    Coord CalculateRoomPosition(Coord dir, int roomWidth, int roomHeight, Room lastRoom)
+    Coord CalculateRoomPosition(Coord dir, int roomWidth, int roomHeight, RoomGenerator lastRoom)
     {
         int stepX;
         int stepY;
@@ -430,7 +441,7 @@ public class DungeonGenerator
         }
     }
 
-    void LinkRooms(Room roomA, Room roomB)
+    void LinkRooms(RoomGenerator roomA, RoomGenerator roomB)
     {
         roomA.LinkToRoomIndex(roomB.GetId());
         roomB.LinkToRoomIndex(roomA.GetId());
@@ -587,9 +598,9 @@ public class DungeonGenerator
         int upperValue = int.MinValue;
         int deeperValue = int.MaxValue;
 
-        for (int i = 0; i < rooms.Count; i++)
+        for (int i = 0; i < generatedRooms.Count; i++)
         {
-            Room room = rooms[i];
+            RoomGenerator room = generatedRooms[i];
 
             if (room.left < leftierValue)
             {
@@ -614,7 +625,7 @@ public class DungeonGenerator
             }
         }
 
-        foreach (Room room in rooms)
+        foreach (RoomGenerator room in generatedRooms)
         {
             Coord roomPos = room.GetWorldPosition();
 
@@ -630,7 +641,7 @@ public class DungeonGenerator
         }
 
         //DEBUG
-        foreach (Room room in failedRooms)
+        foreach (RoomGenerator room in failedRooms)
         {
             Coord roomPos = room.GetWorldPosition();
 
@@ -640,15 +651,15 @@ public class DungeonGenerator
             room.SetWorldPosition(roomPos);
         }
 
-        width = rooms[rightCaveIndex].right;
-        height = Mathf.Abs(rooms[bottomCaveIndex].bottom);
+        width = generatedRooms[rightCaveIndex].right;
+        height = Mathf.Abs(generatedRooms[bottomCaveIndex].bottom);
     }
 
     void GenerateTiles()
     {
         dungeonMap = new int[width, height];
 
-        foreach (Room r in rooms)
+        foreach (RoomGenerator r in generatedRooms)
         {
             int w = r.gameWidth;
             int h = r.gameHeight;
@@ -737,8 +748,8 @@ public class DungeonGenerator
     {
         Coord world = new Coord(local.x, local.y);
 
-        world.x += room.GetWorldPosition().x;
-        world.y -= room.GetWorldPosition().y;
+        world.x += room.Position.x;
+        world.y -= room.Position.y;
 
         return world;
     }
@@ -758,10 +769,11 @@ public struct MapInfo
     public Coord PlayerCoord;
     public Coord ExitPos;
 
+    public List<RoomGenerator> debugRooms;
     public List<Room> rooms;
     public List<Corridor> corridors;
 
-    public List<Coord> enemyCoords;
+    public List<List<Coord>> enemyCoords;
     public List<Coord> lootCoords;
     public List<Coord> eggCoords;
 }

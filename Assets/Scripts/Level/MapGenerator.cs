@@ -34,7 +34,7 @@ public class MapGenerator
     MapInfo mapInfo;
 
     List<Coord> lootCoords;
-    List<Coord> enemyCoords;
+    List<List<Coord>> enemyCoords;
 
     List<Coord> floorCoords;
 
@@ -59,7 +59,7 @@ public class MapGenerator
         }
 
         lootCoords = new List<Coord>();
-        enemyCoords = new List<Coord>();
+        enemyCoords = new List<List<Coord>>();
         floorCoords = new List<Coord>();
     }
 
