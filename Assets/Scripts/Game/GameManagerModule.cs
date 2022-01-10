@@ -10,6 +10,8 @@ public class GameManagerModule : MonoBehaviour
 
     public AssetManager assetContainer;
 
+    public ShadowCaster2DTileMap shadowCasterTilemap;
+
     LevelManager levelManager;
 
     GameObject levelManagerObj;
@@ -134,6 +136,14 @@ public class GameManagerModule : MonoBehaviour
         camManager.SetCamPos(movManager.gameObject.transform.position);
 
         uiVisualizer.InitUI();
+
+        Invoke("GenShadows", .1f);
+        
+    }
+
+    void GenShadows()
+    {
+        shadowCasterTilemap.Generate();
     }
 
     void Update()

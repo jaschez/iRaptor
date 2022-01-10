@@ -32,7 +32,7 @@ public class ForceField : MonoBehaviour
     public int size = 15;
     float weirdValue = 0;
 
-    bool canStart = false;
+    bool canStart = true;
     bool canZoom = false;
     bool canClick = false;
 

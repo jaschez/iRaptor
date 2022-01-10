@@ -96,7 +96,7 @@ public class DashGadget : Gadget
 
         //Habrá que tener esto en cuenta
         // - (Si la cueva mencionada es conocida, habrá que activar su trigger de entrada o salida, ya que
-        // reaparecer ahí es como si hubiera entrado en la cueva)
+        // reaparecer ahí (teletransportarse hasta dicha cueva) es como si hubiera entrado en la cueva)
 
         RaycastHit2D ray = Physics2D.Raycast(transform.position, orientation, maxDist, collisionMask);
 

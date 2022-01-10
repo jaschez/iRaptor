@@ -31,6 +31,8 @@ public class RoomGenerator
 
     public int distanceFromStart = 0;
 
+    public Room.RoomType roomType;
+
     public List<Coord> floorCoords { get; private set; }
     public List<Room.Entry> entries { get; private set; }
     public List<Coord> startPoints { get; private set; }
@@ -47,8 +49,10 @@ public class RoomGenerator
     public int top { get; private set; }
     public int bottom { get; private set; }
 
-    public RoomGenerator(Coord pos, int rawW, int rawH, int _scaleFactor, int _id, float fillPerc)
+    public RoomGenerator(Room.RoomType roomType, Coord pos, int rawW, int rawH, int _scaleFactor, int _id, float fillPerc)
     {
+        this.roomType = roomType;
+
         worldPos = pos;
 
         scaleFactor = _scaleFactor;
@@ -122,7 +126,7 @@ public class RoomGenerator
     public Room ExportRoom()
     {
         Room room = new Room(
-            Room.RoomType.Normal,
+            roomType,
             gameWidth,
             gameHeight,
             worldPos,

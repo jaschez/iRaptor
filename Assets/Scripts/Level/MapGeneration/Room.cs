@@ -64,6 +64,7 @@ public struct Room
 
     public enum RoomType
     {
+        Entrance,
         Normal
     }
 }

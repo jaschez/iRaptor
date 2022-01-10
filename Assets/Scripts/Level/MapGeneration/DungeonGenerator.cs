@@ -295,7 +295,9 @@ public class DungeonGenerator
 
         Coord roomPos = CalculateRoomPosition(dir, roomWidth, roomHeight, lastRoom);
 
-        RoomGenerator newRoom = new RoomGenerator(roomPos, roomWidth, roomHeight, scaleFactor, id, fillPerc);
+        Room.RoomType rType = id == 0 ? Room.RoomType.Entrance : Room.RoomType.Normal;
+
+        RoomGenerator newRoom = new RoomGenerator(rType, roomPos, roomWidth, roomHeight, scaleFactor, id, fillPerc);
         RoomGenerator overlapped = GetNearestOverlappingRoom(newRoom);
 
         if (overlapped == null)

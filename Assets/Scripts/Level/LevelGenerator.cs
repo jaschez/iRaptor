@@ -72,6 +72,7 @@ public class LevelGenerator : MonoBehaviour
 
         //Se usará para crear las barreras de los pasadizos
         List<Corridor> remainingCorridors = new List<Corridor>(mapInfo.corridors);
+        Dictionary<int, GameObject> barrierIndex = new Dictionary<int, GameObject>();
 
         Vector3Int position;
 
@@ -100,16 +101,17 @@ public class LevelGenerator : MonoBehaviour
             }
         }
 
+
+        //Sistema de oleadas
+        waveManObj = new GameObject("WaveManager");
+        WaveManager waveManager = waveManObj.AddComponent<WaveManager>();
+
         foreach (Room room in mapInfo.rooms)
         {
             roomParent = new GameObject("Room" + room.ID);
             lootParent = new GameObject("Loot");
             chestParent = new GameObject("Chests");
             enemyParent = new GameObject("Enemies");
-
-            //Sistema de oleadas
-            waveManObj = new GameObject("WaveManager");
-            waveManObj.AddComponent<WaveManager>();
 
             //Capa de enemigos
             //InstantiateObjectList(room.enemyCoords, room.GetWorldPosition(), enemyPrefab, enemyParent);
@@ -131,6 +133,8 @@ public class LevelGenerator : MonoBehaviour
                 if (roomEntry.type != Room.EntryType.Central)
                 {
                     GameObject trigger = new GameObject("EntryRoom");
+
+                    trigger.layer = LayerMask.NameToLayer("Entry");
 
                     BoxCollider2D col;
 
@@ -170,9 +174,18 @@ public class LevelGenerator : MonoBehaviour
                             barrierRotation = Quaternion.Euler(0, 0, 90);
                         }
 
-                        Instantiate(barrierPrefab, barrierPos, barrierRotation);
+                        GameObject barrierObj = Instantiate(barrierPrefab, barrierPos, barrierRotation);
+
+                        barrierObj.name = "Barrier"+ roomEntry.LinkedCorridor.ToString();
+
+                        barrierIndex.Add(roomEntry.LinkedCorridor, barrierObj);
+                        waveManager.AddBarrierToRoom(room.ID, barrierObj);
 
                         remainingCorridors.Remove(corridor);
+                    }
+                    else
+                    {
+                        waveManager.AddBarrierToRoom(room.ID, barrierIndex[roomEntry.LinkedCorridor]);
                     }
                 }
             }
@@ -181,7 +194,7 @@ public class LevelGenerator : MonoBehaviour
         Instantiate(exitPrefab, new Vector3(mapInfo.ExitPos.x + 0.5f, mapInfo.ExitPos.y + 0.5f, 1) * 16, Quaternion.identity);
     }
 
-    void InstantiateObjectList(List<Coord> objList, Coord origin, GameObject instantiable, GameObject parentTo = null)
+    public void InstantiateObjectList(List<Coord> objList, Coord origin, GameObject instantiable, GameObject parentTo = null)
     {
         foreach (Coord objCoord in objList)
         {
