@@ -12,66 +12,126 @@ public class TextAnimator : MonoBehaviour
 
     Sequence animSequence;
 
-    void Start()
+    void Awake()
     {
         // Set text
         textMesh = GetComponent<TMP_Text>();
         textTweener = textMesh.GetCharTweener();
     }
 
-    public Sequence Animate(Sequence animation)
+    public void Pause()
     {
-        DOTween.Kill(textMesh);
-        animation.SetTarget(textMesh);
-
-        animSequence = DOTween.Sequence().Join(animation);
-        return animSequence;
+        animSequence.TogglePause();
     }
 
-    public static Sequence BounceOut(TextAnimator anim, float distance = 10, int? charsAhead = null)
+    public Sequence BounceOut(float distance = 10, int? charsAhead = null)
     {
         Sequence textSequence = DOTween.Sequence();
-        CharTweener tweener = anim.textTweener;
         
-        int count = charsAhead ?? tweener.CharacterCount;
+        int count = charsAhead ?? textTweener.CharacterCount;
 
         for (int i = 0; i < count; i++)
         {
             Sequence charSequence = DOTween.Sequence();
-            charSequence.Insert(0, tweener.DOFade(i, 0, 0));
-            charSequence.Insert(0, tweener.DOOffsetMoveY(i, distance, 0.05f).SetEase(Ease.OutSine));
-            charSequence.Insert(0.05f, tweener.DOOffsetMoveY(i, 0, 0.1f).SetEase(Ease.OutSine));
-            textSequence.Insert((float)i / count * 0.4f, charSequence);
+            charSequence.Insert(0.08f, textTweener.DOFade(i, 0, 0));
+            charSequence.Insert(0, textTweener.DOOffsetMoveY(i, distance, 0.05f).SetEase(Ease.OutSine));
+            charSequence.Insert(0.05f, textTweener.DOOffsetMoveY(i, 0, 0.01f).SetEase(Ease.OutSine));
+            textSequence.Insert(i * 0.02f, charSequence);
         }
 
-        tweener.UpdateCharProperties();
+        textTweener.UpdateCharProperties();
 
         return textSequence;
     }
 
-    public static Sequence BounceIn(TextAnimator anim, float distance = 10, int? charsAhead = null)
+    public Sequence CharUp(float distance = 10, int? charsAhead = null)
     {
         Sequence textSequence = DOTween.Sequence();
-        CharTweener tweener = anim.textTweener;
 
-        int count = charsAhead ?? tweener.CharacterCount;
+        int count = charsAhead ?? textTweener.CharacterCount;
+        
         for (int i = 0; i < count; i++)
         {
-            tweener.SetAlpha(i, 0);
-            tweener.SetLocalScale(i, 1);
-            tweener.ResetPosition(i);
-            tweener.UpdateCharProperties();
+            Sequence charSequence = DOTween.Sequence();
+            charSequence.Insert(0, textTweener.DOOffsetMoveY(i, distance, 0.02f).SetEase(Ease.OutSine));
+            charSequence.Insert(0.05f, textTweener.DOOffsetMoveY(i, 0, 0.1f).SetEase(Ease.OutSine));
+            charSequence.Insert(0.05f, textTweener.DOColor(i,Color.gray,.5f).SetEase(Ease.OutSine));
+            textSequence.Insert(i * 0.03f, charSequence);
+        }
+
+        return textSequence;
+    }
+
+    public Sequence Idle(float distance = 10, int? charsAhead = null)
+    {
+        Sequence textSequence = DOTween.Sequence();
+
+        int count = charsAhead ?? textTweener.CharacterCount;
+
+        for (int i = 0; i < count; i++)
+        {
+            Sequence charSequence = DOTween.Sequence();
+            charSequence.Insert(0, textTweener.DOOffsetMoveY(i, 0, 0f).SetEase(Ease.OutSine));
+            textSequence.Insert(0, charSequence);
+        }
+
+        return textSequence;
+    }
+
+    public Sequence CharDown(float distance = 10, int? charsAhead = null)
+    {
+        Sequence textSequence = DOTween.Sequence();
+
+        int count = charsAhead ?? textTweener.CharacterCount;
+
+        for (int i = 0; i < count; i++)
+        {
+            Sequence charSequence = DOTween.Sequence();
+            charSequence.Insert(0.05f, textTweener.DOOffsetMoveY(i, 0, 0.1f).SetEase(Ease.OutSine));
+            textSequence.Insert((float)i / count * 0.4f, charSequence);
+        }
+
+        textTweener.UpdateCharProperties();
+
+        return textSequence;
+    }
+
+    public Sequence BounceIn(float distance = 10, int? charsAhead = null)
+    {
+        Sequence textSequence = DOTween.Sequence();
+
+        int count = charsAhead ?? textTweener.CharacterCount;
+        for (int i = 0; i < count; i++)
+        {
+            textTweener.SetAlpha(i, 0);
+            textTweener.SetLocalScale(i, 1);
+            textTweener.ResetPosition(i);
+            textTweener.UpdateCharProperties();
         }
 
         for (int i = 0; i < count; i++)
         {
             Sequence charSequence = DOTween.Sequence();
-            charSequence.Insert(0, tweener.DOFade(i, 1, 0));
-            charSequence.Insert(0, tweener.DOOffsetMoveY(i, distance, 0.05f).SetEase(Ease.OutSine));
-            charSequence.Insert(0.05f, tweener.DOOffsetMoveY(i, 0, 0.1f).SetEase(Ease.OutSine));
+            charSequence.Insert(0, textTweener.DOFade(i, 1, 0));
+            charSequence.Insert(0, textTweener.DOOffsetMoveY(i, distance, 0.05f).SetEase(Ease.OutSine));
+            charSequence.Insert(0.05f, textTweener.DOOffsetMoveY(i, 0, 0.1f).SetEase(Ease.OutSine));
             textSequence.Insert((float)i / count * 0.4f, charSequence);
         }
 
         return textSequence;
+    }
+
+    public void OnSelect() {
+        transform.DOLocalMoveX(30, 0.1f).SetEase(Ease.InOutSine);
+    }
+
+    public void OnDeselect()
+    {
+        transform.DOLocalMoveX(0, 0.1f).SetEase(Ease.InOutSine);
+    }
+
+    public CharTweener GetCharTweener()
+    {
+        return textTweener;
     }
 }
