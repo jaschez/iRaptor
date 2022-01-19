@@ -5,13 +5,17 @@ using UnityEngine;
 
 public class MenuInteraction : MonoBehaviour
 {
-    public ParticleSystem backgroundParticles;
+    public Animator particlesAnim;
+
+    public TextAnimator continueText;
+
+    public Sequence continueSequence;
 
     MenuStates state = MenuStates.Intro;
 
     void Start()
     {
-        
+        continueSequence = continueText.Animate(TextAnimator.BounceIn(continueText)).SetLoops(-1, LoopType.Restart).SetDelay(1.5f);
     }
 
     // Update is called once per frame
@@ -20,21 +24,11 @@ public class MenuInteraction : MonoBehaviour
         if (Input.GetMouseButtonDown(0) && state == MenuStates.Intro)
         {
             state = MenuStates.Menu;
-            StartCoroutine(StopBackgroundNoise());
-        }
-    }
 
-    IEnumerator StopBackgroundNoise()
-    {
-        float endTime = Time.time + 2f;
-        var noise = backgroundParticles.noise;
-        while (endTime < Time.time)
-        {
-            //noise.strength.constant// Mathf.Lerp(noise.strength.constant, 0, Time.deltaTime*4f);
-            yield return null;
+            particlesAnim.SetTrigger("start");
+            continueSequence.Kill();
+            continueText.Animate(TextAnimator.BounceOut(continueText)).onComplete = () => continueText.gameObject.SetActive(false);
         }
-
-        yield return null;
     }
 
     public enum MenuStates

@@ -7,32 +7,52 @@ using UnityEngine;
 
 public class TextAnimator : MonoBehaviour
 {
+    TMP_Text textMesh;
+    CharTweener textTweener;
+
+    Sequence animSequence;
+
     void Start()
     {
         // Set text
-        TMP_Text textMesh = GetComponent<TMP_Text>();
-
-        CharTweener tweener = textMesh.GetCharTweener();
-        /* Sequence sequence = DOTween.Sequence();
-         for (int i = 0; i < tweener.CharacterCount; i++)
-         {
-             float timeOffset = Mathf.Lerp(0, .5f, i / (float)tweener.CharacterCount);
-             Sequence charSequence = DOTween.Sequence();
-             charSequence
-                 .Append(tweener.DOOffsetMoveY(i, 5f, .2f).SetEase(Ease.InOutCubic));
-             sequence.Insert(timeOffset + 1, charSequence);
-         }
-
-         sequence.SetLoops(-1, LoopType.Incremental);*/
-
-        DOTween.Sequence()
-    .Join(BounceIn(textMesh)).SetLoops(-1, LoopType.Restart).SetDelay(2f);
+        textMesh = GetComponent<TMP_Text>();
+        textTweener = textMesh.GetCharTweener();
     }
 
-    private Sequence BounceIn(TMP_Text text, float distance = 10, int? charsAhead = null)
+    public Sequence Animate(Sequence animation)
+    {
+        DOTween.Kill(textMesh);
+        animation.SetTarget(textMesh);
+
+        animSequence = DOTween.Sequence().Join(animation);
+        return animSequence;
+    }
+
+    public static Sequence BounceOut(TextAnimator anim, float distance = 10, int? charsAhead = null)
     {
         Sequence textSequence = DOTween.Sequence();
-        CharTweener tweener = text.GetCharTweener();
+        CharTweener tweener = anim.textTweener;
+        
+        int count = charsAhead ?? tweener.CharacterCount;
+
+        for (int i = 0; i < count; i++)
+        {
+            Sequence charSequence = DOTween.Sequence();
+            charSequence.Insert(0, tweener.DOFade(i, 0, 0));
+            charSequence.Insert(0, tweener.DOOffsetMoveY(i, distance, 0.05f).SetEase(Ease.OutSine));
+            charSequence.Insert(0.05f, tweener.DOOffsetMoveY(i, 0, 0.1f).SetEase(Ease.OutSine));
+            textSequence.Insert((float)i / count * 0.4f, charSequence);
+        }
+
+        tweener.UpdateCharProperties();
+
+        return textSequence;
+    }
+
+    public static Sequence BounceIn(TextAnimator anim, float distance = 10, int? charsAhead = null)
+    {
+        Sequence textSequence = DOTween.Sequence();
+        CharTweener tweener = anim.textTweener;
 
         int count = charsAhead ?? tweener.CharacterCount;
         for (int i = 0; i < count; i++)
@@ -49,11 +69,9 @@ public class TextAnimator : MonoBehaviour
             charSequence.Insert(0, tweener.DOFade(i, 1, 0));
             charSequence.Insert(0, tweener.DOOffsetMoveY(i, distance, 0.05f).SetEase(Ease.OutSine));
             charSequence.Insert(0.05f, tweener.DOOffsetMoveY(i, 0, 0.1f).SetEase(Ease.OutSine));
-            //charSequence.Insert(.5f, tweener.DOFade(i, 0, 0));
             textSequence.Insert((float)i / count * 0.4f, charSequence);
         }
 
-        textSequence.SetTarget(text);
         return textSequence;
     }
 }
