@@ -10,18 +10,11 @@ public class TextAnimator : MonoBehaviour
     TMP_Text textMesh;
     CharTweener textTweener;
 
-    Sequence animSequence;
-
     void Awake()
     {
         // Set text
         textMesh = GetComponent<TMP_Text>();
         textTweener = textMesh.GetCharTweener();
-    }
-
-    public void Pause()
-    {
-        animSequence.TogglePause();
     }
 
     public Sequence BounceOut(float distance = 10, int? charsAhead = null)
@@ -37,58 +30,6 @@ public class TextAnimator : MonoBehaviour
             charSequence.Insert(0, textTweener.DOOffsetMoveY(i, distance, 0.05f).SetEase(Ease.OutSine));
             charSequence.Insert(0.05f, textTweener.DOOffsetMoveY(i, 0, 0.01f).SetEase(Ease.OutSine));
             textSequence.Insert(i * 0.02f, charSequence);
-        }
-
-        textTweener.UpdateCharProperties();
-
-        return textSequence;
-    }
-
-    public Sequence CharUp(float distance = 10, int? charsAhead = null)
-    {
-        Sequence textSequence = DOTween.Sequence();
-
-        int count = charsAhead ?? textTweener.CharacterCount;
-        
-        for (int i = 0; i < count; i++)
-        {
-            Sequence charSequence = DOTween.Sequence();
-            charSequence.Insert(0, textTweener.DOOffsetMoveY(i, distance, 0.02f).SetEase(Ease.OutSine));
-            charSequence.Insert(0.05f, textTweener.DOOffsetMoveY(i, 0, 0.1f).SetEase(Ease.OutSine));
-            charSequence.Insert(0.05f, textTweener.DOColor(i,Color.gray,.5f).SetEase(Ease.OutSine));
-            textSequence.Insert(i * 0.03f, charSequence);
-        }
-
-        return textSequence;
-    }
-
-    public Sequence Idle(float distance = 10, int? charsAhead = null)
-    {
-        Sequence textSequence = DOTween.Sequence();
-
-        int count = charsAhead ?? textTweener.CharacterCount;
-
-        for (int i = 0; i < count; i++)
-        {
-            Sequence charSequence = DOTween.Sequence();
-            charSequence.Insert(0, textTweener.DOOffsetMoveY(i, 0, 0f).SetEase(Ease.OutSine));
-            textSequence.Insert(0, charSequence);
-        }
-
-        return textSequence;
-    }
-
-    public Sequence CharDown(float distance = 10, int? charsAhead = null)
-    {
-        Sequence textSequence = DOTween.Sequence();
-
-        int count = charsAhead ?? textTweener.CharacterCount;
-
-        for (int i = 0; i < count; i++)
-        {
-            Sequence charSequence = DOTween.Sequence();
-            charSequence.Insert(0.05f, textTweener.DOOffsetMoveY(i, 0, 0.1f).SetEase(Ease.OutSine));
-            textSequence.Insert((float)i / count * 0.4f, charSequence);
         }
 
         textTweener.UpdateCharProperties();
@@ -128,6 +69,16 @@ public class TextAnimator : MonoBehaviour
     public void OnDeselect()
     {
         transform.DOLocalMoveX(0, 0.1f).SetEase(Ease.InOutSine);
+    }
+
+    public void ResetPosition()
+    {
+        transform.localPosition = Vector3.zero;
+    }
+
+    public void Stop()
+    {
+        DOTween.Kill(textMesh);
     }
 
     public CharTweener GetCharTweener()
