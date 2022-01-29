@@ -493,8 +493,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   size: 13
   leaves: 7
-  seed: 520484727
-  autoSeed: 1
+  seed: 2034859788
+  autoSeed: 0
 --- !u!4 &795958389
 Transform:
   m_ObjectHideFlags: 0

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GraphVisualizer : MonoBehaviour
 {
-    GraphGenerator graph = new GraphGenerator(new int[] { 2, 1, 4, 1 , 3, 2 });
+    GraphGenerator graph;
 
     public int size = 0;
     public int leaves = 0;
@@ -27,23 +27,26 @@ public class GraphVisualizer : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
+            seq = "";
+            calculatedLeaves = 0;
+
             if (autoSeed)
             {
                 seed = new System.Random().Next();
             }
-
-            sequence = graph.GenerateSequence(size, leaves, seed);
-            graph = new GraphGenerator(sequence);
-            UnrootedNode[] nodes = graph.GenerateGraph();
+            
+            graph = new GraphGenerator(seed, size, leaves);
+            RootedNode[] nodes = graph.GenerateGraph();
+            sequence = graph.PruferCode;
 
             foreach (int i in sequence)
             {
                 seq += i.ToString() + ",";
             }
 
-            foreach (UnrootedNode node in nodes)
+            foreach (RootedNode node in nodes)
             {
-                if (node.Neighbours.Count == 1)
+                if (node.Childs.Count == 0)
                 {
                     calculatedLeaves++;
                 }
@@ -52,6 +55,7 @@ public class GraphVisualizer : MonoBehaviour
             Debug.Log("Seed: " + seed);
             Debug.Log(seq);
             Debug.Log("Leaves: " + calculatedLeaves);
+
         }
     }
 }
