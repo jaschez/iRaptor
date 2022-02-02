@@ -7,6 +7,8 @@ public class GraphVisualizer : MonoBehaviour
     GraphGenerator graph;
 
     public int size = 0;
+    public int desiredLoops = 0;
+    public int desiredLoopLength = 0;
     public int leaves = 0;
     public int seed = 0;
     public bool autoSeed = true;
@@ -35,7 +37,7 @@ public class GraphVisualizer : MonoBehaviour
                 seed = new System.Random().Next();
             }
             
-            graph = new GraphGenerator(seed, size, leaves);
+            graph = new GraphGenerator(seed, size, leaves, desiredLoops, desiredLoopLength);
             RootedNode[] nodes = graph.GenerateGraph();
             sequence = graph.PruferCode;
 
@@ -50,6 +52,22 @@ public class GraphVisualizer : MonoBehaviour
                 {
                     calculatedLeaves++;
                 }
+
+                if (node.Parent == null)
+                {
+                    Debug.Log("Parent ID: " + node.ID);
+                }
+            }
+
+            foreach (List<RootedNode> loop in graph.Loops)
+            {
+                string loopStr = "Loop in: ";
+                foreach (RootedNode node in loop)
+                {
+                    loopStr += node.ID + ",";
+                }
+
+                Debug.Log(loopStr);
             }
 
             Debug.Log("Seed: " + seed);

@@ -14,16 +14,17 @@ public class GraphGenerator
 
     int loopNumber;
     int minLoopLength;
-    int maxLoopLength;
 
-    public List<List<int>> Loops { get; private set; }
+    public List<List<RootedNode>> Loops { get; private set; }
 
-    public GraphGenerator(int Seed, int Size, int Leaves, int loops, int minLoopLength, int maxLoopLength) {
+    List<RootedNode> DeepestPossibleLeaves;
+    RootedNode DeepestLeaf;
+
+    public GraphGenerator(int Seed, int Size, int Leaves, int loops, int minLoopLength) {
         this.Seed = Seed;
         this.Size = Size;
         this.Leaves = Leaves;
         this.minLoopLength = minLoopLength;
-        this.maxLoopLength = maxLoopLength;
         loopNumber = loops;
     }
 
@@ -53,7 +54,7 @@ public class GraphGenerator
         rootedTree = RootTree(unrootedTree, rootElement);
         mapGraph = GenerateLoops(rootedTree);
 
-        return rootedTree;
+        return mapGraph;
     }
 
     public int[] GeneratePruferSequence()
@@ -172,6 +173,8 @@ public class GraphGenerator
         Stack<UnrootedNode> stack = new Stack<UnrootedNode>();
         UnrootedNode evaluated;
 
+        DeepestPossibleLeaves = new List<RootedNode>();
+
         stack.Push(rootElement);
 
         while (stack.Count > 0)
@@ -202,9 +205,25 @@ public class GraphGenerator
                 }
 
                 nodeParent.AddChild(newRootNode);
-            }
+                
+                newRootNode.SetDepth(nodeParent.Depth+1);
 
-            newRootNode.SetDepth(nodeParent.Depth+1);
+                if (DeepestPossibleLeaves.Count > 0)
+                {
+                    if (newRootNode.Depth > DeepestPossibleLeaves[0].Depth)
+                    {
+                        DeepestPossibleLeaves = new List<RootedNode>();
+                        DeepestPossibleLeaves.Add(newRootNode);
+                    }else if (newRootNode.Depth == DeepestPossibleLeaves[0].Depth)
+                    {
+                        DeepestPossibleLeaves.Add(newRootNode);
+                    }
+                }
+                else
+                {
+                    DeepestPossibleLeaves.Add(newRootNode);
+                }
+            }
 
             tree.Add(evaluated.Label, newRootNode);
         }
@@ -216,61 +235,140 @@ public class GraphGenerator
     {
         List<RootedNode> leaves = new List<RootedNode>();
 
+        if (DeepestPossibleLeaves.Count > 1)
+        {
+            DeepestLeaf = null;
+        }
+        else
+        {
+            DeepestLeaf = DeepestPossibleLeaves[0];
+        }
+
         //Collect all the leaves from the tree
         foreach (RootedNode node in tree)
         {
             if (node.Childs.Count == 0)
             {
-                leaves.Add(node);
+                if (node != DeepestLeaf) {
+                    leaves.Add(node);
+                }
             }
         }
 
-        for (int loopIndex = 0; loopIndex < loopNumber; loopIndex++)
+        Loops = new List<List<RootedNode>>();
+
+        for (int loopIndex = 0; loopIndex < loopNumber && leaves.Count > 0; loopIndex++)
         {
-            RootedNode leaf = leaves[random.Next(0, leaves.Count)];
-            RootedNode evaluatedNode = leaf;
-            RootedNode splitNode = null;
-
+            List<RootedNode> loop = new List<RootedNode>();
             Stack<RootedNode> stack = new Stack<RootedNode>();
-
-            List<int> loop = new List<int>();
+            RootedNode leaf;
+            RootedNode evaluatedNode;
+            RootedNode splitNode = null;
+            
             int loopLength = 0;
+            int leafIndex;
 
-            bool loopEnd = false;
+            leafIndex = random.Next(0, leaves.Count);
+            leaf = leaves[leafIndex];
+            evaluatedNode = leaf;
 
-            for (int i = 0; i < maxLoopLength && splitNode == null; i++)
+            leaves.RemoveAt(leafIndex);
+
+            //First part, ascend through the branch
+            for (int i = 0; i < minLoopLength && splitNode == null; i++)
             {
-                loop.Add(evaluatedNode.ID);
-                
+                if (!BelongsToLoop(evaluatedNode.ID)) {
+                    loop.Add(evaluatedNode);
 
-                if (evaluatedNode.Childs.Count > 1)
-                {
-                    splitNode = evaluatedNode;
+                    if (evaluatedNode.Childs.Count > 1)
+                    {
+                        splitNode = evaluatedNode;
+                    }
+                    else
+                    {
+                        evaluatedNode = evaluatedNode.Parent;
+                    }
+
+                    loopLength++;
                 }
-                else
+            }
+
+            if (splitNode == null)
+            {
+                loopIndex--;
+                continue;
+            }
+
+            if (loopLength < minLoopLength || evaluatedNode.Childs.Count >= 4)
+            {
+                for (int i = evaluatedNode.Childs.Count - 1; i >= 0; i--)
                 {
+                    RootedNode child = evaluatedNode.Childs[i];
+                    if (child.ID != loop[loop.Count - 2].ID)
+                    {
+                        if (!BelongsToLoop(child.ID) && child != DeepestLeaf) {
+                            stack.Push(child);
+                        }
+                    }
+                }
+
+                //Second part, walk trough the childs until the desired loop path is achieved
+                bool belongsToOtherLoop;
+
+                do
+                {
+                    belongsToOtherLoop = false;
+                    evaluatedNode = stack.Pop();
+
+                    for (int i = evaluatedNode.Childs.Count - 1; i >= 0; i--)
+                    {
+                        RootedNode child = evaluatedNode.Childs[i];
+
+                        if (!BelongsToLoop(child.ID) && child != DeepestLeaf) {
+                            stack.Push(child);
+                        }
+                        else
+                        {
+                            belongsToOtherLoop = true;
+                        }
+                    }
+                } while (((evaluatedNode.Depth - splitNode.Depth) + loopLength < minLoopLength || evaluatedNode.Childs.Count >= 4 || belongsToOtherLoop) && stack.Count > 0);
+
+                while (evaluatedNode.ID != splitNode.ID)
+                {
+                    loop.Insert(loopLength, evaluatedNode);
                     evaluatedNode = evaluatedNode.Parent;
                 }
-
-                loopLength++;
             }
 
-            if (loopLength >= minLoopLength && evaluatedNode.Childs.Count >= 4)
-            {
-                loopEnd = true;
-            }
+            if (loop.Count >= minLoopLength) {
 
-            for (int i = evaluatedNode.Childs.Count - 1; i >= 0; i--)
-            {
-                RootedNode child = evaluatedNode.Childs[i];
-                if (child.ID != loop[loop.Count - 2]) {
-                    stack.Push(child);
+                if (DeepestLeaf == null) {
+                    foreach (RootedNode element in loop)
+                    {
+                        if (DeepestPossibleLeaves.Contains(element))
+                        {
+                            DeepestPossibleLeaves.Remove(element);
+                        }
+                    }
+
+                    if (DeepestPossibleLeaves.Count == 1)
+                    {
+                        DeepestLeaf = DeepestPossibleLeaves[0];
+                    }else if (DeepestPossibleLeaves.Count == 0)
+                    {
+                        loopIndex--;
+                        continue;
+                    }
                 }
-            }
 
-            while (!loopEnd)
+                loop[0].AddChild(loop[loop.Count - 1]);
+                Loops.Add(loop);
+            }
+            else
             {
-                //TODO: Completar fase 2, recorrer hijos
+                loopIndex--;
+                continue;
             }
         }
 
@@ -368,6 +466,21 @@ public class GraphGenerator
 
         lNode.AddNeighbour(sNode);
         sNode.AddNeighbour(lNode);
+    }
+
+    bool BelongsToLoop(int ID)
+    {
+        bool belongsToLoop = false;
+
+        for (int j = 0; j < Loops.Count && !belongsToLoop; j++)
+        {
+            if (Loops[j].FindIndex(element => element.ID == ID) >= 0)
+            {
+                belongsToLoop = true;
+            }
+        }
+
+        return belongsToLoop;
     }
 }
 

@@ -491,10 +491,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 677340784c25d9e45a8df4f9e4f5a284, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  size: 13
-  leaves: 7
-  seed: 2034859788
-  autoSeed: 0
+  size: 14
+  desiredLoops: 2
+  desiredLoopLength: 4
+  leaves: 6
+  seed: 1472895360
+  autoSeed: 1
 --- !u!4 &795958389
 Transform:
   m_ObjectHideFlags: 0
