@@ -1,83 +1,73 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
-using UnityEngine;
 
+/*
+ * Data structure that represents the rooms of a level
+ * and the connections between them.
+ * 
+ * Will be used later by the World Generator to position
+ * each room in an specific position in the world
+ */
 public class GraphGenerator
 {
     System.Random random;
 
-    public int[] PruferCode { get; private set; }
+    GraphInput graphInput;
 
-    public int Seed { get; private set; }
-    public int Size { get; private set; }
-    public int Leaves { get; private set; }
+    List<List<RootedNode>> loops;
+    List<RootedNode> deepestPossibleLeaves;
 
-    int loopNumber;
-    int minLoopLength;
+    RootedNode deepestLeaf;
 
-    public List<List<RootedNode>> Loops { get; private set; }
-
-    List<RootedNode> DeepestPossibleLeaves;
-    RootedNode DeepestLeaf;
-
-    public GraphGenerator(int Seed, int Size, int Leaves, int loops, int minLoopLength) {
-        this.Seed = Seed;
-        this.Size = Size;
-        this.Leaves = Leaves;
-        this.minLoopLength = minLoopLength;
-        loopNumber = loops;
+    public GraphGenerator(GraphInput graphInput) {
+        this.graphInput = graphInput;
     }
 
-    public RootedNode[] GenerateGraph()
+    public GraphOutput GenerateGraph()
     {
+        GraphOutput graphInfo;
+
         RootedNode[] rootedTree, mapGraph;
 
         UnrootedNode[] unrootedTree;
         UnrootedNode rootElement;
 
+        int[] pruferCode;
         int rootLabel;
-        int selectedNeighbour;
+        int calculatedLeaves;
 
-        PruferCode = GeneratePruferSequence();
-
-        unrootedTree = PruferTreeGeneration(PruferCode);
-        rootLabel = CalculateRoot(PruferCode);
+        pruferCode = GeneratePruferSequence();
+        unrootedTree = PruferTreeGeneration(pruferCode);
+        rootLabel = CalculateRoot(pruferCode);
         rootElement = SearchNode(new List<UnrootedNode>(unrootedTree), rootLabel);
 
         //We choose randomly between the root element and his childs to get more variety of possible trees
-        selectedNeighbour = random.Next(-1, rootElement.Neighbours.Count);
-        if (selectedNeighbour >= 0)
-        {
-            rootElement = rootElement.Neighbours[selectedNeighbour];
-        }
-
+        rootElement = ChooseRandomNeighbour(rootElement);
         rootedTree = RootTree(unrootedTree, rootElement);
         mapGraph = GenerateLoops(rootedTree);
+        calculatedLeaves = CalculateTreeLeaves(mapGraph);
 
-        return mapGraph;
+        graphInfo = new GraphOutput(graphInput.Size, graphInput.Size, calculatedLeaves, pruferCode, deepestLeaf, mapGraph, loops);
+
+        return graphInfo;
     }
 
     public int[] GeneratePruferSequence()
     {
-        random = new System.Random(Seed);
+        random = new System.Random(graphInput.Seed);
 
-        int[] seq = new int[Size-2];
+        int[] seq = new int[graphInput.Size-2];
 
         List<int> seqElements = new List<int>();
         List<int> notDuplicatedFlag = new List<int>();
         List<int> uniqueSequence;
 
-        if (Leaves < 2)
-        {
-            Leaves = 2;
-        }
-
-        for (int i = 0; i < Size;i++)
+        for (int i = 0; i < graphInput.Size;i++)
         {
             seqElements.Add(i + 1);
         }
 
-        for(int i = 0; i < Leaves; i++)
+        for(int i = 0; i < graphInput.Leaves; i++)
         {
             int index = random.Next(0, seqElements.Count);
             
@@ -87,7 +77,7 @@ public class GraphGenerator
         uniqueSequence = new List<int>(seqElements);
 
         //Duplicate elements in the sequence that has not been duplicated yet, as many times as leaves it should have
-        for (int i = 0; i < Leaves - 2; i++)
+        for (int i = 0; i < graphInput.Leaves - 2; i++)
         {
             if (notDuplicatedFlag.Count == 0)
             {
@@ -114,7 +104,7 @@ public class GraphGenerator
         return seq;
     }
 
-    public UnrootedNode[] PruferTreeGeneration(int[] pruferCode)
+    UnrootedNode[] PruferTreeGeneration(int[] pruferCode)
     {
         List<UnrootedNode> nodes = new List<UnrootedNode>();
 
@@ -173,7 +163,7 @@ public class GraphGenerator
         Stack<UnrootedNode> stack = new Stack<UnrootedNode>();
         UnrootedNode evaluated;
 
-        DeepestPossibleLeaves = new List<RootedNode>();
+        deepestPossibleLeaves = new List<RootedNode>();
 
         stack.Push(rootElement);
 
@@ -208,20 +198,20 @@ public class GraphGenerator
                 
                 newRootNode.SetDepth(nodeParent.Depth+1);
 
-                if (DeepestPossibleLeaves.Count > 0)
+                if (deepestPossibleLeaves.Count > 0)
                 {
-                    if (newRootNode.Depth > DeepestPossibleLeaves[0].Depth)
+                    if (newRootNode.Depth > deepestPossibleLeaves[0].Depth)
                     {
-                        DeepestPossibleLeaves = new List<RootedNode>();
-                        DeepestPossibleLeaves.Add(newRootNode);
-                    }else if (newRootNode.Depth == DeepestPossibleLeaves[0].Depth)
+                        deepestPossibleLeaves = new List<RootedNode>();
+                        deepestPossibleLeaves.Add(newRootNode);
+                    }else if (newRootNode.Depth == deepestPossibleLeaves[0].Depth)
                     {
-                        DeepestPossibleLeaves.Add(newRootNode);
+                        deepestPossibleLeaves.Add(newRootNode);
                     }
                 }
                 else
                 {
-                    DeepestPossibleLeaves.Add(newRootNode);
+                    deepestPossibleLeaves.Add(newRootNode);
                 }
             }
 
@@ -235,13 +225,13 @@ public class GraphGenerator
     {
         List<RootedNode> leaves = new List<RootedNode>();
 
-        if (DeepestPossibleLeaves.Count > 1)
+        if (deepestPossibleLeaves.Count > 1)
         {
-            DeepestLeaf = null;
+            deepestLeaf = null;
         }
         else
         {
-            DeepestLeaf = DeepestPossibleLeaves[0];
+            deepestLeaf = deepestPossibleLeaves[0];
         }
 
         //Collect all the leaves from the tree
@@ -249,15 +239,15 @@ public class GraphGenerator
         {
             if (node.Childs.Count == 0)
             {
-                if (node != DeepestLeaf) {
+                if (node != deepestLeaf) {
                     leaves.Add(node);
                 }
             }
         }
 
-        Loops = new List<List<RootedNode>>();
+        loops = new List<List<RootedNode>>();
 
-        for (int loopIndex = 0; loopIndex < loopNumber && leaves.Count > 0; loopIndex++)
+        for (int loopIndex = 0; loopIndex < graphInput.LoopNumber && leaves.Count > 0; loopIndex++)
         {
             List<RootedNode> loop = new List<RootedNode>();
             Stack<RootedNode> stack = new Stack<RootedNode>();
@@ -275,7 +265,7 @@ public class GraphGenerator
             leaves.RemoveAt(leafIndex);
 
             //First part, ascend through the branch
-            for (int i = 0; i < minLoopLength && splitNode == null; i++)
+            for (int i = 0; i < graphInput.MinimumLoopLength && splitNode == null; i++)
             {
                 if (!BelongsToLoop(evaluatedNode.ID)) {
                     loop.Add(evaluatedNode);
@@ -299,14 +289,14 @@ public class GraphGenerator
                 continue;
             }
 
-            if (loopLength < minLoopLength || evaluatedNode.Childs.Count >= 4)
+            if (loopLength < graphInput.MinimumLoopLength || evaluatedNode.Childs.Count >= 4)
             {
                 for (int i = evaluatedNode.Childs.Count - 1; i >= 0; i--)
                 {
                     RootedNode child = evaluatedNode.Childs[i];
                     if (child.ID != loop[loop.Count - 2].ID)
                     {
-                        if (!BelongsToLoop(child.ID) && child != DeepestLeaf) {
+                        if (!BelongsToLoop(child.ID) && child != deepestLeaf) {
                             stack.Push(child);
                         }
                     }
@@ -324,7 +314,7 @@ public class GraphGenerator
                     {
                         RootedNode child = evaluatedNode.Childs[i];
 
-                        if (!BelongsToLoop(child.ID) && child != DeepestLeaf) {
+                        if (!BelongsToLoop(child.ID) && child != deepestLeaf) {
                             stack.Push(child);
                         }
                         else
@@ -332,7 +322,7 @@ public class GraphGenerator
                             belongsToOtherLoop = true;
                         }
                     }
-                } while (((evaluatedNode.Depth - splitNode.Depth) + loopLength < minLoopLength || evaluatedNode.Childs.Count >= 4 || belongsToOtherLoop) && stack.Count > 0);
+                } while (((evaluatedNode.Depth - splitNode.Depth) + loopLength < graphInput.MinimumLoopLength || evaluatedNode.Childs.Count >= 4 || belongsToOtherLoop) && stack.Count > 0);
 
                 while (evaluatedNode.ID != splitNode.ID)
                 {
@@ -341,21 +331,21 @@ public class GraphGenerator
                 }
             }
 
-            if (loop.Count >= minLoopLength) {
+            if (loop.Count >= graphInput.MinimumLoopLength) {
 
-                if (DeepestLeaf == null) {
+                if (deepestLeaf == null) {
                     foreach (RootedNode element in loop)
                     {
-                        if (DeepestPossibleLeaves.Contains(element))
+                        if (deepestPossibleLeaves.Contains(element))
                         {
-                            DeepestPossibleLeaves.Remove(element);
+                            deepestPossibleLeaves.Remove(element);
                         }
                     }
 
-                    if (DeepestPossibleLeaves.Count == 1)
+                    if (deepestPossibleLeaves.Count == 1)
                     {
-                        DeepestLeaf = DeepestPossibleLeaves[0];
-                    }else if (DeepestPossibleLeaves.Count == 0)
+                        deepestLeaf = deepestPossibleLeaves[0];
+                    }else if (deepestPossibleLeaves.Count == 0)
                     {
                         loopIndex--;
                         continue;
@@ -363,7 +353,7 @@ public class GraphGenerator
                 }
 
                 loop[0].AddChild(loop[loop.Count - 1]);
-                Loops.Add(loop);
+                loops.Add(loop);
             }
             else
             {
@@ -419,7 +409,7 @@ public class GraphGenerator
 
                 currentMean /= elementCount;
 
-                float distance = Mathf.Abs(center - currentMean);
+                float distance = System.Math.Abs(center - currentMean);
 
                 if (distance < nearestMeanDistance)
                 {
@@ -432,6 +422,35 @@ public class GraphGenerator
         root = nearestElement;
 
         return root;
+    }
+
+    int CalculateTreeLeaves(RootedNode[] tree)
+    {
+        int leaves = 0;
+
+        foreach (RootedNode node in tree)
+        {
+            if (node.Childs.Count == 0)
+            {
+                leaves++;
+            }
+        }
+
+        return leaves;
+    }
+
+    UnrootedNode ChooseRandomNeighbour(UnrootedNode node)
+    {
+        int selectedNeighbour = random.Next(-1, node.Neighbours.Count);
+
+        UnrootedNode selectedNode = node;
+
+        if (selectedNeighbour >= 0)
+        {
+            selectedNode = node.Neighbours[selectedNeighbour];
+        }
+
+        return selectedNode;
     }
 
     UnrootedNode SearchNode(List<UnrootedNode> nodes, int label)
@@ -472,9 +491,9 @@ public class GraphGenerator
     {
         bool belongsToLoop = false;
 
-        for (int j = 0; j < Loops.Count && !belongsToLoop; j++)
+        for (int j = 0; j < loops.Count && !belongsToLoop; j++)
         {
-            if (Loops[j].FindIndex(element => element.ID == ID) >= 0)
+            if (loops[j].FindIndex(element => element.ID == ID) >= 0)
             {
                 belongsToLoop = true;
             }
@@ -484,7 +503,7 @@ public class GraphGenerator
     }
 }
 
-public class UnrootedNode
+class UnrootedNode
 {
     public List<UnrootedNode> Neighbours { get; private set; }
     public int Label { get; private set; }

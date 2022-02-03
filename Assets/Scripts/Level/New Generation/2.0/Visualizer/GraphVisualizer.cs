@@ -4,17 +4,14 @@ using UnityEngine;
 
 public class GraphVisualizer : MonoBehaviour
 {
-    GraphGenerator graph;
-
-    public int size = 0;
-    public int desiredLoops = 0;
-    public int desiredLoopLength = 0;
-    public int leaves = 0;
-    public int seed = 0;
+    [SerializeField]
+    public GraphInput graphInput;
     public bool autoSeed = true;
 
+    GraphGenerator graphGenerator;
+    GraphOutput graph;
+
     int[] sequence;
-    int calculatedLeaves = 0;
 
     string seq = "";
 
@@ -30,15 +27,15 @@ public class GraphVisualizer : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             seq = "";
-            calculatedLeaves = 0;
 
             if (autoSeed)
             {
-                seed = new System.Random().Next();
+                int seed = new System.Random().Next();
+                graphInput = new GraphInput(seed, graphInput.Size, graphInput.Leaves, graphInput.LoopNumber, graphInput.MinimumLoopLength);
             }
             
-            graph = new GraphGenerator(seed, size, leaves, desiredLoops, desiredLoopLength);
-            RootedNode[] nodes = graph.GenerateGraph();
+            graphGenerator = new GraphGenerator(graphInput);
+            graph = graphGenerator.GenerateGraph();
             sequence = graph.PruferCode;
 
             foreach (int i in sequence)
@@ -46,13 +43,8 @@ public class GraphVisualizer : MonoBehaviour
                 seq += i.ToString() + ",";
             }
 
-            foreach (RootedNode node in nodes)
+            foreach (RootedNode node in graph.Map)
             {
-                if (node.Childs.Count == 0)
-                {
-                    calculatedLeaves++;
-                }
-
                 if (node.Parent == null)
                 {
                     Debug.Log("Parent ID: " + node.ID);
@@ -70,9 +62,9 @@ public class GraphVisualizer : MonoBehaviour
                 Debug.Log(loopStr);
             }
 
-            Debug.Log("Seed: " + seed);
+            Debug.Log("Seed: " + graph.Seed);
             Debug.Log(seq);
-            Debug.Log("Leaves: " + calculatedLeaves);
+            Debug.Log("Leaves: " + graph.Leaves);
 
         }
     }
