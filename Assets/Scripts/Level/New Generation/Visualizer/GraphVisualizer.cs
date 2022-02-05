@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class GraphVisualizer : MonoBehaviour
 {
-    [SerializeField]
-    public GraphInput graphInput;
+    public WorldGenerationParameters parameters;
     public bool autoSeed = true;
 
-    GraphGenerator graphGenerator;
+    WorldGraphGenerator generator;
+    WorldGraphOutput output;
     GraphOutput graph;
 
     int[] sequence;
@@ -18,7 +18,7 @@ public class GraphVisualizer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-    
+        
     }
 
     // Update is called once per frame
@@ -31,11 +31,13 @@ public class GraphVisualizer : MonoBehaviour
             if (autoSeed)
             {
                 int seed = new System.Random().Next();
-                graphInput = new GraphInput(seed, graphInput.Size, graphInput.Leaves, graphInput.LoopNumber, graphInput.MinimumLoopLength);
+                parameters.GraphParameters.Seed = seed;
             }
-            
-            graphGenerator = new GraphGenerator(graphInput);
-            graph = graphGenerator.GenerateGraph();
+
+            generator = new WorldGraphGenerator(parameters);
+            output = generator.GenerateWorldGraph();
+
+            graph = output.GraphInfo;
             sequence = graph.PruferCode;
 
             foreach (int i in sequence)
@@ -43,13 +45,10 @@ public class GraphVisualizer : MonoBehaviour
                 seq += i.ToString() + ",";
             }
 
-            foreach (RootedNode node in graph.Map)
-            {
-                if (node.Parent == null)
-                {
-                    Debug.Log("Parent ID: " + node.ID);
-                }
-            }
+            Debug.Log("Seed: " + graph.Seed);
+            Debug.Log("Sequence: " + seq);
+            Debug.Log("Parent: " + graph.Nodes[0].ID);
+            Debug.Log("Leaves: " + graph.Leaves.Length);
 
             foreach (List<RootedNode> loop in graph.Loops)
             {
@@ -62,10 +61,15 @@ public class GraphVisualizer : MonoBehaviour
                 Debug.Log(loopStr);
             }
 
-            Debug.Log("Seed: " + graph.Seed);
-            Debug.Log(seq);
-            Debug.Log("Leaves: " + graph.Leaves);
-
+            foreach (RoomType roomType in output.FilteredRooms.Keys)
+            {
+                Debug.Log(roomType.ToString());
+                foreach (RootedNode node in output.FilteredRooms[roomType])
+                {
+                    Debug.Log("ID: " + node.ID);
+                    Debug.Log("Childs: " + node.Childs.Count.ToString());
+                }
+            }
         }
     }
 }

@@ -1231,7 +1231,7 @@ Tilemap:
   m_Origin: {x: -117, y: -12, z: 0}
   m_Size: {x: 117, y: 18, z: 1}
   m_TileAnchor: {x: 0.5, y: 0.5, z: 0}
-  m_TileOrientation: 2
+  m_TileOrientation: 0
   m_TileOrientationMatrix:
     e00: 1
     e01: 0

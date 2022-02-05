@@ -55,7 +55,7 @@ public class LevelGenerator : MonoBehaviour
 
     void LoadLevelFromMap(MapInfo mapInfo)
     {
-        Tile wall = Resources.Load("wall2", typeof(Tile)) as Tile;
+        Tile wall = Resources.Load("wall3", typeof(Tile)) as Tile;
         Tile floor = Resources.Load("floor", typeof(Tile)) as Tile;
         /*Tile floor2 = Resources.Load("floor2", typeof(Tile)) as Tile;
         Tile floor3 = Resources.Load("floor3", typeof(Tile)) as Tile;*/

@@ -5,7 +5,7 @@ using UnityEngine;
 public class WorldGenerator : MonoBehaviour
 {
     public GameObject square;
-    WorldGraph graph;
+    WorldGraphGenerator graph;
 
     private void Start()
     {

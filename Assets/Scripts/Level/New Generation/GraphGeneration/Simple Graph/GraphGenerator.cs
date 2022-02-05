@@ -27,14 +27,13 @@ public class GraphGenerator
     {
         GraphOutput graphInfo;
 
-        RootedNode[] rootedTree, mapGraph;
+        RootedNode[] rootedTree, loopedGraph, leaves;
 
         UnrootedNode[] unrootedTree;
         UnrootedNode rootElement;
 
         int[] pruferCode;
         int rootLabel;
-        int calculatedLeaves;
 
         pruferCode = GeneratePruferSequence();
         unrootedTree = PruferTreeGeneration(pruferCode);
@@ -44,10 +43,10 @@ public class GraphGenerator
         //We choose randomly between the root element and his childs to get more variety of possible trees
         rootElement = ChooseRandomNeighbour(rootElement);
         rootedTree = RootTree(unrootedTree, rootElement);
-        mapGraph = GenerateLoops(rootedTree);
-        calculatedLeaves = CalculateTreeLeaves(mapGraph);
+        loopedGraph = GenerateLoops(rootedTree);
+        leaves = CalculateTreeLeaves(loopedGraph);
 
-        graphInfo = new GraphOutput(graphInput.Size, graphInput.Size, calculatedLeaves, pruferCode, deepestLeaf, mapGraph, loops);
+        graphInfo = new GraphOutput(graphInput.Seed, graphInput.Size, pruferCode, deepestLeaf, loopedGraph, leaves, loops);
 
         return graphInfo;
     }
@@ -247,7 +246,7 @@ public class GraphGenerator
 
         loops = new List<List<RootedNode>>();
 
-        for (int loopIndex = 0; loopIndex < graphInput.LoopNumber && leaves.Count > 0; loopIndex++)
+        for (int loopIndex = 0; loopIndex < graphInput.Loops && leaves.Count > 0; loopIndex++)
         {
             List<RootedNode> loop = new List<RootedNode>();
             Stack<RootedNode> stack = new Stack<RootedNode>();
@@ -364,6 +363,21 @@ public class GraphGenerator
 
         return tree;
     }
+    
+    RootedNode[] CalculateTreeLeaves(RootedNode[] tree)
+    {
+        List<RootedNode> leaves = new List<RootedNode>();
+
+        foreach (RootedNode node in tree)
+        {
+            if (node.Childs.Count == 0)
+            {
+                leaves.Add(node);
+            }
+        }
+
+        return leaves.ToArray();
+    }
 
     int CalculateRoot(int[] sequence)
     {
@@ -422,21 +436,6 @@ public class GraphGenerator
         root = nearestElement;
 
         return root;
-    }
-
-    int CalculateTreeLeaves(RootedNode[] tree)
-    {
-        int leaves = 0;
-
-        foreach (RootedNode node in tree)
-        {
-            if (node.Childs.Count == 0)
-            {
-                leaves++;
-            }
-        }
-
-        return leaves;
     }
 
     UnrootedNode ChooseRandomNeighbour(UnrootedNode node)
@@ -526,6 +525,8 @@ public class RootedNode
     public RootedNode Parent { get; private set; }
     public List<RootedNode> Childs { get; private set; }
 
+    public RoomType Type;
+
     public int ID { get; private set; } = -1;
     public int Depth { get; private set; } = -1;
 
@@ -535,6 +536,8 @@ public class RootedNode
         this.ID = ID;
 
         Childs = new List<RootedNode>();
+        
+        Type = RoomType.Null;
     }
 
     public void AddChild(RootedNode child)
@@ -543,6 +546,11 @@ public class RootedNode
         {
             Childs.Add(child);
         }
+    }
+
+    public void SetRoomType(RoomType Type)
+    {
+        this.Type = Type;
     }
 
     public void SetParent(RootedNode Parent)

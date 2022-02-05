@@ -9,27 +9,27 @@ public struct GraphOutput
     public int[] PruferCode { get; }
     public int Seed { get; }
     public int Size { get; }
-    public int Leaves { get; }
 
     public List<List<RootedNode>> Loops { get; }
-
-    public RootedNode[] Map { get; }
+    
+    public RootedNode[] Nodes { get; }
+    public RootedNode[] Leaves { get; }
     public RootedNode DeepestLeaf { get; }
 
     public GraphOutput(
         int Seed,
         int Size,
-        int Leaves,
         int[] PruferCode,
         RootedNode DeepestLeaf,
-        RootedNode[] Map,
+        RootedNode[] Nodes,
+        RootedNode[] Leaves,
         List<List<RootedNode>> Loops)
     {
         this.Seed = Seed;
         this.Size = Size;
         this.Leaves = Leaves;
         this.PruferCode = PruferCode;
-        this.Map = Map;
+        this.Nodes = Nodes;
         this.Loops = Loops;
         this.DeepestLeaf = DeepestLeaf;
     }

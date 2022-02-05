@@ -491,11 +491,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 677340784c25d9e45a8df4f9e4f5a284, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  size: 14
-  desiredLoops: 2
-  desiredLoopLength: 4
-  leaves: 6
-  seed: 1472895360
+  parameters:
+    GraphParameters:
+      Seed: 304809688
+      Size: 16
+      Leaves: 7
+      Loops: 2
+      MinimumLoopLength: 4
+    SpecialRoomList:
+      Rewards: 2
+      Shops: 1
+      Lore: 1
+      Minibosses: 1
+    MinimumBossDepthFactor: 0.5
+    MinimumKeyRoomDepthFactor: 0.2
+    ChanceOfOneWayLoop: 0.5
+    ChanceOfUnfairness: 0.2
   autoSeed: 1
 --- !u!4 &795958389
 Transform:
