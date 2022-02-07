@@ -374,14 +374,3 @@ public class WorldGraphGenerator
         return suitableIndex;
     }
 }
-
-public class RoomNode
-{
-    RoomType Type;
-    List<RoomNode> Neighbours;
-
-    public RoomNode(RoomType Type)
-    {
-        this.Type = Type;
-    }
-}
