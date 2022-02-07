@@ -7,7 +7,7 @@ public class GraphVisualizer : MonoBehaviour
     public WorldGenerationParameters parameters;
     public bool autoSeed = true;
 
-    WorldGraphGenerator generator;
+    WorldGenerator generator;
     WorldGraphOutput output;
     GraphOutput graph;
 
@@ -34,8 +34,8 @@ public class GraphVisualizer : MonoBehaviour
                 parameters.GraphParameters.Seed = seed;
             }
 
-            generator = new WorldGraphGenerator(parameters);
-            output = generator.GenerateWorldGraph();
+            generator = new WorldGenerator(parameters);
+            output = generator.GraphOutput;
 
             graph = output.GraphInfo;
             sequence = graph.PruferCode;
@@ -69,6 +69,19 @@ public class GraphVisualizer : MonoBehaviour
                     Debug.Log("ID: " + node.ID);
                     Debug.Log("Childs: " + node.Childs.Count.ToString());
                 }
+            }
+
+            foreach (List<RootedNode> comp in generator.GenerateWorld())
+            {
+                Debug.Log("Composite:");
+                string str = "";
+
+                foreach (RootedNode node in comp)
+                {
+                    str += node.ID.ToString() + ",";
+                }
+
+                Debug.Log(str);
             }
         }
     }

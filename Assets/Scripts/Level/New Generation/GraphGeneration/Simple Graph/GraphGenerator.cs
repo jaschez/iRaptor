@@ -173,7 +173,7 @@ public class GraphGenerator
 
             foreach (UnrootedNode neighbour in evaluated.Neighbours)
             {
-                int parentID = neighbour.Label;
+                int parentID = neighbour.ID;
                 if (tree.ContainsKey(parentID))
                 {
                     nodeParent = tree[parentID];
@@ -184,7 +184,7 @@ public class GraphGenerator
                 }
             }
 
-            newRootNode = new RootedNode(nodeParent, evaluated.Label);
+            newRootNode = new RootedNode(nodeParent, evaluated.ID);
 
             if (nodeParent != null)
             {
@@ -214,7 +214,7 @@ public class GraphGenerator
                 }
             }
 
-            tree.Add(evaluated.Label, newRootNode);
+            tree.Add(evaluated.ID, newRootNode);
         }
 
         return tree.Values.ToArray();
@@ -465,7 +465,7 @@ public class GraphGenerator
     {
         foreach (UnrootedNode node in nodes)
         {
-            if (node.Label == label)
+            if (node.ID == label)
             {
                 return node;
             }
@@ -508,67 +508,5 @@ public class GraphGenerator
         }
 
         return belongsToLoop;
-    }
-}
-
-class UnrootedNode
-{
-    public List<UnrootedNode> Neighbours { get; private set; }
-    public int Label { get; private set; }
-    public UnrootedNode(int Label)
-    {
-        Neighbours = new List<UnrootedNode>();
-        this.Label = Label;
-    }
-
-    public void AddNeighbour(UnrootedNode neighbour)
-    {
-        if (!Neighbours.Contains(neighbour)) {
-            Neighbours.Add(neighbour);
-        }
-    }
-}
-
-public class RootedNode
-{
-    public RootedNode Parent { get; private set; }
-    public List<RootedNode> Childs { get; private set; }
-
-    public RoomType Type;
-
-    public int ID { get; private set; } = -1;
-    public int Depth { get; private set; } = -1;
-
-    public RootedNode(RootedNode Parent, int ID)
-    {
-        this.Parent = Parent;
-        this.ID = ID;
-
-        Childs = new List<RootedNode>();
-        
-        Type = RoomType.Null;
-    }
-
-    public void AddChild(RootedNode child)
-    {
-        if (!Childs.Contains(child))
-        {
-            Childs.Add(child);
-        }
-    }
-
-    public void SetRoomType(RoomType Type)
-    {
-        this.Type = Type;
-    }
-
-    public void SetParent(RootedNode Parent)
-    {
-        this.Parent = Parent;
-    }
-
-    public void SetDepth(int Depth)
-    {
-        this.Depth = Depth;
     }
 }

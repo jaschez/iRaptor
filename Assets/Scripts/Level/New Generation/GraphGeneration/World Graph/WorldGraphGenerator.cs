@@ -54,7 +54,7 @@ public class WorldGraphGenerator
         ExamineRemainingNodes();
         FilterGraph();
 
-        return new WorldGraphOutput(filteredRooms, graphOutput);
+        return new WorldGraphOutput(filteredRooms, gameRooms, graphOutput);
     }
 
     void LocateEntrance()
