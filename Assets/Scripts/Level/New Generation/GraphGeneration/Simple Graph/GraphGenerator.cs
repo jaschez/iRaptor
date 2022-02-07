@@ -253,18 +253,20 @@ public class GraphGenerator
             RootedNode leaf;
             RootedNode evaluatedNode;
             RootedNode splitNode = null;
-            
+
+            int loopLengthTarget;
             int loopLength = 0;
             int leafIndex;
 
             leafIndex = random.Next(0, leaves.Count);
+            loopLengthTarget = random.Next(graphInput.MinimumLoopLength, graphInput.MaximumLoopLength + 1);
             leaf = leaves[leafIndex];
             evaluatedNode = leaf;
 
             leaves.RemoveAt(leafIndex);
 
             //First part, ascend through the branch
-            for (int i = 0; i < graphInput.MinimumLoopLength && splitNode == null; i++)
+            for (int i = 0; i < loopLengthTarget && splitNode == null; i++)
             {
                 if (!BelongsToLoop(evaluatedNode.ID)) {
                     loop.Add(evaluatedNode);
@@ -288,7 +290,7 @@ public class GraphGenerator
                 continue;
             }
 
-            if (loopLength < graphInput.MinimumLoopLength || evaluatedNode.Childs.Count >= 4)
+            if (loopLength < loopLengthTarget || evaluatedNode.Childs.Count >= 4)
             {
                 for (int i = evaluatedNode.Childs.Count - 1; i >= 0; i--)
                 {
@@ -313,15 +315,17 @@ public class GraphGenerator
                     {
                         RootedNode child = evaluatedNode.Childs[i];
 
-                        if (!BelongsToLoop(child.ID) && child != deepestLeaf) {
-                            stack.Push(child);
+                        if (!BelongsToLoop(child.ID)) {
+                            if (child != deepestLeaf) {
+                                stack.Push(child);
+                            }
                         }
                         else
                         {
                             belongsToOtherLoop = true;
                         }
                     }
-                } while (((evaluatedNode.Depth - splitNode.Depth) + loopLength < graphInput.MinimumLoopLength || evaluatedNode.Childs.Count >= 4 || belongsToOtherLoop) && stack.Count > 0);
+                } while (((evaluatedNode.Depth - splitNode.Depth) + loopLength < loopLengthTarget || evaluatedNode.Childs.Count >= 4 || belongsToOtherLoop) && stack.Count > 0);
 
                 while (evaluatedNode.ID != splitNode.ID)
                 {
@@ -330,7 +334,7 @@ public class GraphGenerator
                 }
             }
 
-            if (loop.Count >= graphInput.MinimumLoopLength) {
+            if (loop.Count >= loopLengthTarget) {
 
                 if (deepestLeaf == null) {
                     foreach (RootedNode element in loop)
@@ -359,6 +363,11 @@ public class GraphGenerator
                 loopIndex--;
                 continue;
             }
+        }
+
+        if (deepestLeaf == null)
+        {
+            deepestLeaf = deepestPossibleLeaves[random.Next(0, deepestPossibleLeaves.Count)];
         }
 
         return tree;

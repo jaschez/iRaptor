@@ -10,8 +10,9 @@ public struct GraphInput
     public int Leaves;
     public int Loops;
     public int MinimumLoopLength;
+    public int MaximumLoopLength;
 
-    public GraphInput(int Seed, int Size, int Leaves, int Loops, int MinimumLoopLength)
+    public GraphInput(int Seed, int Size, int Leaves, int Loops, int MinimumLoopLength, int MaximumLoopLength)
     {
         if (Seed < 2)
         {
@@ -24,7 +25,8 @@ public struct GraphInput
         
         this.Size = Size;
         this.Loops = Loops;
-        this.MinimumLoopLength = MinimumLoopLength;
         this.Leaves = Leaves;
+        this.MinimumLoopLength = MinimumLoopLength;
+        this.MaximumLoopLength = MaximumLoopLength;
     }
 }

@@ -165,11 +165,14 @@ public class WorldGraphGenerator
             RoomType roomChoice = ChooseRoomType();
             keyRoom.SetRoomType(roomChoice);
 
-            keyRoomList[roomChoice]--;
+            if (keyRoomList.ContainsKey(roomChoice)) {
 
-            if (keyRoomList[roomChoice] == 0)
-            {
-                keyRoomList.Remove(roomChoice);
+                keyRoomList[roomChoice]--;
+
+                if (keyRoomList[roomChoice] == 0)
+                {
+                    keyRoomList.Remove(roomChoice);
+                }
             }
 
             availableRooms.Remove(keyRoom);
@@ -257,6 +260,30 @@ public class WorldGraphGenerator
                 gameRooms.Add(node);
             }
         }
+
+        //Hub rooms location
+        List<RootedNode> hubList = new List<RootedNode>(availableRooms);
+        int maxChilds;
+
+        //Take the rooms with more childs
+        hubList = hubList.OrderByDescending(room => room.Childs.Count).ToList();
+        maxChilds = hubList[0].Childs.Count;
+
+        while (hubList[hubList.Count - 1].Childs.Count != maxChilds)
+        {
+            hubList.RemoveAt(hubList.Count - 1);
+        }
+
+        //Order by depth and take a middle-depth room
+        hubList = hubList.OrderByDescending(room => room.Depth).ToList();
+        
+        RootedNode hub = hubList[hubList.Count / 2];
+        hub.SetRoomType(RoomType.Hub);
+
+        gameRooms.Add(hub);
+        availableRooms.Remove(hub);
+
+        //Set normal room location
 
         foreach (RootedNode node in availableRooms)
         {

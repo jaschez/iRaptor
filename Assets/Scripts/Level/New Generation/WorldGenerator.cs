@@ -4,11 +4,12 @@ using UnityEngine;
 
 public class WorldGenerator : MonoBehaviour
 {
-    public GameObject square;
-    WorldGraphGenerator graph;
+    WorldGraphGenerator graphGenerator;
+    WorldGraphOutput graphOutput;
 
-    private void Start()
+    public WorldGenerator(WorldGenerationParameters param)
     {
-        
+        graphGenerator = new WorldGraphGenerator(param);
+        graphOutput = graphGenerator.GenerateWorldGraph();
     }
 }

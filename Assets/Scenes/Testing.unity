@@ -493,11 +493,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   parameters:
     GraphParameters:
-      Seed: 304809688
-      Size: 16
+      Seed: 1222680601
+      Size: 15
       Leaves: 7
       Loops: 2
       MinimumLoopLength: 4
+      MaximumLoopLength: 5
     SpecialRoomList:
       Rewards: 2
       Shops: 1
@@ -505,9 +506,9 @@ MonoBehaviour:
       Minibosses: 1
     MinimumBossDepthFactor: 0.5
     MinimumKeyRoomDepthFactor: 0.2
-    ChanceOfOneWayLoop: 0.5
+    ChanceOfOneWayLoop: 0.3
     ChanceOfUnfairness: 0.2
-  autoSeed: 1
+  autoSeed: 0
 --- !u!4 &795958389
 Transform:
   m_ObjectHideFlags: 0

@@ -1,6 +1,7 @@
 ﻿public enum RoomType{
     Entrance,
     Normal,
+    Hub,
     Corridor,
     Rest,
     Lore,
