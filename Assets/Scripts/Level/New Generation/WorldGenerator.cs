@@ -5,8 +5,9 @@ public class WorldGenerator
 
     WorldGraphGenerator graphGenerator;
 
-    List<List<RootedNode>> composites;
-    List<RootedNode> roomList;
+    List<List<RoomNode>> roomComposites;
+
+    List<RootedNode> nodeList;
     List<RootedNode> unexploredComposites;
 
     List<RootedNode> loopStartNode;
@@ -19,17 +20,23 @@ public class WorldGenerator
         graphGenerator = new WorldGraphGenerator(param);
         GraphOutput = graphGenerator.GenerateWorldGraph();
 
-        composites = new List<List<RootedNode>>();
-        roomList = new List<RootedNode>(GraphOutput.Rooms);
+        roomComposites = new List<List<RoomNode>>();
+
+        nodeList = new List<RootedNode>(GraphOutput.Rooms);
     }
 
-    public List<List<RootedNode>> GenerateWorld()
+    public List<List<RoomNode>> GenerateWorld()
     {
+        //1. Process each composite; convert each RootedNode into a RoomNode.
         GenerateComposites();
 
-        //Process each composite; convert each RootedNode into a RoomNode
+        //2. Generate each room based on room parameters.
+        //Create Room Generators
 
-        return composites;
+
+        //3. Locate phisycally each composite on relative spaces, then join them.
+
+        return roomComposites;
     }
 
     void GenerateComposites()
@@ -76,7 +83,7 @@ public class WorldGenerator
         for (int i = 0; i < GraphOutput.GraphInfo.Loops.Count; i++)
         {
             List<RootedNode> loop = GraphOutput.GraphInfo.Loops[i];
-            List<RootedNode> composite = new List<RootedNode>();
+            List<RoomNode> composite = new List<RoomNode>();
             RootedNode currentNode;
 
             int startingLoopIndex = loopStartIndex[i];
@@ -87,26 +94,33 @@ public class WorldGenerator
                 currentIndex = (startingLoopIndex + j) % loop.Count;
                 currentNode = loop[currentIndex];
 
-                composite.Add(currentNode);
+                AddToRoomComposite(currentNode, composite);
+
+                //Ensure that every node in the loop is connected
+                if (j > 0 && !composite[j].Neighbours.Contains(composite[j - 1]))
+                {
+                    composite[j].AddNeighbour(composite[j - 1]);
+                    composite[j - 1].AddNeighbour(composite[j]);
+                }
             }
 
-            composites.Add(composite);
+            roomComposites.Add(composite);
         }
     }
 
     void CreateRemainingComposites()
     {
-        composites.Add(ExploreComposite(roomList[0]));
+        roomComposites.Add(ExploreComposite(nodeList[0]));
 
         foreach (RootedNode compStart in unexploredComposites)
         {
-            composites.Add(ExploreComposite(compStart));
+            roomComposites.Add(ExploreComposite(compStart));
         }
     }
 
-    List<RootedNode> ExploreComposite(RootedNode root)
+    List<RoomNode> ExploreComposite(RootedNode root)
     {
-        List<RootedNode> composite = new List<RootedNode>();
+        List<RoomNode> composite = new List<RoomNode>();
         Stack<RootedNode> stack = new Stack<RootedNode>();
 
         stack.Push(root);
@@ -123,9 +137,45 @@ public class WorldGenerator
                 }
             }
 
-            composite.Add(evaluated);
+            AddToRoomComposite(evaluated, composite);
         }
 
         return composite;
+    }
+
+    void AddToRoomComposite(RootedNode node, List<RoomNode> composite)
+    {
+        RoomNode newRoom = FindRoomID(composite, node.ID);
+        RoomNode neighbour;
+
+        if (newRoom == null)
+        {
+            newRoom = new RoomNode(node);
+            composite.Add(newRoom);
+        }
+
+        if (node.Parent != null)
+        {
+            neighbour = FindRoomID(composite, node.Parent.ID);
+
+            if (neighbour != null)
+            {
+                newRoom.AddNeighbour(neighbour);
+                neighbour.AddNeighbour(newRoom);
+            }
+        }
+    }
+
+    RoomNode FindRoomID(List<RoomNode> list, int id)
+    {
+        foreach (RoomNode room in list)
+        {
+            if (room.ID == id)
+            {
+                return room;
+            }
+        }
+
+        return null;
     }
 }

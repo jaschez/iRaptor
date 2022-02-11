@@ -71,12 +71,12 @@ public class GraphVisualizer : MonoBehaviour
                 }
             }
 
-            foreach (List<RootedNode> comp in generator.GenerateWorld())
+            foreach (List<RoomNode> comp in generator.GenerateWorld())
             {
                 Debug.Log("Composite:");
                 string str = "";
 
-                foreach (RootedNode node in comp)
+                foreach (RoomNode node in comp)
                 {
                     str += node.ID.ToString() + ",";
                 }

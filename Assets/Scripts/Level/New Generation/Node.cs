@@ -5,10 +5,10 @@ public class Node<T>
 {
     public List<T> Neighbours { get; protected set; }
 
-    public RoomType Type { get; private set; }
+    public RoomType Type { get; protected set; }
 
     public int ID { get; private set; }
-    public int Depth { get; private set; } = -1;
+    public int Depth { get; protected set; } = -1;
 
     public Node(int ID)
     {
@@ -76,6 +76,22 @@ public class RootedNode : Node<RootedNode>
 
 public class RoomNode : Node<RoomNode>
 {
-    public RoomNode(int ID) : base(ID) { }
+
+    public int Width { get; private set; }
+    public int Height { get; private set; }
+
+    public TileType[,] Map;
+
+    public RoomNode(int ID, RoomType Type) : base(ID)
+    {
+        this.Type = Type;
+        //Map = new TileType[Width, Height];
+    }
+
+    public RoomNode(RootedNode node) : base(node.ID)
+    {
+        Type = node.Type;
+        Depth = node.Depth;
+    }
 
 }
