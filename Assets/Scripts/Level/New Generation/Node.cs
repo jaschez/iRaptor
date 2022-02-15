@@ -80,18 +80,40 @@ public class RoomNode : Node<RoomNode>
     public int Width { get; private set; }
     public int Height { get; private set; }
 
-    public TileType[,] Map;
+    public TileType[,] TileMap { get; private set; }
+
+    //public List<Entry> Entries { get; private set; }
+    public List<Coord> Floor { get; private set; }
+    public List<Coord> Loot { get; private set; }
+    public List<Coord> Chest { get; private set; }
+    public List<Coord> InterestingPlaces { get; private set; }
+    public List<List<Coord>> Enemies { get; private set; }
 
     public RoomNode(int ID, RoomType Type) : base(ID)
     {
         this.Type = Type;
-        //Map = new TileType[Width, Height];
     }
 
     public RoomNode(RootedNode node) : base(node.ID)
     {
         Type = node.Type;
         Depth = node.Depth;
+    }
+
+    public void Create(int width, int height, TileType[,] tileMap, 
+        List<Coord> floor /*,List<Coord> loot, List<Coord> chest,
+        List<Coord> interestingPlaces, List<List<Coord>> enemies*/)
+    {
+        Width = width;
+        Height = height;
+
+        TileMap = tileMap;
+
+        Floor = floor;
+        /*Loot = loot;
+        Chest = chest;
+        InterestingPlaces = interestingPlaces;
+        Enemies = enemies;*/
     }
 
 }

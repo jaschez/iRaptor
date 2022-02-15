@@ -13,6 +13,8 @@ public class WorldGenerator
     List<RootedNode> loopStartNode;
     List<int> loopStartIndex;
 
+    int generationSeed;
+
     public WorldGraphOutput GraphOutput { get; private set; }
 
     public WorldGenerator(WorldGenerationParameters param)
@@ -23,6 +25,8 @@ public class WorldGenerator
         roomComposites = new List<List<RoomNode>>();
 
         nodeList = new List<RootedNode>(GraphOutput.Rooms);
+
+        generationSeed = param.GraphParameters.Seed;
     }
 
     public List<List<RoomNode>> GenerateWorld()
@@ -32,7 +36,7 @@ public class WorldGenerator
 
         //2. Generate each room based on room parameters.
         //Create Room Generators
-
+        GenerateRooms();
 
         //3. Locate phisycally each composite on relative spaces, then join them.
 
@@ -44,6 +48,28 @@ public class WorldGenerator
         SearchComposites();
         CreateLoopComposites();
         CreateRemainingComposites();
+    }
+
+    void GenerateRooms()
+    {
+        foreach (List<RoomNode> composite in roomComposites)
+        {
+            //Generar direccion del composite
+            //Debe comprobarse si es un bucle
+            foreach (RoomNode node in composite)
+            {
+                RoomGeneration generator;
+
+                Coord nextPosition = new Coord(0, 0);
+
+                switch (node.Type)
+                {
+                    case RoomType.Normal:
+                        generator = new NormalGeneration(nextPosition, generationSeed);
+                        break;
+                }
+            }
+        }
     }
 
     public void SearchComposites()

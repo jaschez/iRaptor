@@ -5,6 +5,8 @@ using UnityEngine;
 [System.Serializable]
 public struct WorldGenerationParameters
 {
+    public int Level;
+
     public GraphInput GraphParameters;
     public KeyRoomList SpecialRoomList;
 
