@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 public class WorldGenerator
 {
-
     WorldGraphGenerator graphGenerator;
 
     System.Random random;
@@ -16,7 +16,10 @@ public class WorldGenerator
     List<RootedNode> unexploredComposites;
 
     List<RootedNode> loopStartNode;
+    
     List<int> loopStartIndex;
+
+    public List<RoomNode> RoomList { get; private set; }
 
     public WorldGraphOutput GraphOutput { get; private set; }
 
@@ -27,13 +30,14 @@ public class WorldGenerator
 
         roomGenerators = new List<RoomGeneration>();
         roomComposites = new List<List<RoomNode>>();
+        RoomList = new List<RoomNode>();
 
         nodeList = new List<RootedNode>(GraphOutput.Rooms);
 
         random = new System.Random(param.GraphParameters.Seed);
     }
 
-    public List<List<RoomNode>> GenerateWorld()
+    public void GenerateWorld()
     {
         //1. Process each composite; convert each RootedNode into a RoomNode.
         GenerateComposites();
@@ -46,8 +50,6 @@ public class WorldGenerator
 
         //4. Generate the inners of each room
         CreateRooms();
-
-        return roomComposites;
     }
 
     void GenerateComposites()
@@ -77,8 +79,6 @@ public class WorldGenerator
     {
         roomComposites = roomComposites.OrderByDescending(x => x.Count).ToList();
 
-        List<RoomNode> collidingRooms = new List<RoomNode>();
-
         foreach (List<RoomNode> composite in roomComposites)
         {
             //Get the parent from the original Node Tree, if its actually null, original position
@@ -91,10 +91,10 @@ public class WorldGenerator
                 RoomGeneration parentGenerator = FindGenerationID(roomGenerators, evaluatedNode.ID);
                 RoomGeneration compositeGenerator = FindGenerationID(roomGenerators, firstRoom.ID);
 
-                PlaceComposite(compositeGenerator, parentGenerator, composite, collidingRooms);
+                PlaceComposite(compositeGenerator, parentGenerator, composite, RoomList);
             }
 
-            collidingRooms.AddRange(composite);
+            RoomList.AddRange(composite);
         }
     }
 
@@ -175,7 +175,7 @@ public class WorldGenerator
                 {
                     Coord evaluatedDir = directions[j];
 
-                    float offset = (float)random.NextDouble() % 1;
+                    float offset = 0.5f;//(float)random.NextDouble() % 1;
 
                     SpawnRoom(room, previousRoomGenerator.AssociatedRoom, evaluatedDir, 0, offset);
 
@@ -254,7 +254,7 @@ public class WorldGenerator
                 for (int i = 0; i < directions.Length && roomCollided; i++) {
                     chosenDirection = directions[i];
 
-                    SpawnRoom(room, previousRoom, chosenDirection, spaceness);
+                    SpawnRoom(room, previousRoom, chosenDirection, spaceness,.5f);
 
                     //Check if it collides with any other room
                     roomCollided = CheckRoomCollision(room, locatedRooms);
@@ -264,7 +264,7 @@ public class WorldGenerator
                     {
                         for (float range = 0; range < 1 && roomCollided; range += .02f)
                         {
-                            float offset = range <= .5f ? range + .5f : 1f - range;
+                            float offset = .5f;//range <= .5f ? range + .5f : 1f - range;
 
                             SpawnRoom(room, previousRoom, chosenDirection, spaceness, offset);
 
@@ -681,5 +681,62 @@ public class WorldGenerator
         }
 
         return null;
+    }
+
+    public override string ToString()
+    {
+
+        string result;
+        string sequence = "";
+
+        foreach (int i in GraphOutput.GraphInfo.PruferCode)
+        {
+            sequence += i.ToString() + ",";
+        }
+
+        result = "Seed: " + GraphOutput.GraphInfo.Seed + "\n";
+        result += "Prufer Code: " + sequence + "\n";
+        result += "Graph Parent ID: " + GraphOutput.GraphInfo.Nodes[0].ID + "\n";
+        result += "Leaves: " + GraphOutput.GraphInfo.Leaves.Length + "\n";
+
+        foreach (List<RootedNode> loop in GraphOutput.GraphInfo.Loops)
+        {
+            result += "Loop in: ";
+
+            foreach (RootedNode node in loop)
+            {
+                result += node.ID + ",";
+            }
+
+            result += "\n";
+        }
+
+        foreach (RoomType roomType in GraphOutput.FilteredRooms.Keys)
+        {
+            result += "ID of rooms of type" + roomType.ToString() + ": ";
+
+            foreach (RootedNode node in GraphOutput.FilteredRooms[roomType])
+            {
+                result += "ID: " + node.ID + ",";
+            }
+
+            result += "\n";
+        }
+
+        result += "Composites:\n";
+
+        foreach (List<RoomNode> comp in roomComposites)
+        {
+            result += "\t-";
+
+            foreach (RoomNode node in comp)
+            {
+                result += node.ID.ToString() + ",";
+            }
+
+            result += "\n";
+        }
+
+        return result;
     }
 }

@@ -71,7 +71,9 @@ public class GraphVisualizer : MonoBehaviour
                 }
             }
 
-            foreach (List<RoomNode> comp in generator.GenerateWorld())
+            generator.GenerateWorld();
+
+            /*foreach (List<RoomNode> comp in generator.roomComposites)
             {
                 Debug.Log("Composite:");
                 string str = "";
@@ -82,7 +84,7 @@ public class GraphVisualizer : MonoBehaviour
                 }
 
                 Debug.Log(str);
-            }
+            }*/
         }
     }
 }

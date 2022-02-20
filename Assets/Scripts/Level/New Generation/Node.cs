@@ -123,8 +123,6 @@ public class RoomNode : Node<RoomNode>
 
         Floor = floor;
 
-        SetWorldPosition(new Coord(0, 0));
-
         /*Loot = loot;
         Chest = chest;
         InterestingPlaces = interestingPlaces;

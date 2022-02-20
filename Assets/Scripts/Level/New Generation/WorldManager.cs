@@ -1,25 +1,78 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
-public class WorldManager
+public class WorldManager : MonoBehaviour
 {
     System.Random random;
 
-    public int[] LevelSeeds;
+    TilemapGenerator tilemapGenerator;
+
+    WorldGenerator generator;
+
+    public int[] LevelSeeds { get; private set; }
+    public int Seed;
 
     public readonly int Levels = 4;
-    public readonly int Seed;
 
     float loreSpawnChance = 0.4f;
     float extraLoopSpawnChance = 0.5f;
 
-    public WorldManager()
+    public bool autoSeed = true;
+
+    bool ready = false;
+
+    void Start()
     {
-        Seed = new System.Random().Next();
+        Init();
+        CreateSeeds();
+        GenerateLevelAsync(0);
+
+        StartCoroutine(WaitForGeneration());
+
+        Debug.Log("Seed: " + Seed);
+    }
+
+    void Init()
+    {
+        if (autoSeed) {
+            Seed = new System.Random().Next();
+        }
+
         random = new System.Random(Seed);
 
+        tilemapGenerator = TilemapGenerator.GetInstance();
+    }
+
+    public void CreateSeeds()
+    {
         LevelSeeds = new int[Levels];
+
+        for (int i = 0; i < Levels; i++)
+        {
+            LevelSeeds[i] = random.Next();
+        }
+    }
+
+    public async void GenerateLevelAsync(int level)
+    {
+        var result = await Task.Run(() =>
+        {
+            if (LevelSeeds != null)
+            {
+                WorldGenerationParameters parameters = CalculateParameters(level);
+
+                generator = new WorldGenerator(parameters);
+                generator.GenerateWorld();
+
+                ready = true;
+
+                Debug.Log(generator.ToString());
+            }
+
+            return 0;
+        });
     }
 
     WorldGenerationParameters CalculateParameters(int level)
@@ -55,10 +108,7 @@ public class WorldManager
         int leaves;
         int loops = 2;
 
-        foreach (var property in keyRooms.GetType().GetProperties())
-        {
-            totalKeyRooms += (int)property.GetValue(keyRooms, null);
-        }
+        totalKeyRooms += keyRooms.Lore + keyRooms.Minibosses + keyRooms.Rewards + keyRooms.Shops;
 
         if (level > 2 && random.NextDouble() % 1 < extraLoopSpawnChance)
         {
@@ -102,5 +152,16 @@ public class WorldManager
         }
 
         return keyRooms;
+    }
+
+    IEnumerator WaitForGeneration()
+    {
+
+        while (!ready)
+        {
+            yield return null;
+        }
+
+        tilemapGenerator.LoadLevel(generator.RoomList);
     }
 }
