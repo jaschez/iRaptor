@@ -80,6 +80,11 @@ public class RoomNode : Node<RoomNode>
     public int Width { get; private set; }
     public int Height { get; private set; }
 
+    public int Top { get; private set; }
+    public int Bottom { get; private set; }
+    public int Left { get; private set; }
+    public int Right { get; private set; }
+
     public TileType[,] TileMap { get; private set; }
 
     //public List<Entry> Entries { get; private set; }
@@ -88,6 +93,8 @@ public class RoomNode : Node<RoomNode>
     public List<Coord> Chest { get; private set; }
     public List<Coord> InterestingPlaces { get; private set; }
     public List<List<Coord>> Enemies { get; private set; }
+
+    public Coord Position { get; private set; }
 
     public RoomNode(int ID, RoomType Type) : base(ID)
     {
@@ -100,20 +107,52 @@ public class RoomNode : Node<RoomNode>
         Depth = node.Depth;
     }
 
-    public void Create(int width, int height, TileType[,] tileMap, 
-        List<Coord> floor /*,List<Coord> loot, List<Coord> chest,
-        List<Coord> interestingPlaces, List<List<Coord>> enemies*/)
+    public void SetDimensions(int width, int height)
     {
         Width = width;
         Height = height;
 
+        SetWorldPosition(new Coord(0, 0));
+    }
+
+    public void Generate(TileType[,] tileMap, List<Coord> floor
+        /*,List<Coord> loot, List<Coord> chest,
+        List<Coord> interestingPlaces, List<List<Coord>> enemies*/)
+    {
         TileMap = tileMap;
 
         Floor = floor;
+
+        SetWorldPosition(new Coord(0, 0));
+
         /*Loot = loot;
         Chest = chest;
         InterestingPlaces = interestingPlaces;
         Enemies = enemies;*/
     }
 
+    public void SetWorldPosition(Coord position)
+    {
+        Position = position;
+
+        Left = position.x;
+        Right = position.x + Width;
+        Top = position.y;
+        Bottom = position.y - Height;
+    }
+
+    public bool OverlapsRoom(RoomNode another)
+    {
+        return OverlapsValueX(another.Left, another.Right) && OverlapsValueY(another.Bottom, another.Top);
+    }
+
+    bool OverlapsValueX(int min, int max)
+    {
+        return Right > min && max > Left;
+    }
+
+    bool OverlapsValueY(int min, int max)
+    {
+        return Top > min && max > Bottom;
+    }
 }

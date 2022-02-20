@@ -8,7 +8,9 @@ public abstract class RoomGeneration
 
     public RoomType GenerationType { get; protected set; }
 
-    public int[,] Map { get; private set; }
+    public RoomNode AssociatedRoom { get; protected set; }
+
+    protected int[,] Map { get; private set; }
 
     public TileType[,] TileMap { get; private set; }
 
@@ -36,13 +38,11 @@ public abstract class RoomGeneration
     public List<Coord> scaledStartPoints { get; private set; }
     public List<Coord> interestingPoints { get; private set; }
 
-    Coord localPosition;
-
-    public RoomGeneration(Coord localPosition, int seed)
+    public RoomGeneration(RoomNode room, int seed)
     {
         random = new System.Random(seed);
 
-        SetWorldPosition(localPosition);
+        AssociatedRoom = room;
 
         FloorCoords = new List<Coord>();
         entries = new List<Room.Entry>();
@@ -60,10 +60,14 @@ public abstract class RoomGeneration
 
         FillPercentage = fillPercentage;
 
+        Map = new int[Width, Height];
+        TileMap = new TileType[Width, Height];
+
+        AssociatedRoom.SetDimensions(Width, Height);
+
         simpleWidth = Width / scaleFactor;
         simpleHeight = Height / scaleFactor;
 
-        Map = new int[Width, Height];
         simpleMap = new int[simpleWidth, simpleHeight];
 
         //By defalut, all the room is walls
@@ -76,14 +80,14 @@ public abstract class RoomGeneration
         }
     }
 
-    public void Generate(RoomNode room)
+    public void Generate()
     {
         GenerateMap();
         CalculateFloorCoordinates();
         CalculateInterestingCoords();
         GenerateTileMap();
 
-        room.Create(Width, Height, TileMap, FloorCoords);
+        AssociatedRoom.Generate(TileMap, FloorCoords);
     }
 
     protected abstract void GenerateMap();
@@ -121,7 +125,7 @@ public abstract class RoomGeneration
 
         if (startPoints.Count == 1)
         {
-            AddEntry(new Coord((Left + Right) / 2, (Top + Bottom) / 2), Room.EntryType.Central);
+            AddEntry(new Coord((Left + Right) / 2, (Top + Bottom) / 2));
         }
 
         //Later, we scale the points to a smaller room format
@@ -324,11 +328,8 @@ public abstract class RoomGeneration
         }
     }
 
-    public void AddEntry(Coord c, Room.EntryType e, int linkedCorridor = -1)
+    public void AddEntry(Coord localCoord)
     {
-        entries.Add(new Room.Entry(c, e, linkedCorridor));
-
-        Coord localCoord = new Coord(c.x - localPosition.x, System.Math.Abs(c.y - localPosition.y));
         startPoints.Add(localCoord);
     }
 
@@ -344,15 +345,5 @@ public abstract class RoomGeneration
     bool OutOfBounds(int x, int y, int w, int h)
     {
         return x < 0 || y < 0 || x >= w || y >= h;
-    }
-
-    public void SetWorldPosition(Coord pos)
-    {
-        localPosition = pos;
-
-        Left = pos.x;
-        Right = pos.x + Width;
-        Top = pos.y;
-        Bottom = pos.y - Height;
     }
 }
