@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 public class WorldGenerator
 {
@@ -10,7 +9,7 @@ public class WorldGenerator
 
     List<RoomGeneration> roomGenerators;
 
-    List<List<RoomNode>> roomComposites;
+    public List<List<RoomNode>> roomComposites;
 
     List<RootedNode> nodeList;
     List<RootedNode> unexploredComposites;
@@ -88,7 +87,7 @@ public class WorldGenerator
 
             if (evaluatedNode.Parent != null)
             {
-                RoomGeneration parentGenerator = FindGenerationID(roomGenerators, evaluatedNode.ID);
+                RoomGeneration parentGenerator = FindGenerationID(roomGenerators, evaluatedNode.Parent.ID);
                 RoomGeneration compositeGenerator = FindGenerationID(roomGenerators, firstRoom.ID);
 
                 PlaceComposite(compositeGenerator, parentGenerator, composite, RoomList);
@@ -116,6 +115,14 @@ public class WorldGenerator
         {
             RoomNode room = composite[i];
 
+            foreach (RoomNode neighbour in room.Neighbours)
+            {
+                if (locatedRooms.Contains(neighbour))
+                {
+                    previousRoomGenerator = FindGenerationID(roomGenerators, neighbour.ID);
+                }
+            }
+
             //Generate a list of possible directions
             Coord[] directions = GenerateRandomDirectionList();
 
@@ -128,8 +135,6 @@ public class WorldGenerator
 
             roomGenerators.Add(roomGenerator);
             locatedRooms.Add(room);
-
-            previousRoomGenerator = roomGenerator;
         }
     }
 
@@ -264,7 +269,7 @@ public class WorldGenerator
                     {
                         for (float range = 0; range < 1 && roomCollided; range += .02f)
                         {
-                            float offset = .5f;//range <= .5f ? range + .5f : 1f - range;
+                            float offset = range <= .5f ? range + .5f : 1f - range;
 
                             SpawnRoom(room, previousRoom, chosenDirection, spaceness, offset);
 
@@ -291,6 +296,7 @@ public class WorldGenerator
         RoomNode previousRoom = roomParent.AssociatedRoom;
 
         Coord chosenDirection = new Coord(0, 0);
+        Coord deltaPos;
 
         bool compositeCollided = true;
         int spaceness = 0;
@@ -301,15 +307,19 @@ public class WorldGenerator
             for (int i = 0; i < directions.Length && compositeCollided; i++)
             {
                 chosenDirection = directions[i];
+                deltaPos = room.Position;
 
-                SpawnRoom(room, previousRoom, chosenDirection, spaceness);
+                SpawnRoom(room, previousRoom, chosenDirection, spaceness, .5f);
+
+                deltaPos.x = room.Position.x - deltaPos.x;
+                deltaPos.y = room.Position.y - deltaPos.y;
 
                 //Move the rest of the composite with it, using the position of the first room as a delta
                 foreach (RoomNode compRoom in composite)
                 {
                     if (compRoom.ID != room.ID)
                     {
-                        compRoom.SetWorldPosition(new Coord(compRoom.Position.x + room.Position.x, compRoom.Position.y + room.Position.y));
+                        compRoom.SetWorldPosition(new Coord(compRoom.Position.x + deltaPos.x, compRoom.Position.y + deltaPos.y));
                     }
                 }
 
@@ -322,15 +332,19 @@ public class WorldGenerator
                     for (float range = 0; range < 1 && compositeCollided; range += .02f)
                     {
                         float offset = range <= .5f ? range + .5f : 1f - range;
+                        deltaPos = room.Position;
 
                         SpawnRoom(room, previousRoom, chosenDirection, spaceness, offset);
 
-                        //Move the rest of the composite with it, using the position of the first room as a delta
+                        deltaPos.x = room.Position.x - deltaPos.x;
+                        deltaPos.y = room.Position.y - deltaPos.y;
+
+                        //Move the rest of the composite with it, using the movement of the first room
                         foreach (RoomNode compRoom in composite)
                         {
                             if (compRoom.ID != room.ID)
                             {
-                                compRoom.SetWorldPosition(new Coord(compRoom.Position.x + room.Position.x, compRoom.Position.y + room.Position.y));
+                                compRoom.SetWorldPosition(new Coord(compRoom.Position.x + deltaPos.x, compRoom.Position.y + deltaPos.y));
                             }
                         }
 
@@ -408,6 +422,10 @@ public class WorldGenerator
         {
             case RoomType.Normal:
                 generator = new NormalGeneration(room, generationSeed);
+                break;
+
+            case RoomType.Entrance:
+                generator = new EntranceGeneration(room, generationSeed);
                 break;
 
             default:
@@ -727,7 +745,7 @@ public class WorldGenerator
 
         foreach (List<RoomNode> comp in roomComposites)
         {
-            result += "\t-";
+            result += "\t";
 
             foreach (RoomNode node in comp)
             {

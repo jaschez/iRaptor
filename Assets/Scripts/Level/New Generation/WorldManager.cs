@@ -116,9 +116,9 @@ public class WorldManager : MonoBehaviour
         }
 
         rooms = level + random.Next(0, 3) + 15;
-        leaves = totalKeyRooms +  loops + level;
+        leaves = totalKeyRooms + loops + level + 1;
 
-        minLoopLength = 2 + level;
+        minLoopLength = 3 + level;
         maxLoopLength = 4 + level;
 
         graphParameters = new GraphInput(LevelSeeds[level], rooms, leaves, loops, minLoopLength, maxLoopLength);
@@ -162,6 +162,6 @@ public class WorldManager : MonoBehaviour
             yield return null;
         }
 
-        tilemapGenerator.LoadLevel(generator.RoomList);
+        tilemapGenerator.LoadLevel(generator.roomComposites);
     }
 }

@@ -125,7 +125,7 @@ public abstract class RoomGeneration
 
         if (startPoints.Count == 1)
         {
-            AddEntry(new Coord((Left + Right) / 2, (Top + Bottom) / 2));
+            AddEntry(new Coord(Width / 2, Height / 2));
         }
 
         //Later, we scale the points to a smaller room format
