@@ -161,61 +161,63 @@ public abstract class RoomGeneration
             currentFillPerc = floorTiles / (float)totalRoomTiles;
         }
 
-        while (activeExplorers.Count > 1 || currentFillPerc < FillPercentage) //Mientras el numero de caminos sea mayor que 1 o el porcentaje de llenado sea menor que el establecido
-        {
-
-            explorerIndex = activeExplorers[activeExplorerIndex];
-            currentExplorer = explorers[explorerIndex]; //El explorador esta siendo elegido para seguir trazando el camino...
-
-            //Choose a random direction inside the room frontiers
-
-            do
+        if (activeExplorers.Count > 0) {
+            while (activeExplorers.Count > 1 || currentFillPerc < FillPercentage) //Mientras el numero de caminos sea mayor que 1 o el porcentaje de llenado sea menor que el establecido
             {
-                dir = ChooseDirection();
 
-            } while (OutOfBounds(currentExplorer.x + dir.x, currentExplorer.y + dir.y, simpleWidth, simpleHeight));
+                explorerIndex = activeExplorers[activeExplorerIndex];
+                currentExplorer = explorers[explorerIndex]; //El explorador esta siendo elegido para seguir trazando el camino...
 
-            //Move the explorer 1 unit in the chosen direction
+                //Choose a random direction inside the room frontiers
 
-            currentExplorer.x += dir.x;
-            currentExplorer.y += dir.y;
-
-            //Mark the current position in the room and in the flag as explored
-
-            if (simpleMap[currentExplorer.x, currentExplorer.y] == 1)
-            {
-                simpleMap[currentExplorer.x, currentExplorer.y] = 0;
-
-                floorTiles++;
-                currentFillPerc = floorTiles / (float)totalRoomTiles;
-            }
-
-            flags[explorerIndex, currentExplorer.x, currentExplorer.y] = 1;
-
-            //Checking if the current path intersects another room path from an active explorer
-
-            for (int flagI = 0; flagI < explorers.Length; flagI++)
-            {
-                if (flagI != explorerIndex && activeExplorers.Contains(flagI))
+                do
                 {
-                    if (flags[flagI, currentExplorer.x, currentExplorer.y] == 1)
+                    dir = ChooseDirection();
+
+                } while (OutOfBounds(currentExplorer.x + dir.x, currentExplorer.y + dir.y, simpleWidth, simpleHeight));
+
+                //Move the explorer 1 unit in the chosen direction
+
+                currentExplorer.x += dir.x;
+                currentExplorer.y += dir.y;
+
+                //Mark the current position in the room and in the flag as explored
+
+                if (simpleMap[currentExplorer.x, currentExplorer.y] == 1)
+                {
+                    simpleMap[currentExplorer.x, currentExplorer.y] = 0;
+
+                    floorTiles++;
+                    currentFillPerc = floorTiles / (float)totalRoomTiles;
+                }
+
+                flags[explorerIndex, currentExplorer.x, currentExplorer.y] = 1;
+
+                //Checking if the current path intersects another room path from an active explorer
+
+                for (int flagI = 0; flagI < explorers.Length; flagI++)
+                {
+                    if (flagI != explorerIndex && activeExplorers.Contains(flagI))
                     {
-                        //Elige que explorador de los caminos intersectados deja de estar activo
-                        if (random.Next(0, 10) > 5)
+                        if (flags[flagI, currentExplorer.x, currentExplorer.y] == 1)
                         {
-                            activeExplorers.Remove(explorerIndex);
-                        }
-                        else
-                        {
-                            activeExplorers.Remove(flagI);
+                            //Elige que explorador de los caminos intersectados deja de estar activo
+                            if (random.Next(0, 10) > 5)
+                            {
+                                activeExplorers.Remove(explorerIndex);
+                            }
+                            else
+                            {
+                                activeExplorers.Remove(flagI);
+                            }
                         }
                     }
                 }
+
+                explorers[explorerIndex] = currentExplorer;
+
+                activeExplorerIndex = (activeExplorerIndex + 1) % activeExplorers.Count;
             }
-
-            explorers[explorerIndex] = currentExplorer;
-
-            activeExplorerIndex = (activeExplorerIndex + 1) % activeExplorers.Count;
         }
     }
 

@@ -36,7 +36,7 @@ public class WorldGenerator
         random = new System.Random(param.GraphParameters.Seed);
     }
 
-    public void GenerateWorld()
+    public void GenerateWorld(bool debug)
     {
         //1. Process each composite; convert each RootedNode into a RoomNode.
         GenerateComposites();
@@ -45,7 +45,8 @@ public class WorldGenerator
         LocateComposites();
 
         //3. Join all the resulting composites in the global space.
-        JoinComposites();
+        if(!debug)
+            JoinComposites();
 
         //4. Generate the inners of each room
         CreateRooms();
@@ -147,6 +148,7 @@ public class WorldGenerator
 
         //Generate a list of possible directions
         Coord[] directions = GenerateRandomDirectionList();
+        Coord lastDirection = new Coord(0, 0);
 
         for (int i = 0; i < composite.Count; i++)
         {
@@ -163,7 +165,7 @@ public class WorldGenerator
 
             if (i < composite.Count / 2) {
                 //Place the room given the order of possible directions
-                PlaceRoom(roomGenerator, previousRoomGenerator, directions, locatedRooms);
+                lastDirection = PlaceRoom(roomGenerator, previousRoomGenerator, directions, locatedRooms);
             }
             else
             {
@@ -171,8 +173,9 @@ public class WorldGenerator
                 RoomNode startRoom = composite[0];
 
                 List<RoomNode> evaluatedRooms = new List<RoomNode>();
-
+                
                 int nearestIndex = -1;
+                int selectedSpaceness = 0;
                 float nearestDistance = int.MaxValue;
                 float selectedRandomOffset = -1;
 
@@ -180,29 +183,51 @@ public class WorldGenerator
                 {
                     Coord evaluatedDir = directions[j];
 
-                    float offset = 0.5f;//(float)random.NextDouble() % 1;
+                    if (evaluatedDir.x == -lastDirection.x && evaluatedDir.y == -lastDirection.y)
+                    {
+                        continue;
+                    }
+
+                    float offset = 0.5f;
 
                     SpawnRoom(room, previousRoomGenerator.AssociatedRoom, evaluatedDir, 0, offset);
 
-                    if (!CheckRoomCollision(room, locatedRooms))
-                    {
-                        float distance = RoomDistance(room, startRoom);
+                    bool roomCollided = CheckRoomCollision(room, locatedRooms);
+                    int spaceness = 0;
 
-                        if (distance < nearestDistance)
+                    while (roomCollided && spaceness < 1000) {
+                        for (float range = 0; range < 1 && roomCollided; range += .02f)
                         {
-                            nearestDistance = distance;
-                            nearestIndex = j;
+                            offset = range <= .5f ? range + .5f : 1f - range;
 
-                            selectedRandomOffset = offset;
+                            SpawnRoom(room, previousRoomGenerator.AssociatedRoom, evaluatedDir, spaceness, offset);
+
+                            //Check if it collides with any other room
+                            roomCollided = CheckRoomCollision(room, locatedRooms);
                         }
+
+                        spaceness++;
+                    }
+
+                    float distance = RoomDistance(room, startRoom);
+
+                    if (distance < nearestDistance)
+                    {
+                        nearestDistance = distance;
+                        nearestIndex = j;
+
+                        selectedRandomOffset = offset;
+                        selectedSpaceness = spaceness;
                     }
 
                     evaluatedRooms.Add(room);
                 }
 
-                SpawnRoom(room, previousRoomGenerator.AssociatedRoom, directions[nearestIndex], 0, selectedRandomOffset);
+                SpawnRoom(room, previousRoomGenerator.AssociatedRoom, directions[nearestIndex], selectedSpaceness, selectedRandomOffset);
 
                 AddRoomEntries(roomGenerator, previousRoomGenerator, directions[nearestIndex]);
+
+                lastDirection = directions[nearestIndex];
             }
 
             roomGenerators.Add(roomGenerator);
@@ -238,7 +263,7 @@ public class WorldGenerator
         return unordered;
     }
 
-    void PlaceRoom(RoomGeneration roomGenerator, RoomGeneration previousRoomGenerator, Coord[] directions, List<RoomNode> locatedRooms)
+    Coord PlaceRoom(RoomGeneration roomGenerator, RoomGeneration previousRoomGenerator, Coord[] directions, List<RoomNode> locatedRooms)
     {
         RoomNode room = roomGenerator.AssociatedRoom;
         RoomNode previousRoom;
@@ -286,6 +311,8 @@ public class WorldGenerator
             //May depend, if spaceness > 0, we should add entries in a middle corridor
             AddRoomEntries(roomGenerator, previousRoomGenerator, chosenDirection);
         }
+
+        return chosenDirection;
     }
 
     void PlaceComposite(RoomGeneration firstRoom, RoomGeneration roomParent, List<RoomNode> composite, List<RoomNode> locatedRooms)
@@ -301,7 +328,7 @@ public class WorldGenerator
         bool compositeCollided = true;
         int spaceness = 0;
 
-        while (compositeCollided)
+        while (compositeCollided && spaceness < 200)
         {
             //Iterate through each possible direction
             for (int i = 0; i < directions.Length && compositeCollided; i++)
@@ -400,13 +427,13 @@ public class WorldGenerator
         //Place the room right next to the previous one, or with a certain spaceness and offset
         if (chosenDirection.x == 0)
         {
-            position.x = previousRoom.Position.x + perpendicularOffset;
+            position.x = (previousRoom.Position.x + previousRoom.Width / 2) - room.Width / 2 + perpendicularOffset;
             position.y = previousRoom.Position.y + (chosenDirection.y > 0 ? room.Height : -previousRoom.Height) + spaceness * chosenDirection.y;
         }
         else
         {
             position.x = previousRoom.Position.x + (chosenDirection.x > 0 ? previousRoom.Width : -room.Width) + spaceness * chosenDirection.x;
-            position.y = previousRoom.Position.y + perpendicularOffset;
+            position.y = (previousRoom.Position.y - previousRoom.Height / 2) + room.Height / 2 + perpendicularOffset;
         }
 
         room.SetWorldPosition(position);
@@ -463,6 +490,18 @@ public class WorldGenerator
                             unexploredComposites.Add(child);
                         }
                     }
+                }
+            }
+        }
+
+        //Must also verify that childs extern to loops do not belong to any other loop
+        for (int i = 0; i < unexploredComposites.Count; i++)
+        {
+            foreach (RootedNode node in loopStartNode)
+            {
+                if (unexploredComposites[i].ID == node.ID)
+                {
+                    unexploredComposites.RemoveAt(i);
                 }
             }
         }
@@ -561,15 +600,15 @@ public class WorldGenerator
         RoomNode roomA = roomGeneratorA.AssociatedRoom;
         RoomNode roomB = roomGeneratorB.AssociatedRoom;
 
-        Coord roomEntry = new Coord(0, 0);
-        Coord previousRoomEntry = new Coord(0, 0);
+        Coord roomAEntry = new Coord(0, 0);
+        Coord roomBEntry = new Coord(0, 0);
 
         int globalEntryParameter;
 
         int edgeMax;
         int edgeMin;
 
-        int edgeLimit = 2;
+        int edgeLimit = 4;
 
         if (chosenDirection.x == 0)
         {
@@ -582,27 +621,30 @@ public class WorldGenerator
             edgeMax = System.Math.Min(roomA.Top, roomB.Top);
         }
 
-        globalEntryParameter = random.Next(edgeMin + edgeLimit, edgeMax - edgeLimit);
+        int min = edgeMin + edgeLimit;
+        int max = edgeMax - edgeLimit;
+
+        globalEntryParameter = random.Next(min, max);
 
         if (chosenDirection.x == 0)
         {
-            roomEntry.x = globalEntryParameter - roomA.Left;
-            roomEntry.y = roomA.Top - (chosenDirection.y > 0 ? roomA.Bottom + 1 : roomA.Top);
+            roomAEntry.x = globalEntryParameter - roomA.Left;
+            roomAEntry.y = roomA.Top - (chosenDirection.y > 0 ? roomA.Bottom + 1 : roomA.Top);
 
-            previousRoomEntry.x = globalEntryParameter - roomB.Left;
-            previousRoomEntry.y = roomB.Top - (chosenDirection.y > 0 ? roomB.Top : roomB.Bottom + 1);
+            roomBEntry.x = globalEntryParameter - roomB.Left;
+            roomBEntry.y = roomB.Top - (chosenDirection.y > 0 ? roomB.Top : roomB.Bottom + 1);
         }
         else
         {
-            roomEntry.x = (chosenDirection.x > 0 ? roomA.Left : roomA.Right - 1) - roomA.Left;
-            roomEntry.y = roomA.Top - globalEntryParameter;
+            roomAEntry.x = (chosenDirection.x > 0 ? roomA.Left : roomA.Right - 1) - roomA.Left;
+            roomAEntry.y = roomA.Top - globalEntryParameter;
 
-            previousRoomEntry.x = (chosenDirection.x > 0 ? roomB.Right - 1: roomB.Left) - roomB.Left;
-            previousRoomEntry.y = roomB.Top - globalEntryParameter;
+            roomBEntry.x = (chosenDirection.x > 0 ? roomB.Right - 1: roomB.Left) - roomB.Left;
+            roomBEntry.y = roomB.Top - globalEntryParameter;
         }
 
-        roomGeneratorA.AddEntry(roomEntry);
-        roomGeneratorB.AddEntry(previousRoomEntry);
+        roomGeneratorA.AddEntry(roomAEntry);
+        roomGeneratorB.AddEntry(roomBEntry);
     }
 
     float RoomDistance(RoomNode roomA, RoomNode roomB)

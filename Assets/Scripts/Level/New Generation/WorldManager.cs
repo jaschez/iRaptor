@@ -20,6 +20,7 @@ public class WorldManager : MonoBehaviour
     float extraLoopSpawnChance = 0.5f;
 
     public bool autoSeed = true;
+    public bool debug = false;
 
     bool ready = false;
 
@@ -64,7 +65,7 @@ public class WorldManager : MonoBehaviour
                 WorldGenerationParameters parameters = CalculateParameters(level);
 
                 generator = new WorldGenerator(parameters);
-                generator.GenerateWorld();
+                generator.GenerateWorld(debug);
 
                 ready = true;
 
@@ -162,6 +163,13 @@ public class WorldManager : MonoBehaviour
             yield return null;
         }
 
-        tilemapGenerator.LoadLevel(generator.roomComposites);
+        if (!debug)
+        {
+            tilemapGenerator.LoadLevel(generator.roomComposites);
+        }
+        else
+        {
+            tilemapGenerator.DebugLevel(generator.roomComposites);
+        }
     }
 }

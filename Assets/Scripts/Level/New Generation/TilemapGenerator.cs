@@ -15,6 +15,8 @@ public class TilemapGenerator : MonoBehaviour
 
     List<List<RoomNode>> debugRooms;
 
+    bool debug = false;
+
     private void Awake()
     {
         Tiles = new Dictionary<TileType, TileBase>();
@@ -41,11 +43,8 @@ public class TilemapGenerator : MonoBehaviour
 
         //Capa de bloques de cueva
 
-        int space = -1000;
-
         foreach (List <RoomNode> comp in composites)
         {
-            space += 200;
             foreach (RoomNode room in comp)
             {
                 Coord roomPosition = room.Position;
@@ -56,6 +55,39 @@ public class TilemapGenerator : MonoBehaviour
                     {
 
                         Vector3Int tilePosition = new Vector3Int(roomPosition.x + i, roomPosition.y - j, 1);
+                        TileBase tile = Tiles[room.TileMap[i, j]];
+
+                        tilemap.SetTile(tilePosition, tile);
+                    }
+                }
+            }
+        }
+    }
+
+    public void DebugLevel(List<List<RoomNode>> composites)
+    {
+        debugRooms = composites;
+        debug = true;
+
+        tilemap.ClearAllTiles();
+
+        //Capa de bloques de cueva
+
+        int space = -300;
+
+        foreach (List<RoomNode> comp in composites)
+        {
+            space += 150;
+            foreach (RoomNode room in comp)
+            {
+                Coord roomPosition = room.Position;
+
+                for (int i = 0; i < room.Width; i++)
+                {
+                    for (int j = 0; j < room.Height; j++)
+                    {
+
+                        Vector3Int tilePosition = new Vector3Int(roomPosition.x + i + space, roomPosition.y - j, 1);
                         TileBase tile = Tiles[room.TileMap[i, j]];
 
                         tilemap.SetTile(tilePosition, tile);
@@ -84,23 +116,36 @@ public class TilemapGenerator : MonoBehaviour
 
         List<RoomNode> evaluated = new List<RoomNode>();
 
+        int space = 0;
+
+        if (debug)
+        {
+            space = -300;
+        }
+
         if (debugRooms != null)
         {
             foreach (List<RoomNode> comp in debugRooms)
             {
+                if (debug)
+                {
+                    space += 150;
+                }
+
                 foreach (RoomNode room in comp)
                 {
-                    Vector3 a = new Vector3(room.Position.x + room.Width / 2, room.Position.y - room.Height / 2, 1) * tileSize;
+                    Vector3 a = new Vector3(room.Position.x + room.Width / 2, room.Position.y - room.Height / 2, 1) * tileSize + Vector3.right * space * tileSize;
 
                     Gizmos.color = Color.cyan;
                     for (int i = 0; i < room.ID;i++) {
                         Gizmos.DrawSphere(a+Vector3.right*i*3, 10);
                     }
+
                     foreach (RoomNode child in room.Neighbours)
                     {
                         if (!evaluated.Contains(child))
                         {
-                            Vector3 b = new Vector3(child.Position.x + child.Width / 2, child.Position.y - child.Height / 2, 1) * tileSize;
+                            Vector3 b = new Vector3(child.Position.x + child.Width / 2, child.Position.y - child.Height / 2, 1) * tileSize + Vector3.right* space * tileSize;
                             Gizmos.color = Color.red;
                             Gizmos.DrawLine(a, b);
                         }
