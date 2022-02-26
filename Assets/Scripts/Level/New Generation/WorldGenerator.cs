@@ -77,9 +77,51 @@ public class WorldGenerator
 
     void JoinComposites()
     {
-        roomComposites = roomComposites.OrderByDescending(x => x.Count).ToList();
+        //Order joining list by doing a depth-first exploration
+        List<List<RoomNode>> orderedCompostites = new List<List<RoomNode>>();
+        Stack<List<RoomNode>> compositeStack = new Stack<List<RoomNode>>();
 
-        foreach (List<RoomNode> composite in roomComposites)
+        //1. Search root composite
+        for(int i = 0; i < roomComposites.Count && compositeStack.Count == 0; i++)
+        {
+            List<RoomNode> composite = roomComposites[i];
+
+            RoomNode firstRoom = composite[0];
+            RootedNode evaluatedNode = FindNodeID(nodeList, firstRoom.ID);
+
+            if (evaluatedNode.Parent == null)
+            {
+                compositeStack.Push(composite);
+            }
+        }
+
+        //2. Explore in depth-first search
+        while (compositeStack.Count > 0)
+        {
+            List<RoomNode> composite = compositeStack.Pop();
+            orderedCompostites.Add(composite);
+
+            foreach (RoomNode node in composite)
+            {
+                RootedNode evaluatedNode = FindNodeID(nodeList, node.ID);
+
+                foreach (RootedNode child in evaluatedNode.Childs)
+                {
+                    foreach (List<RoomNode> otherComposite in roomComposites)
+                    {
+                        if (otherComposite[0].ID == child.ID)
+                        {
+                            compositeStack.Push(otherComposite);
+                        }
+                    }
+                }
+            }
+
+        }
+
+        //roomComposites = roomComposites.OrderByDescending(x => x.Count).ToList();
+
+        foreach (List<RoomNode> composite in orderedCompostites)
         {
             //Get the parent from the original Node Tree, if its actually null, original position
             //will be kept as intact
