@@ -42,11 +42,13 @@ public class WorldGenerator
         GenerateComposites();
 
         //2. Locate relatively each room based on room parameters, creating room generators
-        LocateComposites();
+        //LocateComposites();
 
         //3. Join all the resulting composites in the global space.
-        if(!debug)
-            JoinComposites();
+        //if(!debug)
+        //    JoinComposites();
+
+        LocateCompositesSequentially();
 
         //4. Generate the inners of each room
         CreateRooms();
@@ -59,129 +61,7 @@ public class WorldGenerator
         CreateRemainingComposites();
     }
 
-    void LocateComposites()
-    {
-        foreach (List<RoomNode> composite in roomComposites)
-        {
-            //Check if composite is a loop, if that is the case we build the composite in a certain way
-            if (IsLoopComposite(composite))
-            {
-                LocateLoop(composite);
-            }
-            else
-            {
-                LocateBranch(composite);
-            }
-        }
-    }
-
-    void JoinComposites()
-    {
-        //Order joining list by doing a depth-first exploration
-        List<List<RoomNode>> orderedCompostites = new List<List<RoomNode>>();
-        Stack<List<RoomNode>> compositeStack = new Stack<List<RoomNode>>();
-
-        //1. Search root composite
-        for(int i = 0; i < roomComposites.Count && compositeStack.Count == 0; i++)
-        {
-            List<RoomNode> composite = roomComposites[i];
-
-            RoomNode firstRoom = composite[0];
-            RootedNode evaluatedNode = FindNodeID(nodeList, firstRoom.ID);
-
-            if (evaluatedNode.Parent == null)
-            {
-                compositeStack.Push(composite);
-            }
-        }
-
-        //2. Explore in depth-first search
-        while (compositeStack.Count > 0)
-        {
-            List<RoomNode> composite = compositeStack.Pop();
-            orderedCompostites.Add(composite);
-
-            foreach (RoomNode node in composite)
-            {
-                RootedNode evaluatedNode = FindNodeID(nodeList, node.ID);
-
-                foreach (RootedNode child in evaluatedNode.Childs)
-                {
-                    foreach (List<RoomNode> otherComposite in roomComposites)
-                    {
-                        if (otherComposite[0].ID == child.ID)
-                        {
-                            compositeStack.Push(otherComposite);
-                        }
-                    }
-                }
-            }
-
-        }
-
-        //roomComposites = roomComposites.OrderByDescending(x => x.Count).ToList();
-
-        foreach (List<RoomNode> composite in orderedCompostites)
-        {
-            //Get the parent from the original Node Tree, if its actually null, original position
-            //will be kept as intact
-            RoomNode firstRoom = composite[0];
-            RootedNode evaluatedNode = FindNodeID(nodeList, firstRoom.ID);
-
-            if (evaluatedNode.Parent != null)
-            {
-                RoomGeneration parentGenerator = FindGenerationID(roomGenerators, evaluatedNode.Parent.ID);
-                RoomGeneration compositeGenerator = FindGenerationID(roomGenerators, firstRoom.ID);
-
-                PlaceComposite(compositeGenerator, parentGenerator, composite, RoomList);
-            }
-
-            RoomList.AddRange(composite);
-        }
-    }
-
-    void CreateRooms()
-    {
-        foreach (RoomGeneration generator in roomGenerators)
-        {
-            generator.Generate();
-        }
-    }
-
-    void LocateBranch(List<RoomNode> composite)
-    {
-        List<RoomNode> locatedRooms = new List<RoomNode>();
-
-        RoomGeneration previousRoomGenerator = null;
-
-        for (int i = 0; i < composite.Count; i++)
-        {
-            RoomNode room = composite[i];
-
-            foreach (RoomNode neighbour in room.Neighbours)
-            {
-                if (locatedRooms.Contains(neighbour))
-                {
-                    previousRoomGenerator = FindGenerationID(roomGenerators, neighbour.ID);
-                }
-            }
-
-            //Generate a list of possible directions
-            Coord[] directions = GenerateRandomDirectionList();
-
-            //Create the room generator
-            //Assign dimensions to the room according to its type
-            RoomGeneration roomGenerator = CreateRoomGenerator(room);
-
-            //Place the room given the order of possible directions
-            PlaceRoom(roomGenerator, previousRoomGenerator, directions, locatedRooms);
-
-            roomGenerators.Add(roomGenerator);
-            locatedRooms.Add(room);
-        }
-    }
-
-    void LocateLoop(List<RoomNode> composite)
+    void GenerateLoop(RoomNode roomParent, List<RoomNode> composite, List<RoomNode> existingRooms)
     {
         List<RoomNode> locatedRooms = new List<RoomNode>();
 
@@ -191,6 +71,13 @@ public class WorldGenerator
         //Generate a list of possible directions
         Coord[] directions = GenerateRandomDirectionList();
         Coord lastDirection = new Coord(0, 0);
+
+        if (roomParent != null)
+        {
+            previousRoomGenerator = FindGeneratorID(roomGenerators, roomParent.ID);
+        }
+
+        locatedRooms.AddRange(existingRooms);
 
         for (int i = 0; i < composite.Count; i++)
         {
@@ -205,7 +92,8 @@ public class WorldGenerator
                 firstGenerator = roomGenerator;
             }
 
-            if (i < composite.Count / 2) {
+            if (i < composite.Count / 2)
+            {
                 //Place the room given the order of possible directions
                 lastDirection = PlaceRoom(roomGenerator, previousRoomGenerator, directions, locatedRooms);
             }
@@ -215,7 +103,7 @@ public class WorldGenerator
                 RoomNode startRoom = composite[0];
 
                 List<RoomNode> evaluatedRooms = new List<RoomNode>();
-                
+
                 int nearestIndex = -1;
                 int selectedSpaceness = 0;
                 float nearestDistance = int.MaxValue;
@@ -225,6 +113,7 @@ public class WorldGenerator
                 {
                     Coord evaluatedDir = directions[j];
 
+                    //If it is about to go backwards, skip that direction
                     if (evaluatedDir.x == -lastDirection.x && evaluatedDir.y == -lastDirection.y)
                     {
                         continue;
@@ -237,7 +126,8 @@ public class WorldGenerator
                     bool roomCollided = CheckRoomCollision(room, locatedRooms);
                     int spaceness = 0;
 
-                    while (roomCollided && spaceness < 1000) {
+                    while (roomCollided && spaceness < 1000)
+                    {
                         for (float range = 0; range < 1 && roomCollided; range += .02f)
                         {
                             offset = range <= .5f ? range + .5f : 1f - range;
@@ -281,6 +171,128 @@ public class WorldGenerator
         //Finally, the start and the end of the loop are joined
         //We should add entries in a middle corridor if the rooms are separated
         //AddRoomEntries(firstGenerator, previousRoomGenerator, chosenDirection);
+    }
+
+    void GenerateBranch(RoomNode roomParent, List<RoomNode> composite, List<RoomNode> existingRooms)
+    {
+        List<RoomNode> locatedRooms = new List<RoomNode>();
+
+        RoomGeneration previousRoomGenerator = null;
+
+        if (roomParent != null)
+        {
+            previousRoomGenerator = FindGeneratorID(roomGenerators, roomParent.ID);
+        }
+
+        locatedRooms.AddRange(existingRooms);
+
+        for (int i = 0; i < composite.Count; i++)
+        {
+            RoomNode room = composite[i];
+
+            //We are searching for the parent like this because there may be a split in the branch,
+            //and because the room composite is ordered in depth-first we could have jumps between
+            //each evaluated 'previous room'
+            foreach (RoomNode neighbour in room.Neighbours)
+            {
+                if (locatedRooms.Contains(neighbour))
+                {
+                    previousRoomGenerator = FindGeneratorID(roomGenerators, neighbour.ID);
+                }
+            }
+
+            //Generate a list of possible directions
+            Coord[] directions = GenerateRandomDirectionList();
+
+            //Create the room generator
+            //Assign dimensions to the room according to its type
+            RoomGeneration roomGenerator = CreateRoomGenerator(room);
+
+            //Place the room given the order of possible directions
+            PlaceRoom(roomGenerator, previousRoomGenerator, directions, locatedRooms);
+
+            roomGenerators.Add(roomGenerator);
+            locatedRooms.Add(room);
+        }
+    }
+
+    void LocateCompositesSequentially()
+    {
+        List<RoomNode> firstComposite = new List<RoomNode>();
+        List<RoomNode> existingRooms = new List<RoomNode>();
+        List<RoomNode> currentComposite;
+
+        Dictionary<List<RoomNode>, RoomNode > parentedComposites = new Dictionary<List<RoomNode>, RoomNode>();
+        Stack<List<RoomNode>> compositeParentsStack = new Stack<List<RoomNode>>();
+
+        //0. Search root composite
+        for (int i = 0; i < roomComposites.Count && firstComposite.Count == 0; i++)
+        {
+            List<RoomNode> composite = roomComposites[i];
+
+            RoomNode firstRoom = composite[0];
+            RootedNode evaluatedNode = FindNodeID(nodeList, firstRoom.ID);
+
+            if (evaluatedNode.Parent == null)
+            {
+                firstComposite = composite;
+            }
+        }
+
+        compositeParentsStack.Push(firstComposite);
+        parentedComposites.Add(firstComposite, null);
+
+        //We run through the generation stack
+        while (compositeParentsStack.Count > 0)
+        {
+            currentComposite = compositeParentsStack.Pop();
+
+            RoomNode roomParent;
+
+            //1. We get the room parent out of the child composite
+            roomParent = parentedComposites[currentComposite];
+
+            //2. Generates the composite, if it is a loop we build the composite in a certain way
+            if (IsLoopComposite(currentComposite))
+            {
+                GenerateLoop(roomParent, currentComposite, existingRooms);
+            }
+            else
+            {
+                GenerateBranch(roomParent, currentComposite, existingRooms);
+            }
+
+            //3. Search for composite parents
+            foreach (RoomNode room in currentComposite)
+            {
+                RootedNode evaluatedNode = FindNodeID(nodeList, room.ID);
+
+                foreach (RootedNode child in evaluatedNode.Childs)
+                {
+                    foreach (List<RoomNode> otherComposite in roomComposites)
+                    {
+                        if (otherComposite != currentComposite)
+                        {
+                            if (otherComposite[0].ID == child.ID)
+                            {
+                                compositeParentsStack.Push(otherComposite);
+                                parentedComposites.Add(otherComposite, room);
+                            }
+                        }
+                    }
+                }
+            }
+
+            existingRooms.AddRange(currentComposite);
+        }
+    }
+
+    void CreateRooms()
+    {
+        foreach (RoomGeneration generator in roomGenerators)
+        {
+            generator.Generate();
+        }
     }
 
     Coord[] GenerateRandomDirectionList()
@@ -355,80 +367,6 @@ public class WorldGenerator
         }
 
         return chosenDirection;
-    }
-
-    void PlaceComposite(RoomGeneration firstRoom, RoomGeneration roomParent, List<RoomNode> composite, List<RoomNode> locatedRooms)
-    {
-        Coord[] directions = GenerateRandomDirectionList();
-
-        RoomNode room = firstRoom.AssociatedRoom;
-        RoomNode previousRoom = roomParent.AssociatedRoom;
-
-        Coord chosenDirection = new Coord(0, 0);
-        Coord deltaPos;
-
-        bool compositeCollided = true;
-        int spaceness = 0;
-
-        while (compositeCollided && spaceness < 200)
-        {
-            //Iterate through each possible direction
-            for (int i = 0; i < directions.Length && compositeCollided; i++)
-            {
-                chosenDirection = directions[i];
-                deltaPos = room.Position;
-
-                SpawnRoom(room, previousRoom, chosenDirection, spaceness, .5f);
-
-                deltaPos.x = room.Position.x - deltaPos.x;
-                deltaPos.y = room.Position.y - deltaPos.y;
-
-                //Move the rest of the composite with it, using the position of the first room as a delta
-                foreach (RoomNode compRoom in composite)
-                {
-                    if (compRoom.ID != room.ID)
-                    {
-                        compRoom.SetWorldPosition(new Coord(compRoom.Position.x + deltaPos.x, compRoom.Position.y + deltaPos.y));
-                    }
-                }
-
-                //Check if it collides with any other room
-                compositeCollided = CheckCompositeCollision(composite, locatedRooms);
-
-                //Explore whole range of offset before trying another direction
-                if (compositeCollided)
-                {
-                    for (float range = 0; range < 1 && compositeCollided; range += .02f)
-                    {
-                        float offset = range <= .5f ? range + .5f : 1f - range;
-                        deltaPos = room.Position;
-
-                        SpawnRoom(room, previousRoom, chosenDirection, spaceness, offset);
-
-                        deltaPos.x = room.Position.x - deltaPos.x;
-                        deltaPos.y = room.Position.y - deltaPos.y;
-
-                        //Move the rest of the composite with it, using the movement of the first room
-                        foreach (RoomNode compRoom in composite)
-                        {
-                            if (compRoom.ID != room.ID)
-                            {
-                                compRoom.SetWorldPosition(new Coord(compRoom.Position.x + deltaPos.x, compRoom.Position.y + deltaPos.y));
-                            }
-                        }
-
-                        //Check if it collides with any other room
-                        compositeCollided = CheckCompositeCollision(composite, locatedRooms);
-                    }
-                }
-            }
-
-            spaceness++;
-        }
-
-        //Add entries in room local positions, betwen previous and current room
-        //May depend, if spaceness > 0, we should add entries in a middle corridor
-        AddRoomEntries(firstRoom, roomParent, chosenDirection);
     }
 
     void SpawnRoom(RoomNode room, RoomNode previousRoom, Coord chosenDirection, int spaceness, float perpendicularOffsetFactor = -1)
@@ -650,7 +588,7 @@ public class WorldGenerator
         int edgeMax;
         int edgeMin;
 
-        int edgeLimit = 4;
+        int edgeLimit = 3;
 
         if (chosenDirection.x == 0)
         {
@@ -665,6 +603,11 @@ public class WorldGenerator
 
         int min = edgeMin + edgeLimit;
         int max = edgeMax - edgeLimit;
+
+        if (min > max)
+        {
+            return;
+        }
 
         globalEntryParameter = random.Next(min, max);
 
@@ -703,18 +646,16 @@ public class WorldGenerator
 
     bool IsLoopComposite(List<RoomNode> composite)
     {
-        if (composite[composite.Count - 1].Neighbours.Count > 0)
+        
+        foreach(RoomNode room in composite)
         {
-            foreach (RoomNode child in composite[composite.Count - 1].Neighbours)
+            if (room.Neighbours.Count != 2)
             {
-                if (child.ID == composite[0].ID)
-                {
-                    return true;
-                }
+                return false;
             }
         }
 
-        return false;
+        return true;
     }
 
     bool CheckRoomCollision(RoomNode room, List<RoomNode> collisions)
@@ -724,22 +665,6 @@ public class WorldGenerator
             if (room.OverlapsRoom(collision))
             {
                 return true;
-            }
-        }
-
-        return false;
-    }
-
-    bool CheckCompositeCollision(List<RoomNode> composite, List<RoomNode> collisions)
-    {
-        foreach (RoomNode collision in collisions)
-        {
-            foreach (RoomNode room in composite)
-            {
-                if (room.OverlapsRoom(collision))
-                {
-                    return true;
-                }
             }
         }
 
@@ -772,7 +697,7 @@ public class WorldGenerator
         return null;
     }
 
-    RoomGeneration FindGenerationID(List<RoomGeneration> list, int id)
+    RoomGeneration FindGeneratorID(List<RoomGeneration> list, int id)
     {
         foreach (RoomGeneration room in list)
         {

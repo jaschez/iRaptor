@@ -199,11 +199,7 @@ public class GraphGenerator
 
                 if (deepestPossibleLeaves.Count > 0)
                 {
-                    if (newRootNode.Depth > deepestPossibleLeaves[0].Depth)
-                    {
-                        deepestPossibleLeaves = new List<RootedNode>();
-                        deepestPossibleLeaves.Add(newRootNode);
-                    }else if (newRootNode.Depth == deepestPossibleLeaves[0].Depth)
+                    if (newRootNode.Depth >= deepestPossibleLeaves[0].Depth)
                     {
                         deepestPossibleLeaves.Add(newRootNode);
                     }
@@ -263,8 +259,6 @@ public class GraphGenerator
             leaf = leaves[leafIndex];
             evaluatedNode = leaf;
 
-            leaves.RemoveAt(leafIndex);
-
             //First part, ascend through the branch
             for (int i = 0; i < loopLengthTarget && splitNode == null; i++)
             {
@@ -301,6 +295,12 @@ public class GraphGenerator
                             stack.Push(child);
                         }
                     }
+                }
+
+                if (stack.Count == 0)
+                {
+                    loopIndex--;
+                    continue;
                 }
 
                 //Second part, walk trough the childs until the desired loop path is achieved
@@ -363,11 +363,14 @@ public class GraphGenerator
                 loopIndex--;
                 continue;
             }
+
+            leaves.RemoveAt(leafIndex);
         }
 
         if (deepestLeaf == null)
         {
-            deepestLeaf = deepestPossibleLeaves[random.Next(0, deepestPossibleLeaves.Count)];
+            //Take one of the deepest nodes
+            deepestLeaf = deepestPossibleLeaves[0];
         }
 
         return tree;

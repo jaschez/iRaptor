@@ -35,6 +35,20 @@ public class WorldManager : MonoBehaviour
         Debug.Log("Seed: " + Seed);
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Init();
+            CreateSeeds();
+            GenerateLevelAsync(0);
+
+            StartCoroutine(WaitForGeneration());
+
+            Debug.Log("Seed: " + Seed);
+        }
+    }
+
     void Init()
     {
         if (autoSeed) {
