@@ -276,7 +276,14 @@ public class WorldGenerator
                             if (otherComposite[0].ID == child.ID)
                             {
                                 compositeParentsStack.Push(otherComposite);
-                                parentedComposites.Add(otherComposite, room);
+
+                                if (!parentedComposites.ContainsKey(otherComposite)) {
+                                    parentedComposites.Add(otherComposite, room);
+                                }
+                                else
+                                {
+                                    parentedComposites[otherComposite] = room;
+                                }
                             }
                         }
                     }
@@ -471,6 +478,8 @@ public class WorldGenerator
             }
         }
 
+        unexploredComposites.Add(nodeList[0]);
+
         //Must also verify that childs extern to loops do not belong to any other loop
         for (int i = 0; i < unexploredComposites.Count; i++)
         {
@@ -519,8 +528,6 @@ public class WorldGenerator
 
     void CreateRemainingComposites()
     {
-        roomComposites.Add(ExploreComposite(nodeList[0]));
-
         foreach (RootedNode compStart in unexploredComposites)
         {
             roomComposites.Add(ExploreComposite(compStart));
