@@ -461,14 +461,11 @@ public class WorldGenerator
                     loopStartNode.Add(node);
                 }
 
-                if (node.Childs.Count > 1)
+                foreach (RootedNode child in node.Childs)
                 {
-                    foreach (RootedNode child in node.Childs)
+                    if (!loop.Contains(child))
                     {
-                        if (!loop.Contains(child))
-                        {
-                            unexploredComposites.Add(child);
-                        }
+                        unexploredComposites.Add(child);
                     }
                 }
             }
@@ -479,9 +476,12 @@ public class WorldGenerator
         {
             foreach (RootedNode node in loopStartNode)
             {
-                if (unexploredComposites[i].ID == node.ID)
+                if (i < unexploredComposites.Count) 
                 {
-                    unexploredComposites.RemoveAt(i);
+                    if (unexploredComposites[i].ID == node.ID)
+                    {
+                        unexploredComposites.RemoveAt(i);
+                    }
                 }
             }
         }
