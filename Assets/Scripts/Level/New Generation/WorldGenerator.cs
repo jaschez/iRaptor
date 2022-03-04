@@ -4,61 +4,42 @@ using System.Linq;
 public class WorldGenerator
 {
     WorldGraphGenerator graphGenerator;
+    CompositeGenerator compositeGenerator;
 
     System.Random random;
 
-    List<RoomGeneration> roomGenerators;
-
-    public List<List<RoomNode>> roomComposites;
-
-    List<RootedNode> nodeList;
-    List<RootedNode> unexploredComposites;
-
-    List<RootedNode> loopStartNode;
-    
-    List<int> loopStartIndex;
-
+    public List<List<RoomNode>> RoomComposites { get; private set; }
     public List<RoomNode> RoomList { get; private set; }
 
-    public WorldGraphOutput GraphOutput { get; private set; }
+    List<RoomGeneration> roomGenerators;
+    List<RootedNode> rootedNodeList;
+
+    public WorldGraphOutput GraphInfo { get; private set; }
 
     public WorldGenerator(WorldGenerationParameters param)
     {
+        random = new System.Random(param.GraphParameters.Seed);
+
         graphGenerator = new WorldGraphGenerator(param);
-        GraphOutput = graphGenerator.GenerateWorldGraph();
+        GraphInfo = graphGenerator.GenerateWorldGraph();
 
         roomGenerators = new List<RoomGeneration>();
-        roomComposites = new List<List<RoomNode>>();
         RoomList = new List<RoomNode>();
 
-        nodeList = new List<RootedNode>(GraphOutput.Rooms);
+        compositeGenerator = new CompositeGenerator(GraphInfo);
 
-        random = new System.Random(param.GraphParameters.Seed);
+        //Process each composite; convert each RootedNode into a RoomNode.
+        RoomComposites = compositeGenerator.GenerateComposites();
+        rootedNodeList = compositeGenerator.RootedNodeList;
     }
 
     public void GenerateWorld(bool debug)
     {
-        //1. Process each composite; convert each RootedNode into a RoomNode.
-        GenerateComposites();
-
-        //2. Locate relatively each room based on room parameters, creating room generators
-        //LocateComposites();
-
-        //3. Join all the resulting composites in the global space.
-        //if(!debug)
-        //    JoinComposites();
-
+        //Locate relatively each room based on room parameters, creating room generators
         LocateCompositesSequentially();
 
-        //4. Generate the inners of each room
+        //Generate the inners of each room
         CreateRooms();
-    }
-
-    void GenerateComposites()
-    {
-        SearchComposites();
-        CreateLoopComposites();
-        CreateRemainingComposites();
     }
 
     void GenerateLoop(RoomNode roomParent, List<RoomNode> composite, List<RoomNode> existingRooms)
@@ -226,12 +207,12 @@ public class WorldGenerator
         Stack<List<RoomNode>> compositeParentsStack = new Stack<List<RoomNode>>();
 
         //0. Search root composite
-        for (int i = 0; i < roomComposites.Count && firstComposite.Count == 0; i++)
+        for (int i = 0; i < RoomComposites.Count && firstComposite.Count == 0; i++)
         {
-            List<RoomNode> composite = roomComposites[i];
+            List<RoomNode> composite = RoomComposites[i];
 
             RoomNode firstRoom = composite[0];
-            RootedNode evaluatedNode = FindNodeID(nodeList, firstRoom.ID);
+            RootedNode evaluatedNode = FindNodeID(rootedNodeList, firstRoom.ID);
 
             if (evaluatedNode.Parent == null)
             {
@@ -265,11 +246,11 @@ public class WorldGenerator
             //3. Search for composite parents
             foreach (RoomNode room in currentComposite)
             {
-                RootedNode evaluatedNode = FindNodeID(nodeList, room.ID);
+                RootedNode evaluatedNode = FindNodeID(rootedNodeList, room.ID);
 
                 foreach (RootedNode child in evaluatedNode.Childs)
                 {
-                    foreach (List<RoomNode> otherComposite in roomComposites)
+                    foreach (List<RoomNode> otherComposite in RoomComposites)
                     {
                         if (otherComposite != currentComposite)
                         {
@@ -450,138 +431,6 @@ public class WorldGenerator
         return generator;
     }
 
-    void SearchComposites()
-    {
-        unexploredComposites = new List<RootedNode>();
-        loopStartNode = new List<RootedNode>();
-        loopStartIndex = new List<int>();
-
-        foreach (List<RootedNode> loop in GraphOutput.GraphInfo.Loops)
-        {
-            for (int i = 0; i < loop.Count; i++)
-            {
-                RootedNode node = loop[i];
-
-                if (!loop.Contains(node.Parent))
-                {
-                    loopStartIndex.Add(i);
-                    loopStartNode.Add(node);
-                }
-
-                foreach (RootedNode child in node.Childs)
-                {
-                    if (!loop.Contains(child))
-                    {
-                        unexploredComposites.Add(child);
-                    }
-                }
-            }
-        }
-
-        unexploredComposites.Add(nodeList[0]);
-
-        //Must also verify that childs extern to loops do not belong to any other loop
-        for (int i = 0; i < unexploredComposites.Count; i++)
-        {
-            foreach (RootedNode node in loopStartNode)
-            {
-                if (i < unexploredComposites.Count) 
-                {
-                    if (unexploredComposites[i].ID == node.ID)
-                    {
-                        unexploredComposites.RemoveAt(i);
-                    }
-                }
-            }
-        }
-    }
-
-    void CreateLoopComposites()
-    {
-        for (int i = 0; i < GraphOutput.GraphInfo.Loops.Count; i++)
-        {
-            List<RootedNode> loop = GraphOutput.GraphInfo.Loops[i];
-            List<RoomNode> composite = new List<RoomNode>();
-            RootedNode currentNode;
-
-            int startingLoopIndex = loopStartIndex[i];
-            int currentIndex;
-
-            for (int j = 0; j < loop.Count; j++)
-            {
-                currentIndex = (startingLoopIndex + j) % loop.Count;
-                currentNode = loop[currentIndex];
-
-                AddToRoomComposite(currentNode, composite);
-
-                //Ensure that every node in the loop is connected
-                if (j > 0 && !composite[j].Neighbours.Contains(composite[j - 1]))
-                {
-                    composite[j].AddNeighbour(composite[j - 1]);
-                    composite[j - 1].AddNeighbour(composite[j]);
-                }
-            }
-
-            roomComposites.Add(composite);
-        }
-    }
-
-    void CreateRemainingComposites()
-    {
-        foreach (RootedNode compStart in unexploredComposites)
-        {
-            roomComposites.Add(ExploreComposite(compStart));
-        }
-    }
-
-    List<RoomNode> ExploreComposite(RootedNode root)
-    {
-        List<RoomNode> composite = new List<RoomNode>();
-        Stack<RootedNode> stack = new Stack<RootedNode>();
-
-        stack.Push(root);
-
-        while (stack.Count > 0)
-        {
-            RootedNode evaluated = stack.Pop();
-
-            foreach (RootedNode child in evaluated.Childs)
-            {
-                if (!loopStartNode.Contains(child))
-                {
-                    stack.Push(child);
-                }
-            }
-
-            AddToRoomComposite(evaluated, composite);
-        }
-
-        return composite;
-    }
-
-    void AddToRoomComposite(RootedNode node, List<RoomNode> composite)
-    {
-        RoomNode newRoom = FindRoomID(composite, node.ID);
-        RoomNode neighbour;
-
-        if (newRoom == null)
-        {
-            newRoom = new RoomNode(node);
-            composite.Add(newRoom);
-        }
-
-        if (node.Parent != null)
-        {
-            neighbour = FindRoomID(composite, node.Parent.ID);
-
-            if (neighbour != null)
-            {
-                newRoom.AddNeighbour(neighbour);
-                neighbour.AddNeighbour(newRoom);
-            }
-        }
-    }
-
     void AddRoomEntries(RoomGeneration roomGeneratorA, RoomGeneration roomGeneratorB, Coord chosenDirection)
     {
         RoomNode roomA = roomGeneratorA.AssociatedRoom;
@@ -678,19 +527,6 @@ public class WorldGenerator
         return false;
     }
 
-    RoomNode FindRoomID(List<RoomNode> list, int id)
-    {
-        foreach (RoomNode room in list)
-        {
-            if (room.ID == id)
-            {
-                return room;
-            }
-        }
-
-        return null;
-    }
-
     RootedNode FindNodeID(List<RootedNode> list, int id)
     {
         foreach (RootedNode room in list)
@@ -723,17 +559,17 @@ public class WorldGenerator
         string result;
         string sequence = "";
 
-        foreach (int i in GraphOutput.GraphInfo.PruferCode)
+        foreach (int i in GraphInfo.GraphInfo.PruferCode)
         {
             sequence += i.ToString() + ",";
         }
 
-        result = "Seed: " + GraphOutput.GraphInfo.Seed + "\n";
+        result = "Seed: " + GraphInfo.GraphInfo.Seed + "\n";
         result += "Prufer Code: " + sequence + "\n";
-        result += "Graph Parent ID: " + GraphOutput.GraphInfo.Nodes[0].ID + "\n";
-        result += "Leaves: " + GraphOutput.GraphInfo.Leaves.Length + "\n";
+        result += "Graph Parent ID: " + GraphInfo.GraphInfo.Nodes[0].ID + "\n";
+        result += "Leaves: " + GraphInfo.GraphInfo.Leaves.Length + "\n";
 
-        foreach (List<RootedNode> loop in GraphOutput.GraphInfo.Loops)
+        foreach (List<RootedNode> loop in GraphInfo.GraphInfo.Loops)
         {
             result += "Loop in: ";
 
@@ -745,11 +581,11 @@ public class WorldGenerator
             result += "\n";
         }
 
-        foreach (RoomType roomType in GraphOutput.FilteredRooms.Keys)
+        foreach (RoomType roomType in GraphInfo.FilteredRooms.Keys)
         {
             result += "ID of rooms of type" + roomType.ToString() + ": ";
 
-            foreach (RootedNode node in GraphOutput.FilteredRooms[roomType])
+            foreach (RootedNode node in GraphInfo.FilteredRooms[roomType])
             {
                 result += "ID: " + node.ID + ",";
             }
@@ -759,7 +595,7 @@ public class WorldGenerator
 
         result += "Composites:\n";
 
-        foreach (List<RoomNode> comp in roomComposites)
+        foreach (List<RoomNode> comp in RoomComposites)
         {
             result += "\t";
 

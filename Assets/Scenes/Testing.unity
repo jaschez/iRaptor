@@ -492,7 +492,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0a18617ce872394ab2efd3dde6d1cb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Seed: 668090620
+  Seed: 681256425
+  CurrentLevel: 0
   autoSeed: 0
   debug: 0
 --- !u!4 &795958389

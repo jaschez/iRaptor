@@ -14,6 +14,9 @@ public class WorldManager : MonoBehaviour
     public int[] LevelSeeds { get; private set; }
     public int Seed;
 
+    [Range(0,3)]
+    public int CurrentLevel = 0;
+
     public readonly int Levels = 4;
 
     float loreSpawnChance = 0.4f;
@@ -28,7 +31,7 @@ public class WorldManager : MonoBehaviour
     {
         Init();
         CreateSeeds();
-        GenerateLevelAsync(0);
+        GenerateLevelAsync(CurrentLevel);
 
         StartCoroutine(WaitForGeneration());
 
@@ -41,7 +44,7 @@ public class WorldManager : MonoBehaviour
         {
             Init();
             CreateSeeds();
-            GenerateLevelAsync(0);
+            GenerateLevelAsync(CurrentLevel);
 
             StartCoroutine(WaitForGeneration());
 
@@ -179,11 +182,11 @@ public class WorldManager : MonoBehaviour
 
         if (!debug)
         {
-            tilemapGenerator.LoadLevel(generator.roomComposites);
+            tilemapGenerator.LoadLevel(generator.RoomComposites);
         }
         else
         {
-            tilemapGenerator.DebugLevel(generator.roomComposites);
+            tilemapGenerator.DebugLevel(generator.RoomComposites);
         }
     }
 }
