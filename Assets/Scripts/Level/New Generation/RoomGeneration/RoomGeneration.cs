@@ -27,15 +27,17 @@ public abstract class RoomGeneration
 
     public float FillPercentage { get; private set; }
 
-    int[,] simpleMap;
+    protected int[,] simpleMap;
 
-    int simpleWidth;
-    int simpleHeight;
+    protected int simpleWidth;
+    protected int simpleHeight;
+
+    protected int widthScale;
+    protected int heightScale;
 
     public List<Coord> FloorCoords { get; private set; }
-    public List<Room.Entry> entries { get; private set; }
-    public List<Coord> startPoints { get; private set; }
-    public List<Coord> scaledStartPoints { get; private set; }
+    public List<Coord> StartPoints { get; private set; }
+    public List<Coord> ScaledStartPoints { get; private set; }
     public List<Coord> interestingPoints { get; private set; }
 
     public RoomGeneration(RoomNode room, int seed)
@@ -45,9 +47,8 @@ public abstract class RoomGeneration
         AssociatedRoom = room;
 
         FloorCoords = new List<Coord>();
-        entries = new List<Room.Entry>();
-        startPoints = new List<Coord>();
-        scaledStartPoints = new List<Coord>();
+        StartPoints = new List<Coord>();
+        ScaledStartPoints = new List<Coord>();
     }
 
     protected void Initialize(RoomType roomType, int width, int height, int scaleFactor, float fillPercentage)
@@ -65,8 +66,11 @@ public abstract class RoomGeneration
 
         AssociatedRoom.SetDimensions(Width, Height);
 
-        simpleWidth = Width / scaleFactor;
-        simpleHeight = Height / scaleFactor;
+        widthScale = Width >= scaleFactor ? scaleFactor : Width;
+        heightScale = Height >= scaleFactor ? scaleFactor : Height;
+
+        simpleWidth = Width / widthScale;
+        simpleHeight = Height / heightScale;
 
         simpleMap = new int[simpleWidth, simpleHeight];
 
@@ -98,6 +102,7 @@ public abstract class RoomGeneration
     {
         GenerateRandomWalk();
         ScaleGameMap();
+        OpenEntries();
     }
 
     void GenerateRandomWalk()
@@ -123,19 +128,19 @@ public abstract class RoomGeneration
         //Firstly we check if there's only one starting point
         //If that's the case, we create another one in the middle of the room
 
-        if (startPoints.Count == 1)
+        if (StartPoints.Count == 1)
         {
             AddEntry(new Coord(Width / 2, Height / 2));
         }
 
         //Later, we scale the points to a smaller room format
 
-        foreach (Coord c in startPoints)
+        foreach (Coord c in StartPoints)
         {
 
             Coord scaled = new Coord(c.x / ScaleFactor, c.y / ScaleFactor);
             scaledPoints.Add(scaled);
-            scaledStartPoints.Add(scaled);
+            ScaledStartPoints.Add(scaled);
         }
 
         explorers = scaledPoints.ToArray();
@@ -243,7 +248,7 @@ public abstract class RoomGeneration
         }
     }
 
-    void SmoothMap()
+    protected void SmoothMap()
     {
         int[,] pGameMap = Map;
 
@@ -264,6 +269,23 @@ public abstract class RoomGeneration
             }
         }
         Map = pGameMap;
+    }
+
+    protected void OpenEntries()
+    {
+        foreach (Coord entry in StartPoints)
+        {
+            for (int x = entry.x - 1; x <= entry.x + 1; x++)
+            {
+                for (int y = entry.y - 1; y <= entry.y + 1; y++)
+                {
+                    if (!OutOfBounds(x, y, Width, Height))
+                    {
+                        Map[x, y] = 0;
+                    }
+                }
+            }
+        }
     }
 
     int GetNeighbours(int x, int y)
@@ -291,7 +313,7 @@ public abstract class RoomGeneration
             }
         }
 
-        foreach (Coord c in scaledStartPoints)
+        foreach (Coord c in ScaledStartPoints)
         {
             if (x / ScaleFactor == c.x && y / ScaleFactor == c.y)
             {
@@ -318,7 +340,7 @@ public abstract class RoomGeneration
 
     void CalculateInterestingCoords()
     {
-        DensityMap densityMap = new DensityMap(Map, 1, 0, startPoints);
+        DensityMap densityMap = new DensityMap(Map, 1, 0, StartPoints);
 
         List<List<Coord>> interestingAreas = densityMap.GetHighPeaks(0.01f, 2).OrderBy(area => area.Count).ToList();
 
@@ -332,10 +354,10 @@ public abstract class RoomGeneration
 
     public void AddEntry(Coord localCoord)
     {
-        startPoints.Add(localCoord);
+        StartPoints.Add(localCoord);
     }
 
-    Coord ChooseDirection()
+    protected Coord ChooseDirection()
     {
         Coord[] directions = { new Coord(1, 0), new Coord(-1, 0), new Coord(0, 1), new Coord(0, -1) };
 
@@ -344,7 +366,7 @@ public abstract class RoomGeneration
         return directions[index];
     }
 
-    bool OutOfBounds(int x, int y, int w, int h)
+    protected bool OutOfBounds(int x, int y, int w, int h)
     {
         return x < 0 || y < 0 || x >= w || y >= h;
     }

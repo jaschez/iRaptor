@@ -9,10 +9,12 @@ public class WorldGenerator
     System.Random random;
 
     public List<List<RoomNode>> RoomComposites { get; private set; }
-    public List<RoomNode> RoomList { get; private set; }
+
+    public List<RoomNode> CorridorList { get; private set; }
 
     List<RoomGeneration> roomGenerators;
     List<RootedNode> rootedNodeList;
+    List<RoomLink> pendingRoomLinks;
 
     public WorldGraphOutput GraphInfo { get; private set; }
 
@@ -24,7 +26,8 @@ public class WorldGenerator
         GraphInfo = graphGenerator.GenerateWorldGraph();
 
         roomGenerators = new List<RoomGeneration>();
-        RoomList = new List<RoomNode>();
+        CorridorList = new List<RoomNode>();
+        pendingRoomLinks = new List<RoomLink>();
 
         compositeGenerator = new CompositeGenerator(GraphInfo);
 
@@ -38,8 +41,108 @@ public class WorldGenerator
         //Locate relatively each room based on room parameters, creating room generators
         LocateCompositesSequentially();
 
+        //Link the remaining rooms, creating corridors between them if necessary
+        LinkRooms();
+
         //Generate the inners of each room
         CreateRooms();
+
+        RoomComposites.Add(CorridorList);
+    }
+
+    void CreateRooms()
+    {
+        foreach (RoomGeneration generator in roomGenerators)
+        {
+            generator.Generate();
+        }
+    }
+
+    void LinkRooms()
+    {
+        foreach (RoomLink link in pendingRoomLinks)
+        {
+            GenerateRoomLink(link.RoomA, link.RoomB);
+        }
+    }
+
+    void LocateCompositesSequentially()
+    {
+        List<RoomNode> firstComposite = new List<RoomNode>();
+        List<RoomNode> existingRooms = new List<RoomNode>();
+        List<RoomNode> currentComposite;
+
+        Dictionary<List<RoomNode>, RoomNode> parentedComposites = new Dictionary<List<RoomNode>, RoomNode>();
+        Stack<List<RoomNode>> compositeParentsStack = new Stack<List<RoomNode>>();
+
+        //0. Search root composite
+        for (int i = 0; i < RoomComposites.Count && firstComposite.Count == 0; i++)
+        {
+            List<RoomNode> composite = RoomComposites[i];
+
+            RoomNode firstRoom = composite[0];
+            RootedNode evaluatedNode = FindNodeID(rootedNodeList, firstRoom.ID);
+
+            if (evaluatedNode.Parent == null)
+            {
+                firstComposite = composite;
+            }
+        }
+
+        compositeParentsStack.Push(firstComposite);
+        parentedComposites.Add(firstComposite, null);
+
+        //We run through the generation stack
+        while (compositeParentsStack.Count > 0)
+        {
+            currentComposite = compositeParentsStack.Pop();
+
+            RoomNode roomParent;
+
+            //1. We get the room parent out of the child composite
+            roomParent = parentedComposites[currentComposite];
+
+            //2. Generates the composite, if it is a loop we build the composite in a certain way
+            if (IsLoopComposite(currentComposite))
+            {
+                GenerateLoop(roomParent, currentComposite, existingRooms);
+            }
+            else
+            {
+                GenerateBranch(roomParent, currentComposite, existingRooms);
+            }
+
+            //3. Search for composite parents
+            foreach (RoomNode room in currentComposite)
+            {
+                RootedNode evaluatedNode = FindNodeID(rootedNodeList, room.ID);
+
+                foreach (RootedNode child in evaluatedNode.Childs)
+                {
+                    foreach (List<RoomNode> otherComposite in RoomComposites)
+                    {
+                        if (otherComposite != currentComposite)
+                        {
+                            if (otherComposite[0].ID == child.ID)
+                            {
+                                compositeParentsStack.Push(otherComposite);
+
+                                if (!parentedComposites.ContainsKey(otherComposite))
+                                {
+                                    parentedComposites.Add(otherComposite, room);
+                                }
+                                else
+                                {
+                                    parentedComposites[otherComposite] = room;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            existingRooms.AddRange(currentComposite);
+        }
     }
 
     void GenerateLoop(RoomNode roomParent, List<RoomNode> composite, List<RoomNode> existingRooms)
@@ -138,7 +241,18 @@ public class WorldGenerator
 
                 SpawnRoom(room, previousRoomGenerator.AssociatedRoom, directions[nearestIndex], selectedSpaceness, selectedRandomOffset);
 
-                AddRoomEntries(roomGenerator, previousRoomGenerator, directions[nearestIndex]);
+                int spacing = GetSpacing(previousRoomGenerator.AssociatedRoom, room, directions[nearestIndex]);
+
+                if (spacing == 0)
+                {
+                    AddRoomEntries(roomGenerator, previousRoomGenerator, directions[nearestIndex]);
+                }
+                else
+                {
+                    //Add to the list of pending links
+                    RoomLink link = new RoomLink(previousRoomGenerator, roomGenerator);
+                    pendingRoomLinks.Add(link);
+                }
 
                 lastDirection = directions[nearestIndex];
             }
@@ -149,9 +263,10 @@ public class WorldGenerator
             previousRoomGenerator = roomGenerator;
         }
 
-        //Finally, the start and the end of the loop are joined
+        //Finally, the start and the end of the loop are linked
         //We should add entries in a middle corridor if the rooms are separated
-        //AddRoomEntries(firstGenerator, previousRoomGenerator, chosenDirection);
+        RoomLink loopLink = new RoomLink(firstGenerator, previousRoomGenerator);
+        pendingRoomLinks.Add(loopLink);
     }
 
     void GenerateBranch(RoomNode roomParent, List<RoomNode> composite, List<RoomNode> existingRooms)
@@ -197,164 +312,157 @@ public class WorldGenerator
         }
     }
 
-    void LocateCompositesSequentially()
+    void GenerateRoomLink(RoomGeneration roomGeneratorA, RoomGeneration roomGeneratorB)
     {
-        List<RoomNode> firstComposite = new List<RoomNode>();
-        List<RoomNode> existingRooms = new List<RoomNode>();
-        List<RoomNode> currentComposite;
+        RoomNode roomA = roomGeneratorA.AssociatedRoom;
+        RoomNode roomB = roomGeneratorB.AssociatedRoom;
 
-        Dictionary<List<RoomNode>, RoomNode > parentedComposites = new Dictionary<List<RoomNode>, RoomNode>();
-        Stack<List<RoomNode>> compositeParentsStack = new Stack<List<RoomNode>>();
+        List<List<RoomNode>> obstacles = new List<List<RoomNode>>(RoomComposites);
 
-        //0. Search root composite
-        for (int i = 0; i < RoomComposites.Count && firstComposite.Count == 0; i++)
+        CorridorRoomGenerator corridor;
+
+        Coord roomAEntry = new Coord(0, 0);
+        Coord roomBEntry = new Coord(0, 0);
+        Coord corridorAEntry = new Coord(0, 0);
+        Coord corridorBEntry = new Coord(0, 0);
+
+        int edgeMax;
+        int edgeMin;
+        int edgeLimit = 3;
+
+        float distance;
+        float dX;
+        float dY;
+
+        //Decide for a parallel or a perpendicular link
+        //For each case, we will generate an exploration (rectangular) zone
+
+        //Beforehand, calculate the direction vector
+        distance = RoomDistance(roomA, roomB);
+        dX = (roomB.Position.x - roomA.Position.x) / distance;
+        dY = (roomB.Position.y - roomA.Position.y) / distance;
+
+        //Assign the range limits to evaluate
+
+        if (System.Math.Abs(dY) >= System.Math.Abs(dX))
         {
-            List<RoomNode> composite = RoomComposites[i];
-
-            RoomNode firstRoom = composite[0];
-            RootedNode evaluatedNode = FindNodeID(rootedNodeList, firstRoom.ID);
-
-            if (evaluatedNode.Parent == null)
-            {
-                firstComposite = composite;
-            }
+            //Vertical link
+            edgeMin = System.Math.Max(roomA.Left, roomB.Left);
+            edgeMax = System.Math.Min(roomA.Right, roomB.Right);
+        }
+        else
+        {
+            //Horizontal link
+            edgeMin = System.Math.Max(roomA.Bottom, roomB.Bottom);
+            edgeMax = System.Math.Min(roomA.Top, roomB.Top);
         }
 
-        compositeParentsStack.Push(firstComposite);
-        parentedComposites.Add(firstComposite, null);
+        int min = edgeMin + edgeLimit;
+        int max = edgeMax - edgeLimit;
 
-        //We run through the generation stack
-        while (compositeParentsStack.Count > 0)
+        int corridorTop;
+        int corridorBottom;
+        int corridorLeft;
+        int corridorRight;
+
+        int parallelLinkParameter;
+
+        //Check range coincidence
+        if (min < max)
         {
-            currentComposite = compositeParentsStack.Pop();
+            //Parallel Link
 
-            RoomNode roomParent;
-
-            //1. We get the room parent out of the child composite
-            roomParent = parentedComposites[currentComposite];
-
-            //2. Generates the composite, if it is a loop we build the composite in a certain way
-            if (IsLoopComposite(currentComposite))
+            //Set corridor bounds
+            if (System.Math.Abs(dY) >= System.Math.Abs(dX))
             {
-                GenerateLoop(roomParent, currentComposite, existingRooms);
+                //Vertical
+                corridorLeft = edgeMin;
+                corridorRight = edgeMax;
+                corridorTop = dY > 0 ? roomB.Bottom : roomA.Bottom;
+                corridorBottom = dY > 0 ? roomA.Top : roomB.Top;
             }
             else
             {
-                GenerateBranch(roomParent, currentComposite, existingRooms);
+                //Horizontal
+                corridorBottom = edgeMin;
+                corridorTop = edgeMax;
+                corridorLeft = dX > 0 ? roomA.Right : roomB.Right;
+                corridorRight = dX > 0 ? roomB.Left : roomA.Left;
             }
 
-            //3. Search for composite parents
-            foreach (RoomNode room in currentComposite)
+            if (corridorTop - corridorBottom == 0 || corridorRight - corridorLeft == 0)
             {
-                RootedNode evaluatedNode = FindNodeID(rootedNodeList, room.ID);
+                Coord direction = new Coord(0, 0);
 
-                foreach (RootedNode child in evaluatedNode.Childs)
+                if (System.Math.Abs(dY) >= System.Math.Abs(dX))
                 {
-                    foreach (List<RoomNode> otherComposite in RoomComposites)
-                    {
-                        if (otherComposite != currentComposite)
-                        {
-                            if (otherComposite[0].ID == child.ID)
-                            {
-                                compositeParentsStack.Push(otherComposite);
-
-                                if (!parentedComposites.ContainsKey(otherComposite)) {
-                                    parentedComposites.Add(otherComposite, room);
-                                }
-                                else
-                                {
-                                    parentedComposites[otherComposite] = room;
-                                }
-                            }
-                        }
-                    }
+                    direction.y = dY > 0 ? 1 : -1;
                 }
+                else
+                {
+                    direction.x = dX > 0 ? 1 : -1;
+                }
+
+                AddRoomEntries(roomGeneratorB, roomGeneratorA, direction);
+                return;
             }
 
-            existingRooms.AddRange(currentComposite);
-        }
-    }
+            corridor = new CorridorRoomGenerator(random.Next(), corridorTop, corridorBottom, corridorLeft, corridorRight);
 
-    void CreateRooms()
-    {
-        foreach (RoomGeneration generator in roomGenerators)
-        {
-            generator.Generate();
-        }
-    }
+            //Set entry for roomA, roomB and corridor
+            parallelLinkParameter = random.Next(min, max);
 
-    Coord[] GenerateRandomDirectionList()
-    {
-        List<Coord> directions = new List<Coord>() { new Coord(1, 0), new Coord(0, 1), new Coord(-1, 0), new Coord(0, -1) };
-        
-        Coord[] unordered = new Coord[4];
-
-        for (int i = 0; i < unordered.Length;i++)
-        {
-            Coord chosenDirection;
-            int randomIndex;
-
-            randomIndex = random.Next(0, directions.Count);
-            chosenDirection = directions[randomIndex];
-
-            directions.RemoveAt(randomIndex);
-
-            unordered[i] = chosenDirection;
-        }
-
-        return unordered;
-    }
-
-    Coord PlaceRoom(RoomGeneration roomGenerator, RoomGeneration previousRoomGenerator, Coord[] directions, List<RoomNode> locatedRooms)
-    {
-        RoomNode room = roomGenerator.AssociatedRoom;
-        RoomNode previousRoom;
-
-        Coord chosenDirection = new Coord(0,0);
-
-        bool roomCollided = true;
-
-        int spaceness = 0;
-
-        if (previousRoomGenerator != null) 
-        {
-            previousRoom = previousRoomGenerator.AssociatedRoom;
-
-            while (roomCollided)
+            if (System.Math.Abs(dY) >= System.Math.Abs(dX))
             {
-                //Iterate through each possible direction
-                for (int i = 0; i < directions.Length && roomCollided; i++) {
-                    chosenDirection = directions[i];
+                roomAEntry.x = parallelLinkParameter - roomA.Left;
+                roomAEntry.y = roomA.Top - (dY < 0 ? roomA.Bottom + 1 : roomA.Top);
 
-                    SpawnRoom(room, previousRoom, chosenDirection, spaceness,.5f);
+                roomBEntry.x = parallelLinkParameter - roomB.Left;
+                roomBEntry.y = roomB.Top - (dY < 0 ? roomB.Top : roomB.Bottom + 1);
 
-                    //Check if it collides with any other room
-                    roomCollided = CheckRoomCollision(room, locatedRooms);
+                corridorAEntry.x = parallelLinkParameter - corridor.AssociatedRoom.Left;
+                corridorAEntry.y = corridor.AssociatedRoom.Top - (dY < 0 ? corridor.AssociatedRoom.Top : corridor.AssociatedRoom.Bottom + 1);
 
-                    //Explore whole range of offset before trying another direction
-                    if (roomCollided)
-                    {
-                        for (float range = 0; range < 1 && roomCollided; range += .02f)
-                        {
-                            float offset = range <= .5f ? range + .5f : 1f - range;
+                corridorBEntry.x = parallelLinkParameter - corridor.AssociatedRoom.Left;
+                corridorBEntry.y = corridor.AssociatedRoom.Top - (dY < 0 ? corridor.AssociatedRoom.Bottom + 1 : corridor.AssociatedRoom.Top);
+            }
+            else
+            {
+                roomAEntry.x = (dX < 0 ? roomA.Left : roomA.Right - 1) - roomA.Left;
+                roomAEntry.y = roomA.Top - parallelLinkParameter;
 
-                            SpawnRoom(room, previousRoom, chosenDirection, spaceness, offset);
+                roomBEntry.x = (dX < 0 ? roomB.Right - 1 : roomB.Left) - roomB.Left;
+                roomBEntry.y = roomB.Top - parallelLinkParameter;
 
-                            //Check if it collides with any other room
-                            roomCollided = CheckRoomCollision(room, locatedRooms);
-                        }
-                    }
-                }
+                corridorAEntry.x = (dX < 0 ? corridor.AssociatedRoom.Right - 1 : corridor.AssociatedRoom.Left) - corridor.AssociatedRoom.Left;
+                corridorAEntry.y = corridor.AssociatedRoom.Top - parallelLinkParameter;
 
-                spaceness++;
+                corridorBEntry.x = (dX < 0 ? corridor.AssociatedRoom.Left : corridor.AssociatedRoom.Right - 1) - corridor.AssociatedRoom.Left;
+                corridorBEntry.y = corridor.AssociatedRoom.Top - parallelLinkParameter;
             }
 
-            //Add entries in room local positions, betwen previous and current room
-            //May depend, if spaceness > 0, we should add entries in a middle corridor
-            AddRoomEntries(roomGenerator, previousRoomGenerator, chosenDirection);
-        }
+            roomGeneratorA.AddEntry(roomAEntry);
+            roomGeneratorB.AddEntry(roomBEntry);
 
-        return chosenDirection;
+            obstacles.Add(CorridorList);
+            corridor.GenerateObstacleMap(obstacles);
+
+            corridor.AddEntry(corridorAEntry);
+            corridor.AddEntry(corridorBEntry);
+
+            corridor.Generate();
+
+            //Check if the corridor is valid
+            if (corridor.IsValidCorridor())
+            {
+                CorridorList.Add(corridor.AssociatedRoom);
+            }
+        }
+        else
+        {
+            //Perpendicular Link
+            //corridor = new CorridorRoomGenerator(random.Next(), corridorTop, corridorBottom, corridorLeft, corridorRight);
+        }
     }
 
     void SpawnRoom(RoomNode room, RoomNode previousRoom, Coord chosenDirection, int spaceness, float perpendicularOffsetFactor = -1)
@@ -382,7 +490,8 @@ public class WorldGenerator
             maxOffset = previousRoom.Top + room.Height - offsetLimit;
         }
 
-        if (perpendicularOffsetFactor == -1) {
+        if (perpendicularOffsetFactor == -1)
+        {
             perpendicularOffset = random.Next(minOffset, maxOffset) - minOffset;
         }
         else
@@ -405,30 +514,6 @@ public class WorldGenerator
         }
 
         room.SetWorldPosition(position);
-    }
-
-    RoomGeneration CreateRoomGenerator(RoomNode room)
-    {
-        RoomGeneration generator;
-
-        int generationSeed = random.Next();
-
-        switch (room.Type)
-        {
-            case RoomType.Normal:
-                generator = new NormalGeneration(room, generationSeed);
-                break;
-
-            case RoomType.Entrance:
-                generator = new EntranceGeneration(room, generationSeed);
-                break;
-
-            default:
-                generator = new NormalGeneration(room, generationSeed);
-                break;
-        }
-
-        return generator;
     }
 
     void AddRoomEntries(RoomGeneration roomGeneratorA, RoomGeneration roomGeneratorB, Coord chosenDirection)
@@ -462,6 +547,9 @@ public class WorldGenerator
 
         if (min > max)
         {
+            RoomLink link = new RoomLink(roomGeneratorA, roomGeneratorB);
+            pendingRoomLinks.Add(link);
+
             return;
         }
 
@@ -480,12 +568,119 @@ public class WorldGenerator
             roomAEntry.x = (chosenDirection.x > 0 ? roomA.Left : roomA.Right - 1) - roomA.Left;
             roomAEntry.y = roomA.Top - globalEntryParameter;
 
-            roomBEntry.x = (chosenDirection.x > 0 ? roomB.Right - 1: roomB.Left) - roomB.Left;
+            roomBEntry.x = (chosenDirection.x > 0 ? roomB.Right - 1 : roomB.Left) - roomB.Left;
             roomBEntry.y = roomB.Top - globalEntryParameter;
         }
 
         roomGeneratorA.AddEntry(roomAEntry);
         roomGeneratorB.AddEntry(roomBEntry);
+    }
+
+    Coord PlaceRoom(RoomGeneration roomGenerator, RoomGeneration previousRoomGenerator, Coord[] directions, List<RoomNode> locatedRooms)
+    {
+        RoomNode room = roomGenerator.AssociatedRoom;
+        RoomNode previousRoom;
+
+        Coord chosenDirection = new Coord(0, 0);
+
+        bool roomCollided = true;
+
+        int spaceness = 0;
+
+        if (previousRoomGenerator != null)
+        {
+            previousRoom = previousRoomGenerator.AssociatedRoom;
+
+            while (roomCollided)
+            {
+                //Iterate through each possible direction
+                for (int i = 0; i < directions.Length && roomCollided; i++)
+                {
+                    chosenDirection = directions[i];
+
+                    SpawnRoom(room, previousRoom, chosenDirection, spaceness, .5f);
+
+                    //Check if it collides with any other room
+                    roomCollided = CheckRoomCollision(room, locatedRooms);
+
+                    //Explore whole range of offset before trying another direction
+                    if (roomCollided)
+                    {
+                        for (float range = 0; range < 1 && roomCollided; range += .02f)
+                        {
+                            float offset = range <= .5f ? range + .5f : 1f - range;
+
+                            SpawnRoom(room, previousRoom, chosenDirection, spaceness, offset);
+
+                            //Check if it collides with any other room
+                            roomCollided = CheckRoomCollision(room, locatedRooms);
+                        }
+                    }
+                }
+
+                spaceness++;
+            }
+
+            //Add entries in room local positions, betwen previous and current room
+            //May depend, if spaceness > 0, we should add entries in a middle corridor
+            int spacing = GetSpacing(previousRoomGenerator.AssociatedRoom, room, chosenDirection);
+
+            if (spacing == 0) {
+                AddRoomEntries(roomGenerator, previousRoomGenerator, chosenDirection);
+            }
+            else
+            {
+                //Add to the list of pending links
+                RoomLink link = new RoomLink(previousRoomGenerator, roomGenerator);
+                pendingRoomLinks.Add(link);
+            }
+        }
+
+        return chosenDirection;
+    }
+
+    Coord[] GenerateRandomDirectionList()
+    {
+        List<Coord> directions = new List<Coord>() { new Coord(1, 0), new Coord(0, 1), new Coord(-1, 0), new Coord(0, -1) };
+        
+        Coord[] unordered = new Coord[4];
+
+        for (int i = 0; i < unordered.Length;i++)
+        {
+            Coord chosenDirection;
+            int randomIndex;
+
+            randomIndex = random.Next(0, directions.Count);
+            chosenDirection = directions[randomIndex];
+
+            directions.RemoveAt(randomIndex);
+
+            unordered[i] = chosenDirection;
+        }
+
+        return unordered;
+    }
+
+    int GetSpacing(RoomNode roomA, RoomNode roomB, Coord direction)
+    {
+        int boundA;
+        int boundB;
+        int spacing;
+
+        if (direction.x == 0)
+        {
+            boundA = direction.y > 0 ? roomA.Top : roomA.Bottom;
+            boundB = direction.y > 0 ? roomB.Bottom : roomB.Top;
+        }
+        else
+        {
+            boundA = direction.x > 0 ? roomA.Right : roomA.Left;
+            boundB = direction.x > 0 ? roomB.Left : roomB.Right;
+        }
+
+        spacing = System.Math.Abs(boundB - boundA);
+
+        return spacing;
     }
 
     float RoomDistance(RoomNode roomA, RoomNode roomB)
@@ -527,11 +722,35 @@ public class WorldGenerator
         return false;
     }
 
-    RootedNode FindNodeID(List<RootedNode> list, int id)
+    RoomGeneration CreateRoomGenerator(RoomNode room)
     {
-        foreach (RootedNode room in list)
+        RoomGeneration generator;
+
+        int generationSeed = random.Next();
+
+        switch (room.Type)
         {
-            if (room.ID == id)
+            case RoomType.Normal:
+                generator = new NormalGeneration(room, generationSeed);
+                break;
+
+            case RoomType.Entrance:
+                generator = new EntranceGeneration(room, generationSeed);
+                break;
+
+            default:
+                generator = new NormalGeneration(room, generationSeed);
+                break;
+        }
+
+        return generator;
+    }
+
+    RoomGeneration FindGeneratorID(List<RoomGeneration> list, int id)
+    {
+        foreach (RoomGeneration room in list)
+        {
+            if (room.AssociatedRoom.ID == id)
             {
                 return room;
             }
@@ -540,11 +759,11 @@ public class WorldGenerator
         return null;
     }
 
-    RoomGeneration FindGeneratorID(List<RoomGeneration> list, int id)
+    RootedNode FindNodeID(List<RootedNode> list, int id)
     {
-        foreach (RoomGeneration room in list)
+        foreach (RootedNode room in list)
         {
-            if (room.AssociatedRoom.ID == id)
+            if (room.ID == id)
             {
                 return room;
             }
@@ -608,5 +827,17 @@ public class WorldGenerator
         }
 
         return result;
+    }
+
+    struct RoomLink
+    {
+        public RoomGeneration RoomA;
+        public RoomGeneration RoomB;
+
+        public RoomLink(RoomGeneration roomA, RoomGeneration roomB)
+        {
+            RoomA = roomA;
+            RoomB = roomB;
+        }
     }
 }

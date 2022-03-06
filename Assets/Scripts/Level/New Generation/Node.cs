@@ -139,6 +139,11 @@ public class RoomNode : Node<RoomNode>
         Bottom = position.y - Height;
     }
 
+    public void SetWorldPosition(int x, int y)
+    {
+        Position = new Coord(x, y);
+    }
+
     public bool OverlapsRoom(RoomNode another)
     {
         return OverlapsValueX(another.Left, another.Right) && OverlapsValueY(another.Bottom, another.Top);
