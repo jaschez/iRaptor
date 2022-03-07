@@ -492,7 +492,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0a18617ce872394ab2efd3dde6d1cb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Seed: 1256983852
+  Seed: 2027361653
   CurrentLevel: 0
   autoSeed: 0
   debug: 0
@@ -528,6 +528,8 @@ MonoBehaviour:
     Type: 0
   - TileResource: {fileID: 11400000, guid: 527320ca03b6d1d48bfb7b2863892417, type: 2}
     Type: 1
+  - TileResource: {fileID: 11400000, guid: 11a0a7e48b6d8194ba8736cf2942c4f0, type: 2}
+    Type: 2
 --- !u!1 &1018192627
 GameObject:
   m_ObjectHideFlags: 0

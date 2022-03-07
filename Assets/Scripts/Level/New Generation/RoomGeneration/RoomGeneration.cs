@@ -10,9 +10,9 @@ public abstract class RoomGeneration
 
     public RoomNode AssociatedRoom { get; protected set; }
 
-    protected int[,] Map { get; private set; }
+    protected TileType[,] Map { get; private set; }
 
-    public TileType[,] TileMap { get; private set; }
+    public TileSkin[,] TileMap { get; private set; }
 
     //Dimensions
     public int Width { get; private set; }
@@ -27,7 +27,7 @@ public abstract class RoomGeneration
 
     public float FillPercentage { get; private set; }
 
-    protected int[,] simpleMap;
+    protected TileType[,] simpleMap;
 
     protected int simpleWidth;
     protected int simpleHeight;
@@ -61,8 +61,8 @@ public abstract class RoomGeneration
 
         FillPercentage = fillPercentage;
 
-        Map = new int[Width, Height];
-        TileMap = new TileType[Width, Height];
+        Map = new TileType[Width, Height];
+        TileMap = new TileSkin[Width, Height];
 
         AssociatedRoom.SetDimensions(Width, Height);
 
@@ -72,14 +72,14 @@ public abstract class RoomGeneration
         simpleWidth = Width / widthScale;
         simpleHeight = Height / heightScale;
 
-        simpleMap = new int[simpleWidth, simpleHeight];
+        simpleMap = new TileType[simpleWidth, simpleHeight];
 
         //By defalut, all the room is walls
         for (int i = 0; i < simpleWidth; i++)
         {
             for (int j = 0; j < simpleHeight; j++)
             {
-                simpleMap[i, j] = 1;
+                simpleMap[i, j] = TileType.Wall;
             }
         }
     }
@@ -103,6 +103,33 @@ public abstract class RoomGeneration
         GenerateRandomWalk();
         ScaleGameMap();
         OpenEntries();
+    }
+
+    protected void DefaultTilemapGeneration(TileSkin floor, TileSkin wall)
+    {
+        for (int i = 0; i < Width; i++)
+        {
+            for (int j = 0; j < Height; j++)
+            {
+                switch (Map[i, j])
+                {
+                    case TileType.Wall:
+                        TileMap[i, j] = wall;
+                        break;
+
+                    case TileType.Floor:
+                        TileMap[i, j] = floor;
+                        break;
+
+                    case TileType.Empty:
+                        TileMap[i, j] = TileSkin.Empty;
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        }
     }
 
     void GenerateRandomWalk()
@@ -158,7 +185,7 @@ public abstract class RoomGeneration
         {
             Coord c = explorers[i];
 
-            simpleMap[c.x, c.y] = 0;
+            simpleMap[c.x, c.y] = TileType.Floor;
             flags[i, c.x, c.y] = 1;
 
             floorTiles++;
@@ -188,9 +215,9 @@ public abstract class RoomGeneration
 
                 //Mark the current position in the room and in the flag as explored
 
-                if (simpleMap[currentExplorer.x, currentExplorer.y] == 1)
+                if (simpleMap[currentExplorer.x, currentExplorer.y] == TileType.Wall)
                 {
-                    simpleMap[currentExplorer.x, currentExplorer.y] = 0;
+                    simpleMap[currentExplorer.x, currentExplorer.y] = TileType.Floor;
 
                     floorTiles++;
                     currentFillPerc = floorTiles / (float)totalRoomTiles;
@@ -250,7 +277,7 @@ public abstract class RoomGeneration
 
     protected void SmoothMap()
     {
-        int[,] pGameMap = Map;
+        TileType[,] pGameMap = Map;
 
         for (int i = 0; i < Width; i++)
         {
@@ -260,11 +287,11 @@ public abstract class RoomGeneration
 
                 if (n > 4)
                 {
-                    pGameMap[i, j] = 1;
+                    pGameMap[i, j] = TileType.Wall;
                 }
                 else if (n < 4)
                 {
-                    pGameMap[i, j] = 0;
+                    pGameMap[i, j] = TileType.Floor;
                 }
             }
         }
@@ -281,7 +308,7 @@ public abstract class RoomGeneration
                 {
                     if (!OutOfBounds(x, y, Width, Height))
                     {
-                        Map[x, y] = 0;
+                        Map[x, y] = TileType.Floor;
                     }
                 }
             }
@@ -300,7 +327,7 @@ public abstract class RoomGeneration
                 {
                     if (xOff != x || yOff != y)
                     {
-                        if (Map[xOff, yOff] == 1)
+                        if (Map[xOff, yOff] == TileType.Wall || Map[xOff, yOff] == TileType.Empty)
                         {
                             n++;
                         }
@@ -340,7 +367,7 @@ public abstract class RoomGeneration
 
     void CalculateInterestingCoords()
     {
-        DensityMap densityMap = new DensityMap(Map, 1, 0, StartPoints);
+        /*DensityMap densityMap = new DensityMap(Map, 1, 0, StartPoints);
 
         List<List<Coord>> interestingAreas = densityMap.GetHighPeaks(0.01f, 2).OrderBy(area => area.Count).ToList();
 
@@ -349,7 +376,7 @@ public abstract class RoomGeneration
         foreach (List<Coord> area in interestingAreas)
         {
             interestingPoints.Add(area[random.Next(0, area.Count)]);
-        }
+        }*/
     }
 
     public void AddEntry(Coord localCoord)
@@ -370,4 +397,11 @@ public abstract class RoomGeneration
     {
         return x < 0 || y < 0 || x >= w || y >= h;
     }
+}
+
+public enum TileType
+{
+    Floor,
+    Wall,
+    Empty
 }

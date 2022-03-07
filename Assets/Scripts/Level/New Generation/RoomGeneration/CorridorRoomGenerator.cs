@@ -65,6 +65,10 @@ public class CorridorRoomGenerator : RoomGeneration
                 {
                     totalRoomTiles++;
                 }
+                else
+                {
+                    simpleMap[x, y] = TileType.Empty;
+                }
             }
         }
 
@@ -75,20 +79,7 @@ public class CorridorRoomGenerator : RoomGeneration
 
     protected override void GenerateTileMap()
     {
-        for (int i = 0; i < Width; i++)
-        {
-            for (int j = 0; j < Height; j++)
-            {
-                if (Map[i, j] == 1)
-                {
-                    TileMap[i, j] = TileType.Wall_Rock;
-                }
-                else
-                {
-                    TileMap[i, j] = TileType.Floor_Rock;
-                }
-            }
-        }
+        DefaultTilemapGeneration(TileSkin.Floor_Rock, TileSkin.Wall_Rock);
     }
 
     void ExplorersGeneration()
@@ -134,7 +125,7 @@ public class CorridorRoomGenerator : RoomGeneration
         {
             Coord c = explorers[i];
 
-            simpleMap[c.x, c.y] = 0;
+            simpleMap[c.x, c.y] = TileType.Floor;
             flags[i, c.x, c.y] = 1;
 
             floorTiles++;
@@ -189,9 +180,9 @@ public class CorridorRoomGenerator : RoomGeneration
 
                 //Mark the current position in the room and in the flag as explored
 
-                if (simpleMap[currentExplorer.x, currentExplorer.y] == 1)
+                if (simpleMap[currentExplorer.x, currentExplorer.y] == TileType.Wall)
                 {
-                    simpleMap[currentExplorer.x, currentExplorer.y] = 0;
+                    simpleMap[currentExplorer.x, currentExplorer.y] = TileType.Floor;
                     floorTiles++;
                 }
 

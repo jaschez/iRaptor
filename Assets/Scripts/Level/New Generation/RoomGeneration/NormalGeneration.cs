@@ -16,19 +16,6 @@ public class NormalGeneration : RoomGeneration
 
     protected override void GenerateTileMap()
     {
-        for (int i = 0; i < Width; i++)
-        {
-            for (int j = 0; j < Height; j++)
-            {
-                if (Map[i, j] == 1)
-                {
-                    TileMap[i, j] = TileType.Wall_Rock;
-                }
-                else
-                {
-                    TileMap[i, j] = TileType.Floor_Rock;
-                }
-            }
-        }
+        DefaultTilemapGeneration(TileSkin.Floor_Rock, TileSkin.Wall_Rock);
     }
 }

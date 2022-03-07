@@ -11,7 +11,7 @@ public class TilemapGenerator : MonoBehaviour
 
     public TileSource[] TileSources;
 
-    Dictionary<TileType, TileBase> Tiles;
+    Dictionary<TileSkin, TileBase> Tiles;
 
     List<List<RoomNode>> debugRooms;
 
@@ -19,7 +19,7 @@ public class TilemapGenerator : MonoBehaviour
 
     private void Awake()
     {
-        Tiles = new Dictionary<TileType, TileBase>();
+        Tiles = new Dictionary<TileSkin, TileBase>();
 
         foreach (TileSource source in TileSources)
         {
@@ -53,11 +53,13 @@ public class TilemapGenerator : MonoBehaviour
                 {
                     for (int j = 0; j < room.Height; j++)
                     {
+                        if (room.TileMap[i, j] != TileSkin.Empty) {
 
-                        Vector3Int tilePosition = new Vector3Int(roomPosition.x + i, roomPosition.y - j, 1);
-                        TileBase tile = Tiles[room.TileMap[i, j]];
+                            Vector3Int tilePosition = new Vector3Int(roomPosition.x + i, roomPosition.y - j, 1);
+                            TileBase tile = Tiles[room.TileMap[i, j]];
 
-                        tilemap.SetTile(tilePosition, tile);
+                            tilemap.SetTile(tilePosition, tile);
+                        }
                     }
                 }
             }
@@ -163,9 +165,9 @@ public class TilemapGenerator : MonoBehaviour
     public struct TileSource
     {
         public TileBase TileResource;
-        public TileType Type;
+        public TileSkin Type;
 
-        public TileSource(TileBase tileResource, TileType tileType)
+        public TileSource(TileBase tileResource, TileSkin tileType)
         {
             TileResource = tileResource;
             Type = tileType;

@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class EntranceGeneration : RoomGeneration
+﻿public class EntranceGeneration : RoomGeneration
 {
     public EntranceGeneration(RoomNode room, int seed) : base(room, seed)
     {
@@ -16,19 +12,6 @@ public class EntranceGeneration : RoomGeneration
 
     protected override void GenerateTileMap()
     {
-        for (int i = 0; i < Width; i++)
-        {
-            for (int j = 0; j < Height; j++)
-            {
-                if (Map[i, j] == 1)
-                {
-                    TileMap[i, j] = TileType.Wall_Rock;
-                }
-                else
-                {
-                    TileMap[i, j] = TileType.Floor_Rock;
-                }
-            }
-        }
+        DefaultTilemapGeneration(TileSkin.Floor_Rock, TileSkin.Wall_Rock);
     }
 }
