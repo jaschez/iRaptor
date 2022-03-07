@@ -149,12 +149,12 @@ public class RoomNode : Node<RoomNode>
         return OverlapsValueX(another.Left, another.Right) && OverlapsValueY(another.Bottom, another.Top);
     }
 
-    bool OverlapsValueX(int min, int max)
+    public bool OverlapsValueX(int min, int max)
     {
         return Right > min && max > Left;
     }
 
-    bool OverlapsValueY(int min, int max)
+    public bool OverlapsValueY(int min, int max)
     {
         return Top > min && max > Bottom;
     }

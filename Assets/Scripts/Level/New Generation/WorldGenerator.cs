@@ -326,25 +326,21 @@ public class WorldGenerator
         Coord corridorAEntry = new Coord(0, 0);
         Coord corridorBEntry = new Coord(0, 0);
 
+        Coord direction;
+
         int edgeMax;
         int edgeMin;
         int edgeLimit = 3;
 
-        float distance;
-        float dX;
-        float dY;
-
         //Decide for a parallel or a perpendicular link
         //For each case, we will generate an exploration (rectangular) zone
 
-        //Beforehand, calculate the direction vector
-        distance = RoomDistance(roomA, roomB);
-        dX = (roomB.Position.x - roomA.Position.x) / distance;
-        dY = (roomB.Position.y - roomA.Position.y) / distance;
+        //Beforehand, calculate the direction
+        direction = GetDirectionBetween(roomA, roomB);
 
         //Assign the range limits to evaluate
 
-        if (System.Math.Abs(dY) >= System.Math.Abs(dX))
+        if (direction.x == 0)
         {
             //Vertical link
             edgeMin = System.Math.Max(roomA.Left, roomB.Left);
@@ -373,36 +369,25 @@ public class WorldGenerator
             //Parallel Link
 
             //Set corridor bounds
-            if (System.Math.Abs(dY) >= System.Math.Abs(dX))
+            if (direction.x == 0)
             {
                 //Vertical
                 corridorLeft = edgeMin;
                 corridorRight = edgeMax;
-                corridorTop = dY > 0 ? roomB.Bottom : roomA.Bottom;
-                corridorBottom = dY > 0 ? roomA.Top : roomB.Top;
+                corridorTop = direction.y > 0 ? roomB.Bottom : roomA.Bottom;
+                corridorBottom = direction.y > 0 ? roomA.Top : roomB.Top;
             }
             else
             {
                 //Horizontal
                 corridorBottom = edgeMin;
                 corridorTop = edgeMax;
-                corridorLeft = dX > 0 ? roomA.Right : roomB.Right;
-                corridorRight = dX > 0 ? roomB.Left : roomA.Left;
+                corridorLeft = direction.x > 0 ? roomA.Right : roomB.Right;
+                corridorRight = direction.x > 0 ? roomB.Left : roomA.Left;
             }
 
             if (corridorTop - corridorBottom == 0 || corridorRight - corridorLeft == 0)
             {
-                Coord direction = new Coord(0, 0);
-
-                if (System.Math.Abs(dY) >= System.Math.Abs(dX))
-                {
-                    direction.y = dY > 0 ? 1 : -1;
-                }
-                else
-                {
-                    direction.x = dX > 0 ? 1 : -1;
-                }
-
                 AddRoomEntries(roomGeneratorB, roomGeneratorA, direction);
                 return;
             }
@@ -412,32 +397,32 @@ public class WorldGenerator
             //Set entry for roomA, roomB and corridor
             parallelLinkParameter = random.Next(min, max);
 
-            if (System.Math.Abs(dY) >= System.Math.Abs(dX))
+            if (direction.x == 0)
             {
                 roomAEntry.x = parallelLinkParameter - roomA.Left;
-                roomAEntry.y = roomA.Top - (dY < 0 ? roomA.Bottom + 1 : roomA.Top);
+                roomAEntry.y = roomA.Top - (direction.y < 0 ? roomA.Bottom + 1 : roomA.Top);
 
                 roomBEntry.x = parallelLinkParameter - roomB.Left;
-                roomBEntry.y = roomB.Top - (dY < 0 ? roomB.Top : roomB.Bottom + 1);
+                roomBEntry.y = roomB.Top - (direction.y < 0 ? roomB.Top : roomB.Bottom + 1);
 
                 corridorAEntry.x = parallelLinkParameter - corridor.AssociatedRoom.Left;
-                corridorAEntry.y = corridor.AssociatedRoom.Top - (dY < 0 ? corridor.AssociatedRoom.Top : corridor.AssociatedRoom.Bottom + 1);
+                corridorAEntry.y = corridor.AssociatedRoom.Top - (direction.y < 0 ? corridor.AssociatedRoom.Top : corridor.AssociatedRoom.Bottom + 1);
 
                 corridorBEntry.x = parallelLinkParameter - corridor.AssociatedRoom.Left;
-                corridorBEntry.y = corridor.AssociatedRoom.Top - (dY < 0 ? corridor.AssociatedRoom.Bottom + 1 : corridor.AssociatedRoom.Top);
+                corridorBEntry.y = corridor.AssociatedRoom.Top - (direction.y < 0 ? corridor.AssociatedRoom.Bottom + 1 : corridor.AssociatedRoom.Top);
             }
             else
             {
-                roomAEntry.x = (dX < 0 ? roomA.Left : roomA.Right - 1) - roomA.Left;
+                roomAEntry.x = (direction.x < 0 ? roomA.Left : roomA.Right - 1) - roomA.Left;
                 roomAEntry.y = roomA.Top - parallelLinkParameter;
 
-                roomBEntry.x = (dX < 0 ? roomB.Right - 1 : roomB.Left) - roomB.Left;
+                roomBEntry.x = (direction.x < 0 ? roomB.Right - 1 : roomB.Left) - roomB.Left;
                 roomBEntry.y = roomB.Top - parallelLinkParameter;
 
-                corridorAEntry.x = (dX < 0 ? corridor.AssociatedRoom.Right - 1 : corridor.AssociatedRoom.Left) - corridor.AssociatedRoom.Left;
+                corridorAEntry.x = (direction.x < 0 ? corridor.AssociatedRoom.Right - 1 : corridor.AssociatedRoom.Left) - corridor.AssociatedRoom.Left;
                 corridorAEntry.y = corridor.AssociatedRoom.Top - parallelLinkParameter;
 
-                corridorBEntry.x = (dX < 0 ? corridor.AssociatedRoom.Left : corridor.AssociatedRoom.Right - 1) - corridor.AssociatedRoom.Left;
+                corridorBEntry.x = (direction.x < 0 ? corridor.AssociatedRoom.Left : corridor.AssociatedRoom.Right - 1) - corridor.AssociatedRoom.Left;
                 corridorBEntry.y = corridor.AssociatedRoom.Top - parallelLinkParameter;
             }
 
@@ -659,6 +644,73 @@ public class WorldGenerator
         }
 
         return unordered;
+    }
+
+    //An accurate algorithm for calculate an appropiate direction for linking rooms
+    Coord GetDirectionBetween(RoomNode roomA, RoomNode roomB)
+    {
+        Dictionary<Coord, int> directionsDistance = new Dictionary<Coord, int>();
+        
+        Coord closestDirection = new Coord(0, 0);
+        int closestDistance = int.MaxValue;
+
+        //If room A shares some parallel coordinates with room B,
+        //will check which one of the opposite pair of the rooms edges is closer to 0
+        if (roomA.OverlapsValueX(roomB.Left, roomB.Right) || roomA.OverlapsValueY(roomB.Bottom, roomB.Top)) {
+
+            //Up
+            directionsDistance.Add(new Coord(0, 1), roomB.Bottom - roomA.Top);
+            //Down
+            directionsDistance.Add(new Coord(0, -1), roomB.Top - roomA.Bottom);
+            //Left
+            directionsDistance.Add(new Coord(-1, 0), roomB.Right - roomA.Left);
+            //Right
+            directionsDistance.Add(new Coord(1, 0), roomB.Left - roomA.Right);
+
+            foreach (Coord direction in directionsDistance.Keys)
+            {
+                int distance = System.Math.Abs(directionsDistance[direction]);
+
+                if (distance < closestDistance)
+                {
+                    if ((direction.x == 0 && roomA.OverlapsValueX(roomB.Left, roomB.Right))
+                        || (direction.y == 0 && roomA.OverlapsValueY(roomB.Bottom, roomB.Top))) {
+                        closestDirection = direction;
+                        closestDistance = distance;
+                    }
+                }
+            }
+        }
+        else
+        {
+            //If no near edge pair was found, we will base on direction vector...
+            if (closestDirection.x == closestDirection.y)
+            {
+                Coord roomACenter;
+                Coord roomBCenter;
+
+                roomACenter.x = (roomA.Left + roomA.Right) / 2;
+                roomACenter.y = (roomA.Top + roomA.Bottom) / 2;
+
+                roomBCenter.x = (roomB.Left + roomB.Right) / 2;
+                roomBCenter.y = (roomB.Top + roomB.Bottom) / 2;
+
+                float distance = RoomDistance(roomA, roomB);
+                float dX = (roomBCenter.x - roomACenter.x) / distance;
+                float dY = (roomBCenter.y - roomACenter.y) / distance;
+
+                if (System.Math.Abs(dX) > System.Math.Abs(dY))
+                {
+                    closestDirection.x = System.Math.Sign(dX);
+                }
+                else
+                {
+                    closestDirection.y = System.Math.Sign(dY);
+                }
+            }
+        }
+
+        return closestDirection;
     }
 
     int GetSpacing(RoomNode roomA, RoomNode roomB, Coord direction)
