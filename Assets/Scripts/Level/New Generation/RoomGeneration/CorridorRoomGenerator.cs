@@ -120,7 +120,7 @@ public class CorridorRoomGenerator : RoomGeneration
 
         //The main generation algorithm starts
 
-        //Check first tile
+        //Check first tiles of exploration
         for (int i = 0; i < explorers.Length; i++)
         {
             Coord c = explorers[i];
@@ -133,25 +133,22 @@ public class CorridorRoomGenerator : RoomGeneration
 
         if (activeExplorers.Count > 0)
         {
-            //Check if all start points are literally on the same location
-            Coord point = new Coord(-1, -1);
-            bool sameLocation = true;
-            foreach (Coord c in ScaledStartPoints)
+            //Check if all start points are intersecting each other
+            //If that is the case its not necesary to explore anymore
+            for (int i = 0; i < explorers.Length; i++)
             {
-                if (point.x == -1 && point.y == -1)
-                {
-                    point = c;
-                }
-                else if (c.x != point.x || c.y != point.y)
-                {
-                    sameLocation = false;
-                }
-            }
+                Coord c = explorers[i];
 
-            //If all explorers have the same coordinates, its not necesary to explore anymore
-            if (sameLocation)
-            {
-                activeExplorers.Clear();
+                for (int flagIndex = 0; flagIndex < explorers.Length; flagIndex++)
+                {
+                    if (flagIndex != i && activeExplorers.Contains(i))
+                    {
+                        if (IntersectingExplorer(flags, flagIndex, c))
+                        {
+                            activeExplorers.Remove(flagIndex);
+                        }
+                    }
+                }
             }
 
             while (activeExplorers.Count > 1 && floorTiles < totalRoomTiles) //Mientras el numero de caminos sea mayor que 1
@@ -188,13 +185,13 @@ public class CorridorRoomGenerator : RoomGeneration
 
                 flags[explorerIndex, currentExplorer.x, currentExplorer.y] = 1;
 
-                //Checking if the current path intersects another room path from an active explorer
+                //Checking if the current path intersects (or touches) another room path from an active explorer
 
                 for (int flagI = 0; flagI < explorers.Length; flagI++)
                 {
                     if (flagI != explorerIndex && activeExplorers.Contains(flagI))
                     {
-                        if (flags[flagI, currentExplorer.x, currentExplorer.y] == 1)
+                        if (IntersectingExplorer(flags, flagI, currentExplorer))
                         {
                             //Elige que explorador de los caminos intersectados deja de estar activo
                             if (random.Next(0, 10) > 5)
@@ -219,6 +216,27 @@ public class CorridorRoomGenerator : RoomGeneration
                 valid = true;
             }
         }
+    }
+
+    bool IntersectingExplorer(int[,,] flags, int flagIndex, Coord explorer)
+    {
+        for (int x = explorer.x - 1; x <= explorer.x + 1; x++)
+        {
+            for (int y = explorer.y - 1; y <= explorer.y + 1; y++)
+            {
+                if (!OutOfBounds(x, y, flags.GetLength(1), flags.GetLength(2)))
+                {
+                    if (x == explorer.x || y == explorer.y) {
+                        if (flags[flagIndex, x, y] == 1)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     void ScaleCorridor()
