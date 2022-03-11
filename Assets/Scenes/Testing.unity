@@ -494,7 +494,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Seed: 2027361653
   CurrentLevel: 0
-  autoSeed: 0
+  autoSeed: 1
   debug: 0
 --- !u!4 &795958389
 Transform:

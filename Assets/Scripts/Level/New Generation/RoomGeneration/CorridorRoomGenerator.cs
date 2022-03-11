@@ -37,9 +37,11 @@ public class CorridorRoomGenerator : RoomGeneration
                         for (int y = 0; y < simpleHeight; y++)
                         {
                             int cellLeft = (x * widthScale) + Left;
-                            int cellRight = (x * (widthScale + 1) - 1) * +Left;
+                            int cellRight = (x * (widthScale + 1) - 1) * Left;
                             int cellTop = Top - (y * heightScale);
                             int cellBottom = Top - (y * (heightScale + 1) - 1);
+
+                            //Except for empty tiles the rest are obstacles
 
                             //Check if the cell bounds collide with the room bounds
                             bool result = (room.Right > cellLeft || room.Left < cellRight)
@@ -260,6 +262,25 @@ public class CorridorRoomGenerator : RoomGeneration
         {
             SmoothMap();
         }
+    }
+
+    public bool AddValidCorridorEntry(Coord entry, Coord validationDirection, Coord validationLimit)
+    {
+        Coord currentPos = new Coord(entry.x, entry.y);
+
+        while(!(currentPos.x == validationLimit.x && currentPos.y == validationLimit.y))
+        {
+            if (!obstacleMap[currentPos.x / widthScale, currentPos.y / heightScale])
+            {
+                AddEntry(currentPos);
+                return true;
+            }
+
+            currentPos.x += validationDirection.x;
+            currentPos.y += validationDirection.y;
+        }
+
+        return false;
     }
 
     public bool IsValidCorridor()

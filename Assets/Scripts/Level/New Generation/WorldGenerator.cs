@@ -332,6 +332,8 @@ public class WorldGenerator
         int edgeMin;
         int edgeLimit = 3;
 
+        obstacles.Add(CorridorList);
+
         //Decide for a parallel or a perpendicular link
         //For each case, we will generate an exploration (rectangular) zone
 
@@ -429,7 +431,6 @@ public class WorldGenerator
             roomGeneratorA.AddEntry(roomAEntry);
             roomGeneratorB.AddEntry(roomBEntry);
 
-            obstacles.Add(CorridorList);
             corridor.GenerateObstacleMap(obstacles);
 
             corridor.AddEntry(corridorAEntry);
@@ -446,7 +447,139 @@ public class WorldGenerator
         else
         {
             //Perpendicular Link
-            //corridor = new CorridorRoomGenerator(random.Next(), corridorTop, corridorBottom, corridorLeft, corridorRight);
+
+            Coord originEntryA;
+            Coord originEntryB;
+            Coord destinationEntryA;
+            Coord destinationEntryB;
+
+            //Get direction vector
+            Coord roomACenter;
+            Coord roomBCenter;
+
+            roomACenter.x = (roomA.Left + roomA.Right) / 2;
+            roomACenter.y = (roomA.Top + roomA.Bottom) / 2;
+
+            roomBCenter.x = (roomB.Left + roomB.Right) / 2;
+            roomBCenter.y = (roomB.Top + roomB.Bottom) / 2;
+
+            float distance = RoomDistance(roomA, roomB);
+            float dX = (roomBCenter.x - roomACenter.x) / distance;
+            float dY = (roomBCenter.y - roomACenter.y) / distance;
+
+            //Based on direction, calculate 2 possible corridors (B is destination, A is origin)
+            CorridorRoomGenerator corridorA;
+            CorridorRoomGenerator corridorB;
+
+            //Set bounds for each corridor
+
+            corridorA = new CorridorRoomGenerator(random.Next(), 
+                dY > 0? roomB.Top : roomA.Bottom,
+                dY > 0? roomA.Top : roomB.Bottom,
+                dX > 0? roomA.Left : roomB.Right,
+                dX > 0? roomB.Left : roomA.Right);
+
+            corridorB = new CorridorRoomGenerator(random.Next(),
+                dY > 0 ? roomB.Bottom : roomA.Top,
+                dY > 0 ? roomA.Bottom : roomB.Top,
+                dX > 0 ? roomA.Right : roomB.Left,
+                dX > 0 ? roomB.Right : roomA.Left);
+
+            //Create obstacle map
+            corridorA.GenerateObstacleMap(obstacles);
+            corridorB.GenerateObstacleMap(obstacles);
+
+            //Assign nearest entries to each other
+
+            if (dY > 0)
+            {
+                originEntryA.y = corridorA.AssociatedRoom.Height - 1;
+                destinationEntryA.y = corridorA.AssociatedRoom.Top - 
+                    (roomA.Top > roomB.Bottom ? roomA.Top : roomB.Bottom) - edgeLimit;
+
+                originEntryB.y = corridorB.AssociatedRoom.Top -
+                    (roomA.Top < roomB.Bottom ? roomA.Top : roomB.Bottom) + edgeLimit;
+                destinationEntryB.y = 0;
+            }
+            else
+            {
+                originEntryA.y = 0;
+                destinationEntryA.y = corridorA.AssociatedRoom.Top -
+                    (roomA.Bottom < roomB.Top ? roomA.Bottom : roomB.Top) + edgeLimit;
+
+                originEntryB.y = corridorB.AssociatedRoom.Top -
+                    (roomA.Bottom > roomB.Top ? roomA.Bottom : roomB.Top) - edgeLimit;
+                destinationEntryB.y = corridorB.AssociatedRoom.Height - 1;
+            }
+
+            if (dX > 0)
+            {
+                originEntryA.x = (roomA.Right < roomB.Left ? roomA.Right : roomB.Left) -
+                    corridorA.AssociatedRoom.Left - edgeLimit;
+                destinationEntryA.x = corridorA.AssociatedRoom.Right - 1;
+
+                originEntryB.x = 0;
+                destinationEntryB.x = (roomA.Right > roomB.Left ? roomA.Right : roomB.Left) -
+                    corridorB.AssociatedRoom.Left + edgeLimit;
+            }
+            else
+            {
+                originEntryA.x = (roomA.Left > roomB.Right ? roomA.Left : roomB.Right) -
+                    corridorA.AssociatedRoom.Left + edgeLimit;
+                destinationEntryA.x = 0;
+
+                originEntryB.x = corridorB.AssociatedRoom.Right - 1;
+                destinationEntryB.x = (roomA.Left < roomB.Right ? roomA.Left : roomB.Right) -
+                    corridorB.AssociatedRoom.Left - edgeLimit;
+            }
+
+            //Search nearest valid entry on each one
+            bool entriesAValid = corridorA.AddValidCorridorEntry(originEntryA, 
+                dX > 0 ? new Coord(-1, 0) : new Coord(-1, 0),
+                dX > 0 ? new Coord(edgeLimit, originEntryA.y) : new Coord(corridorA.Width - edgeLimit, originEntryA.y))
+                && corridorA.AddValidCorridorEntry(destinationEntryA,
+                dY > 0 ? new Coord(0, -1) : new Coord(0, 1),
+                dY > 0 ? new Coord(destinationEntryA.x, edgeLimit) : new Coord(destinationEntryA.x, corridorA.Height - edgeLimit));
+
+            bool entriesBValid = corridorB.AddValidCorridorEntry(originEntryB,
+                dY > 0 ? new Coord(0, 1) : new Coord(0, -1),
+                dY > 0 ? new Coord(originEntryB.x, corridorB.Height - edgeLimit) : new Coord(originEntryB.x, edgeLimit))
+                && corridorB.AddValidCorridorEntry(destinationEntryB,
+                dX > 0 ? new Coord(1, 0) : new Coord(-1, 0),
+                dX > 0 ? new Coord(corridorB.Width - edgeLimit, destinationEntryB.y) : new Coord(edgeLimit, destinationEntryB.y));
+
+            //Check if all corridor entries are valid
+            //(Assign one of the corridors if only one does)
+
+            if (entriesAValid)
+            {
+                corridorA.Generate();
+            }
+            
+            if (entriesBValid)
+            {
+                corridorB.Generate();
+            }
+
+            if (corridorA.IsValidCorridor() && corridorB.IsValidCorridor())
+            {
+                CorridorList.Add(random.NextDouble() % 1 > .5 ? corridorA.AssociatedRoom : corridorB.AssociatedRoom);
+            }
+            else if(corridorA.IsValidCorridor() ^ corridorB.IsValidCorridor())
+            {
+                if (corridorA.IsValidCorridor())
+                {
+                    CorridorList.Add(corridorA.AssociatedRoom);
+                }
+                else
+                {
+                    CorridorList.Add(corridorB.AssociatedRoom);
+                }
+            }
+            else
+            {
+
+            }
         }
     }
 
