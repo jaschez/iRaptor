@@ -319,7 +319,7 @@ public class WorldGenerator
 
         List<List<RoomNode>> obstacles = new List<List<RoomNode>>(RoomComposites);
 
-        CorridorRoomGenerator corridor;
+        CorridorRoomGenerator corridor = null;
 
         Coord roomAEntry = new Coord(0, 0);
         Coord roomBEntry = new Coord(0, 0);
@@ -443,6 +443,10 @@ public class WorldGenerator
             {
                 CorridorList.Add(corridor.AssociatedRoom);
             }
+            else
+            {
+                //Add to collided rooms
+            }
         }
         else
         {
@@ -516,7 +520,7 @@ public class WorldGenerator
             {
                 originEntryA.x = (roomA.Right < roomB.Left ? roomA.Right : roomB.Left) -
                     corridorA.AssociatedRoom.Left - edgeLimit;
-                destinationEntryA.x = corridorA.AssociatedRoom.Right - 1;
+                destinationEntryA.x = corridorA.AssociatedRoom.Width - 1;
 
                 originEntryB.x = 0;
                 destinationEntryB.x = (roomA.Right > roomB.Left ? roomA.Right : roomB.Left) -
@@ -528,14 +532,14 @@ public class WorldGenerator
                     corridorA.AssociatedRoom.Left + edgeLimit;
                 destinationEntryA.x = 0;
 
-                originEntryB.x = corridorB.AssociatedRoom.Right - 1;
+                originEntryB.x = corridorB.AssociatedRoom.Width - 1;
                 destinationEntryB.x = (roomA.Left < roomB.Right ? roomA.Left : roomB.Right) -
                     corridorB.AssociatedRoom.Left - edgeLimit;
             }
 
             //Search nearest valid entry on each one
             bool entriesAValid = corridorA.AddValidCorridorEntry(originEntryA, 
-                dX > 0 ? new Coord(-1, 0) : new Coord(-1, 0),
+                dX > 0 ? new Coord(-1, 0) : new Coord(1, 0),
                 dX > 0 ? new Coord(edgeLimit, originEntryA.y) : new Coord(corridorA.Width - edgeLimit, originEntryA.y))
                 && corridorA.AddValidCorridorEntry(destinationEntryA,
                 dY > 0 ? new Coord(0, -1) : new Coord(0, 1),
@@ -563,22 +567,35 @@ public class WorldGenerator
 
             if (corridorA.IsValidCorridor() && corridorB.IsValidCorridor())
             {
-                CorridorList.Add(random.NextDouble() % 1 > .5 ? corridorA.AssociatedRoom : corridorB.AssociatedRoom);
+                corridor = random.NextDouble() % 1 > .5 ? corridorA : corridorB;
             }
             else if(corridorA.IsValidCorridor() ^ corridorB.IsValidCorridor())
             {
                 if (corridorA.IsValidCorridor())
                 {
-                    CorridorList.Add(corridorA.AssociatedRoom);
+                    corridor = corridorA;
                 }
                 else
                 {
-                    CorridorList.Add(corridorB.AssociatedRoom);
+                    corridor = corridorB;
                 }
             }
             else
             {
+                //Add to collided rooms
+            }
 
+            if (corridor != null)
+            {
+                //Add corridor entries to room A and B
+                //Convert local corridor coords into local room coords
+                Coord origin = ConvertRoomCoordinates(corridor.StartPoints[0], corridor.AssociatedRoom, roomA);
+                Coord destination = ConvertRoomCoordinates(corridor.StartPoints[1], corridor.AssociatedRoom, roomB);
+
+                roomGeneratorA.AddEntry(origin);
+                roomGeneratorB.AddEntry(destination);
+
+                CorridorList.Add(corridor.AssociatedRoom);
             }
         }
     }
@@ -755,6 +772,28 @@ public class WorldGenerator
         }
 
         return chosenDirection;
+    }
+
+    Coord ConvertRoomCoordinates(Coord localCoords, RoomNode originRoom, RoomNode targetRoom)
+    {
+        Coord targetCoords = new Coord(localCoords.x, localCoords.y);
+
+        //Convert from corridor local to global
+        targetCoords.x += originRoom.Left;
+        targetCoords.y = originRoom.Top - targetCoords.y;
+
+        //Convert from global to room local
+        targetCoords.x -= targetRoom.Left;
+        targetCoords.y = targetRoom.Top - targetCoords.y;
+
+        //Restrict conversion with room boundaries
+        targetCoords.x = targetCoords.x < 0 ? 0 : targetCoords.x;
+        targetCoords.x = targetCoords.x > targetRoom.Width - 1 ? targetRoom.Width - 1 : targetCoords.x;
+
+        targetCoords.y = targetCoords.y < 0 ? 0 : targetCoords.y;
+        targetCoords.y = targetCoords.y > targetRoom.Height - 1 ? targetRoom.Height - 1 : targetCoords.y;
+
+        return targetCoords;
     }
 
     Coord[] GenerateRandomDirectionList()

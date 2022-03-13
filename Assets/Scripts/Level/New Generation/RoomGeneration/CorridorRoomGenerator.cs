@@ -36,18 +36,20 @@ public class CorridorRoomGenerator : RoomGeneration
                     {
                         for (int y = 0; y < simpleHeight; y++)
                         {
-                            int cellLeft = (x * widthScale) + Left;
-                            int cellRight = (x * (widthScale + 1) - 1) * Left;
-                            int cellTop = Top - (y * heightScale);
-                            int cellBottom = Top - (y * (heightScale + 1) - 1);
+                            int cellLeft = (x * widthScale) + AssociatedRoom.Left;
+                            int cellRight = ((x + 1) * widthScale - 1) + AssociatedRoom.Left;
+                            int cellTop = AssociatedRoom.Top - (y * heightScale);
+                            int cellBottom = AssociatedRoom.Top - ((y + 1) * heightScale - 1);
 
                             //Except for empty tiles the rest are obstacles
 
                             //Check if the cell bounds collide with the room bounds
-                            bool result = (room.Right > cellLeft || room.Left < cellRight)
-                                && (room.Top > cellBottom || room.Bottom < cellTop);
+                            bool result = (room.Right > cellLeft && room.Left < cellRight)
+                                && (room.Top > cellBottom && room.Bottom < cellTop);
 
-                            obstacleMap[x, y] = result;
+                            if (result) {
+                                obstacleMap[x, y] = true;
+                            }
                         }
                     }
                 }
@@ -258,6 +260,20 @@ public class CorridorRoomGenerator : RoomGeneration
             }
         }
 
+        //Extend empty tiles to the bounds of the unscaled map
+        for (int x = 0; x < Width; x++)
+        {
+            for (int y = 0; y < Height; y++)
+            {
+                int scaledX = (x / widthScale) > simpleWidth - 1 ? simpleWidth - 1 : x / widthScale;
+                int scaledY = (y / heightScale) > simpleHeight - 1 ? simpleHeight - 1 : y / heightScale;
+
+                if (simpleMap[scaledX, scaledY] == TileType.Empty) {
+                    Map[x, y] = TileType.Empty;
+                }
+            }
+        }
+
         for (int s = 0; s < 3; s++)
         {
             SmoothMap();
@@ -268,11 +284,40 @@ public class CorridorRoomGenerator : RoomGeneration
     {
         Coord currentPos = new Coord(entry.x, entry.y);
 
-        while(!(currentPos.x == validationLimit.x && currentPos.y == validationLimit.y))
+        bool resizeX = false;
+        bool resizeY = false;
+
+        if (currentPos.x > (simpleWidth - 1) * widthScale)
+        {
+            currentPos.x = (simpleWidth - 1) * widthScale;
+            resizeX = true;
+        }
+
+        if (currentPos.y > (simpleHeight - 1) * heightScale)
+        {
+            currentPos.y = (simpleHeight - 1) * heightScale;
+            resizeY = true;
+        }
+
+        validationLimit.x = validationLimit.x > (simpleWidth - 1) * widthScale ? (simpleWidth - 1) * widthScale : validationLimit.x;
+        validationLimit.y = validationLimit.y > (simpleHeight - 1) * heightScale ? (simpleHeight - 1) * heightScale : validationLimit.y;
+
+        while (!(currentPos.x == validationLimit.x && currentPos.y == validationLimit.y))
         {
             if (!obstacleMap[currentPos.x / widthScale, currentPos.y / heightScale])
             {
+                if (resizeX)
+                {
+                    currentPos.x = entry.x;
+                }
+
+                if (resizeY)
+                {
+                    currentPos.y = entry.y;
+                }
+
                 AddEntry(currentPos);
+
                 return true;
             }
 

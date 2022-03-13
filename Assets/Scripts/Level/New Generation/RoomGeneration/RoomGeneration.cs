@@ -285,16 +285,23 @@ public abstract class RoomGeneration
             {
                 int n = GetNeighbours(i, j);
 
-                if (n > 4)
-                {
-                    pGameMap[i, j] = TileType.Wall;
+                if (Map[i, j] != TileType.Empty) {
+                    if (n > 4)
+                    {
+                        pGameMap[i, j] = TileType.Wall;
+                    }
+                    else if (n < 4)
+                    {
+                        pGameMap[i, j] = TileType.Floor;
+                    }
                 }
-                else if (n < 4)
+                else
                 {
-                    pGameMap[i, j] = TileType.Floor;
+                    pGameMap[i, j] = TileType.Empty;
                 }
             }
         }
+
         Map = pGameMap;
     }
 
