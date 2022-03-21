@@ -1,8 +1,5 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 public class ForceField : MonoBehaviour
 {
@@ -11,18 +8,14 @@ public class ForceField : MonoBehaviour
 
     public Camera cam;
 
+    public FadeInAndOutScript_Csharp fade;
+
     GameObject[,] forceObjs;
 
     public TextMeshModifier textNotifier;
-    public GameObject textObj;
-    public GameObject endAnimObj;
 
     public AudioClip start;
     public AudioSource loopAudio;
-
-    public Slider progressBar;
-
-    AsyncOperation asyncLoad;
 
     int[] xOffset;
     int[] yOffset;
@@ -30,13 +23,23 @@ public class ForceField : MonoBehaviour
     public int offset = 20;
 
     public int size = 15;
+    public float factor = 96f;
+
     float weirdValue = 0;
 
-    bool canStart = true;
-    bool canZoom = false;
-    bool canClick = false;
+    bool canFade = false;
 
     float glitchTime = 0;
+
+    private void OnEnable()
+    {
+        GameManagerModule.OnLoadingSceneFade += PreFade;
+    }
+
+    private void OnDisable()
+    {
+        GameManagerModule.OnLoadingSceneFade -= PreFade;
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -54,7 +57,7 @@ public class ForceField : MonoBehaviour
         }
 
         //Super weird calculation
-        weirdValue = 1653617004L / (Screen.width * Screen.height) * Screen.dpi / 96f;
+        weirdValue = 1653617004L / (Screen.width * Screen.height) * Screen.dpi / factor;
 
         cam.orthographicSize = 1;
 
@@ -66,13 +69,11 @@ public class ForceField : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!canZoom)
-        {
-            cam.orthographicSize = Mathf.Clamp(Mathf.Lerp(cam.orthographicSize, weirdValue + 5, Time.deltaTime * 3), 0, weirdValue);
-        }
-        else {
-            cam.orthographicSize = Mathf.Lerp(cam.orthographicSize, 1, Time.deltaTime * 15);
-            loopAudio.volume = Mathf.Lerp(loopAudio.volume, 0, Time.deltaTime * 3);
+        weirdValue = 1653617004L / (Screen.width * Screen.height) * Screen.dpi / factor;
+        cam.orthographicSize = Mathf.Clamp(Mathf.Lerp(cam.orthographicSize, weirdValue + 5, Time.deltaTime * 3.4f), 0, weirdValue);
+
+        if(canFade){
+            loopAudio.volume = Mathf.Lerp(loopAudio.volume, 0, Time.deltaTime * 7);
         }
 
         for (int i = 0; i < size; i++)
@@ -83,19 +84,8 @@ public class ForceField : MonoBehaviour
 
                 forceObjs[i, j].transform.rotation = Quaternion.Euler(0, 0, value * 90);
                 forceObjs[i, j].transform.position = new Vector2(i * offset + xOffset[i], j * offset + yOffset[j]);
-                //forceObjs[i, j].transform.position = new Vector2(i * offset + valueC * 5, j * offset + value * 5) - (new Vector2(size / 2, size / 2) - new Vector2(i, j)).normalized * value * 8;//new Vector2(i * offset + valueC * 20, j * offset + value * 20);
-                //forceObjs[i, j].transform.localScale = new Vector2(2 * Mathf.Abs(value) * 0.5f + .8f, 2 * Mathf.Abs(value) * 0.5f + .8f);
-
-                if (canStart)
-                {
-                    forceObjs[i, j].transform.localScale = Vector2.Lerp(forceObjs[i, j].transform.localScale, Vector2.one * .1f, Time.deltaTime * 8);
-                }
+                forceObjs[i, j].transform.localScale = Vector2.Lerp(forceObjs[i, j].transform.localScale, Vector2.one * .1f, Time.deltaTime * 8);
             }
-        }
-
-        if (Input.GetKeyDown(KeyCode.G))
-        {
-            SceneManager.LoadScene(0);
         }
 
         if (glitchTime < Time.time)
@@ -108,23 +98,19 @@ public class ForceField : MonoBehaviour
     void ShowMessage()
     {
         textNotifier.NotifyMessage("LOADING...", true);
-
-        Invoke("StartLoadingScene", 1f);
     }
 
-    void StartZoom()
+    void PreFade()
     {
-        canZoom = true;
+        Invoke("StartFade", 2f);
     }
 
-    void StartLoadingScene()
+    void StartFade()
     {
-        StartCoroutine(LoadScene());
-    }
+        canFade = true;
 
-    void StartScene()
-    {
-        asyncLoad.allowSceneActivation = true;
+        fade.fadeTime = .2f;
+        fade.FadeOut();
     }
 
     IEnumerator Glitch()
@@ -166,36 +152,5 @@ public class ForceField : MonoBehaviour
 
         yield return null;
 
-    }
-
-    IEnumerator LoadScene()
-    {
-
-        yield return null;
-
-        asyncLoad = SceneManager.LoadSceneAsync("Game");
-
-        asyncLoad.allowSceneActivation = false;
-
-        while (!canStart)
-        {
-
-            if (asyncLoad.progress >= .9f)
-            {
-                textNotifier.StopLoop();
-
-                if (!canStart)
-                {
-                    AudioSource.PlayClipAtPoint(start, cam.transform.position);
-                    canStart = true;
-                    textObj.SetActive(false);
-                    endAnimObj.SetActive(true);
-                    Invoke("StartZoom", .2f);
-                    Invoke("StartScene", 1f);
-                }
-            }
-
-            yield return null;
-        }
     }
 }

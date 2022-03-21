@@ -7,31 +7,19 @@ public class LevelManager : MonoBehaviour
 
     static LevelManager instance;
 
-    LevelGenerator generator;
+    System.Random random;
+
+    WorldGenerator output;
+
+    TilemapGenerator tilemapGenerator;
 
     CamManager camManager;
 
-    MapInfo mapInfo;
+    UIVisualizer uiVisualizer;
 
-    int levelIndex;
-    int width, height;
-    int fillPercentage;
-    int smoothness;
-    int maxEnemyNumber;
-    int maxLootNumber;
+    Movement movManager;
 
-    int seed;
-
-    int eggNumber;
-    int beatenEnemies = 0;
-
-    bool connectCaves;
-
-    public delegate void LevelCleared();
-    public delegate void LeftLevel();
-
-    public static event LevelCleared OnLevelClear;
-    public static event LeftLevel OnLevelLeft;
+    PlayerModule player;
 
     private void Awake()
     {
@@ -41,87 +29,102 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    private void OnEnable()
+    public void Initialize(WorldGenerator output)
     {
-        ExitHole.OnExitEnter += ExitLevel;
-    }
+        this.output = output;
 
-    private void OnDisable()
-    {
-        ExitHole.OnExitEnter -= ExitLevel;
-    }
-
-    void Start()
-    {
-    
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-    public void Initialize(int levelIndex, int width, int height, int fillPercentage, int smoothness, int seed, int maxEnemyNumber, int maxLootNumber, bool connectCaves)
-    {
-        this.levelIndex = levelIndex;
-        this.width = width;
-        this.height = height;
-        this.fillPercentage = fillPercentage;
-        this.smoothness = smoothness;
-        this.seed = seed;
-        this.maxEnemyNumber = maxEnemyNumber;
-        this.maxLootNumber = maxLootNumber;
-        this.connectCaves = connectCaves;
-
-        generator = GetComponent<LevelGenerator>();
-
+        player = (PlayerModule)PlayerModule.GetInstance();
         camManager = CamManager.GetInstance();
+        movManager = Movement.GetInstance();
+        uiVisualizer = UIVisualizer.GetInstance();
+        tilemapGenerator = TilemapGenerator.GetInstance();
+
+        random = new System.Random(new System.Random(output.GraphInfo.GraphInfo.Seed).Next());
+
+        //LoadPlayerState(playerState);
+        Generate(output.RoomComposites);
+
+        movManager.SetStartMode();
+        camManager.SetCamPos(movManager.gameObject.transform.position);
+        uiVisualizer.InitUI();
     }
 
-    public void Generate()
+    void Generate(List<List<RoomNode>> rooms)
     {
-        mapInfo = generator.GenerateLevel(width, height, fillPercentage, smoothness, seed, connectCaves, maxEnemyNumber, maxLootNumber);
+        tilemapGenerator.LoadLevel(rooms);
 
-        eggNumber = 3;//mapInfo.InitialEggs;
-    }
+        //Place Player
+        RoomNode entranceRoom = null;
+        Coord playerCoord;
 
-    public void AddBeatenEgg()
-    {
-        beatenEnemies++;
-        CheckAllBeatenEggs();
-    }
-
-    void CheckAllBeatenEggs()
-    {
-        if (beatenEnemies >= eggNumber)
+        foreach (List<RoomNode> composite in rooms)
         {
-            //Stage Clear
-            UIVisualizer.GetInstance().PopUpImportantMessage("STAGE CLEAR.\nADVANCE TO THE NEXT AREA.");
-            //UIVisualizer.GetInstance().PopUp(PopUpType.Info, "Stage Clear!", PlayerModule.GetInstance().transform, 1.5f, 20);
-            Debug.Log("Stage Clear!");
-
-            camManager.ShakeQuake(10, 2.5f, false);
-            camManager.Flash();
-
-            FinishLevel();
+            foreach (RoomNode room in composite)
+            {
+                if (room.Type == RoomType.Entrance)
+                {
+                    entranceRoom = room;
+                    break;
+                }
+            }
         }
+
+        playerCoord = entranceRoom.Floor[random.Next(0, entranceRoom.Floor.Count)];
+
+        player.transform.position = CoordToVect(playerCoord, entranceRoom.Position);
+    }
+
+    void AdvanceLevel()
+    {
+        //Realizar transición y avanzar nivel
+
+        player.GetComponent<Rigidbody2D>().simulated = false;
+        player.GetComponent<Movement>().enabled = false;
+        player.GetComponent<AttackModule>().enabled = false;
+        player.enabled = false;
+
+        camManager.Zoom(10, 5);
+
+        uiVisualizer.TransitionScene();
+
+        Invoke("FinishLevel", 1f);
     }
 
     void FinishLevel()
     {
-        //Invocar cofre de recompensa y mostrar salida
-        OnLevelClear?.Invoke();
+        PlayerState playerState = SavePlayerState();
+        GameManagerModule.GetInstance().FinishLevel(playerState);
     }
 
-    void ExitLevel()
+    void ClearLevel()
     {
-        OnLevelLeft?.Invoke();
+        //Stage Clear
+        UIVisualizer.GetInstance().PopUpImportantMessage("STAGE CLEAR.\nADVANCE TO THE NEXT AREA.");
+        //UIVisualizer.GetInstance().PopUp(PopUpType.Info, "Stage Clear!", PlayerModule.GetInstance().transform, 1.5f, 20);
+        Debug.Log("Stage Clear!");
+
+        camManager.ShakeQuake(10, 2.5f, false);
+        camManager.Flash();
     }
 
-    public MapInfo GetMapInfo()
+    PlayerState SavePlayerState()
     {
-        return mapInfo;
+        return player.SavePlayerState();
+    }
+
+    void LoadPlayerState(PlayerState state)
+    {
+        player.LoadPlayerState(state);
+    }
+
+    public List<List<RoomNode>> GetMapInfo()
+    {
+        return output.RoomComposites;
+    }
+
+    Vector3 CoordToVect(Coord c, Coord relativeTo, int tileSize = 16)
+    {
+        return new Vector3(relativeTo.x + (c.x + .5f) * tileSize, relativeTo.y - (c.y + .5f) * tileSize, 1);
     }
 
     public static LevelManager GetInstance()

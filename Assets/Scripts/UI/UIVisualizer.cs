@@ -77,11 +77,6 @@ public class UIVisualizer : MonoBehaviour
         StartCoroutine("UpdateMaxHealthBar");
     }
 
-    private void OnDisable()
-    {
-        player.OnEntityEvent -= OnPlayerEvent;
-    }
-
     void OnPlayerEvent(Entity sender, Entity.EntityEvent eventType, int param)
     {
 

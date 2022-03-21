@@ -1,211 +1,131 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine;
 
 public class GameManagerModule : MonoBehaviour
 {
-
     static GameManagerModule instance;
 
-    public AssetManager assetContainer;
-
-    public ShadowCaster2DTileMap shadowCasterTilemap;
+    System.Random random;
 
     LevelManager levelManager;
+    WorldManager worldManager;
+    WorldGenerator generator;
 
-    GameObject levelManagerObj;
-    GameObject cursor;
+    PlayerState storedPlayerState;
 
-    UIVisualizer uiVisualizer;
+    public delegate void LoadingSceneFade();
+    public static event LoadingSceneFade OnLoadingSceneFade;
 
-    CamManager camManager;
+    public int[] LevelSeeds { get; private set; }
+    public int UniversalSeed;
+    public int CurrentLevel { get; private set; }
 
-    Movement movManager;
+    public int TotalLevels { get; private set; } = 3;
 
-    PlayerModule player;
-
-    Camera camComponent;
-
-    SceneState sceneState;
-
-    PlayerState playerState;
-
-    Vector3 cursorPosition;
-
-    int[] levelSeeds;
-
-    public int maxLevels = 4;
-
-    public int currentLevel;
-    public int width, height;
-    public int fillPercentage;
-    public int smoothness;
-    public int enemyNumber;
-    public int lootNumber;
-
-    public int seed;
-
-    int levelSeed;
-
-    public bool randomSeed, connectCaves;
+    public bool RandomSeed;
 
     void Awake()
     {
         if (instance == null)
         {
-
             instance = this;
             DontDestroyOnLoad(this);
-
         }
         else if(instance != this)
         {
-
             Destroy(this);
-
         }
-    }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        sceneState = SceneState.Game;
-
-        Cursor.lockState = CursorLockMode.Confined;
-        Cursor.visible = false;
-
-        int randSeed = Random.Range(int.MinValue, int.MaxValue);
-
-        if (randomSeed)
+        if (RandomSeed)
         {
-            seed = randSeed;
-            Debug.Log("Seed: " + seed);
+            UniversalSeed = new System.Random().Next();
         }
 
-        Random.InitState(seed);
+        random = new System.Random(UniversalSeed);
 
-        levelSeeds = new int[maxLevels];
+        CurrentLevel = 0;
 
-        for (int i = 0; i < maxLevels; i++)
+        CreateSeeds();
+    }
+
+    void OnEnable()
+    {
+        //Start listening for a scene change as soon as this script is enabled.
+        SceneManager.sceneLoaded += OnLevelFinishedLoading;
+
+    }
+
+    void OnDisable()
+    {
+        //Stop listening for a scene change as soon as this script is disabled.
+        SceneManager.sceneLoaded -= OnLevelFinishedLoading;
+
+    }
+
+    void OnLevelFinishedLoading(Scene scene, LoadSceneMode mode)
+    {
+        switch (scene.name)
         {
-            levelSeeds[i] = Random.Range(int.MinValue, int.MaxValue);
+            case "Loading":
+                OnLoadingSceneFade();
+                Invoke("StartGeneration", 3f);
+                break;
+
+            case "Game":
+                StartLevel();
+                break;
         }
-    }
-
-    private void OnEnable()
-    {
-        LevelManager.OnLevelLeft += AdvanceLevel;
-    }
-
-    private void OnDisable()
-    {
-        LevelManager.OnLevelLeft -= AdvanceLevel;
     }
 
     public string GetGameSeed()
     {
-        return seed.ToString("X4");
+        return UniversalSeed.ToString();
     }
 
-    void InitNextLevel()
+    async void StartGeneration()
     {
+        worldManager = new WorldManager();
 
-        levelSeed = levelSeeds[currentLevel];
+        var generationTask = await worldManager.GenerateLevelAsync(CurrentLevel, LevelSeeds[CurrentLevel]);
 
-        player = (PlayerModule)PlayerModule.GetInstance();
-        camManager = CamManager.GetInstance();
-        movManager = Movement.GetInstance();
-        uiVisualizer = UIVisualizer.GetInstance();
+        FinishLevelGeneration(generationTask);
+    }
 
-        cursor = GameObject.FindGameObjectWithTag("cursor");
-        levelManagerObj = GameObject.FindGameObjectWithTag("lvlmanager");
-        camComponent = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
+    void StartLevel()
+    {
+        StartCoroutine(InitializeLevelManager());
+    }
 
-        levelManager = levelManagerObj.AddComponent<LevelManager>();
-        levelManager.Initialize(currentLevel, width, height, fillPercentage, smoothness, levelSeed, enemyNumber, lootNumber, connectCaves);
-        levelManager.Generate();
+    void FinishLevelGeneration(WorldGenerator output)
+    {
+        generator = output;
 
-        movManager.SetStartMode();
+        //Do something
 
-        if (currentLevel != 0)
-        {
-            LoadPlayerState();
-        }
-
-        camManager.SetCamPos(movManager.gameObject.transform.position);
-
-        uiVisualizer.InitUI();
-
-        Invoke("GenShadows", .1f);
+        //////////////
         
-    }
-
-    void GenShadows()
-    {
-        shadowCasterTilemap.Generate();
-    }
-
-    void Update()
-    {
-
-        if (cursor && camComponent)
-        {
-            if (Controls.IsAllowed()) {
-                cursorPosition = camComponent.ScreenToWorldPoint(Input.mousePosition);
-                cursorPosition.z = 1;
-                cursor.transform.position = cursorPosition;
-            }
-        }
-        else
-        {
-            cursor = GameObject.FindGameObjectWithTag("cursor");
-            camComponent = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
-        }
-
-        if (levelManagerObj == null && sceneState == SceneState.Game)
-        {
-            InitNextLevel();
-        }
-
-        if (Input.GetKeyDown(KeyCode.G))
-        {
-            SavePlayerState();
-            //currentLevel = -1;
-            GenerateNewLevel();
-        }
-    }
-
-    void AdvanceLevel()
-    {
-        //Realizar transición y avanzar nivel
-        currentLevel++;
-
-        SavePlayerState();
-
-        cursor.SetActive(false);
-        player.GetComponent<Rigidbody2D>().simulated = false;
-        player.GetComponent<Movement>().enabled = false;
-        player.GetComponent<AttackModule>().enabled = false;
-        player.enabled = false;
-
-        CamManager.GetInstance().Zoom(10, 5);
-
-        uiVisualizer.TransitionScene();
-
-        Invoke("LoadUpgradeScene", 1f);
-    }
-
-    void GenerateNewLevel()
-    {
-        sceneState = SceneState.Game;
         SceneManager.LoadScene("Game");
     }
 
-    void LoadUpgradeScene()
+    public void FinishLevel(PlayerState state)
     {
-        //sceneState = SceneState.Upgrade;
-        SceneManager.LoadScene(1);
+        levelManager = null;
+        storedPlayerState = state;
+        CurrentLevel++;
+
+        SceneManager.LoadScene("Loading");
+    }
+
+    void CreateSeeds()
+    {
+        LevelSeeds = new int[TotalLevels];
+
+        for (int i = 0; i < TotalLevels; i++)
+        {
+            LevelSeeds[i] = random.Next();
+        }
     }
 
     public static GameManagerModule GetInstance()
@@ -213,19 +133,14 @@ public class GameManagerModule : MonoBehaviour
         return instance;
     }
 
-    public void SavePlayerState()
+    IEnumerator InitializeLevelManager()
     {
-        playerState = player.SavePlayerState();
-    }
+        while (levelManager == null)
+        {
+            levelManager = LevelManager.GetInstance();
+            yield return null;
+        }
 
-    public void LoadPlayerState()
-    {
-        player.LoadPlayerState(playerState);
-    }
-
-    enum SceneState
-    {
-        Game,
-        Upgrade
+        levelManager.Initialize(generator);
     }
 }

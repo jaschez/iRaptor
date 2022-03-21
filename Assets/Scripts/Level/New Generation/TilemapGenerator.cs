@@ -11,6 +11,8 @@ public class TilemapGenerator : MonoBehaviour
 
     public TileSource[] TileSources;
 
+    public ShadowCaster2DTileMap shadowCaster;
+
     Dictionary<TileSkin, TileBase> Tiles;
 
     List<List<RoomNode>> debugRooms;
@@ -64,6 +66,8 @@ public class TilemapGenerator : MonoBehaviour
                 }
             }
         }
+
+        //StartCoroutine(GenerateShadows());
     }
 
     public void DebugLevel(List<List<RoomNode>> composites)
@@ -97,6 +101,13 @@ public class TilemapGenerator : MonoBehaviour
                 }
             }
         }
+    }
+
+    IEnumerator GenerateShadows()
+    {
+        yield return new WaitForEndOfFrame();
+
+        shadowCaster.Generate();
     }
 
     public static TilemapGenerator GetInstance()

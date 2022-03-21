@@ -91,6 +91,7 @@ public abstract class RoomGeneration
         CalculateInterestingCoords();
         GenerateTileMap();
 
+        //We transfer the generated data to the associated room
         AssociatedRoom.Generate(TileMap, FloorCoords);
     }
 
@@ -364,7 +365,7 @@ public abstract class RoomGeneration
         {
             for (int j = 0; j < Height; j++)
             {
-                if (Map[i, j] == 0)
+                if (Map[i, j] == TileType.Floor)
                 {
                     FloorCoords.Add(new Coord(i, j));
                 }

@@ -115,30 +115,7 @@ public class Minimap : MonoBehaviour
 
         Coord worldPos = room.Position;
 
-        /*for (int y = 0; y < roomHeight; y++)
-        {
-            for (int x = 0; x < roomWidth; x++)
-            {
-                colorIndex = (y - worldPos.y) * width + x + worldPos.x;
-
-                // Debemos comparar un estado desde el mapa con el de la habitación
-                // Si hay una pared y son iguales, se coloca el color pared, en caso
-                // contrario, es celda vacía.
-
-                if (minimapInfo.map[x + worldPos.x, y - worldPos.y] == 1) //Pared
-                {
-                    colourMap[colorIndex] = new Color(.8f, .8f, .8f);
-                }
-                else if (map[x, y] == 2) //Suelo
-                {
-                    colourMap[colorIndex] = new Color(.2f, .2f, .2f);
-                }
-                else
-                {
-                    colourMap[colorIndex] = new Color(0, 0, 0, 0);
-                }
-            }
-        }*/
+        
 
         foreach (Coord tile in room.Floor)
         {
@@ -192,7 +169,7 @@ public class Minimap : MonoBehaviour
     {
         while (minimapInfo.map == null)
         {
-            minimapInfo = levelManager.GetMapInfo();
+            //minimapInfo = levelManager.GetMapInfo();
             yield return null;
         }
 

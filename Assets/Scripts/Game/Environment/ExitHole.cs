@@ -22,12 +22,12 @@ public class ExitHole : MonoBehaviour, Interactable
 
     private void OnEnable()
     {
-        LevelManager.OnLevelClear += AllowExit;
+        //LevelManager.OnLevelClear += AllowExit;
     }
 
     private void OnDestroy()
     {
-        LevelManager.OnLevelClear -= AllowExit;
+        //LevelManager.OnLevelClear -= AllowExit;
     }
 
     void AllowExit()

@@ -22,7 +22,7 @@ public class Egg : EnemyModule
     {
         //CamManager.GetInstance().ShakeQuake(6, 2f, false);
         CamManager.GetInstance().ShockGame(.1f);
-        levelManager.AddBeatenEgg();
+        //levelManager.AddBeatenEgg();
     }
 
     // Update is called once per frame

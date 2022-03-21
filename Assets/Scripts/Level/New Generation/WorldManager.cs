@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class WorldManager : MonoBehaviour
+public class WorldManager
 {
     System.Random random;
 
-    TilemapGenerator tilemapGenerator;
-
     WorldGenerator generator;
+
+    public delegate void GenerationReady(WorldGenerator output);
+    public static event GenerationReady OnGenerationReady;
 
     public int[] LevelSeeds { get; private set; }
     public int Seed;
@@ -22,83 +23,30 @@ public class WorldManager : MonoBehaviour
     float loreSpawnChance = 0.4f;
     float extraLoopSpawnChance = 0.5f;
 
-    public bool autoSeed = true;
-    public bool debug = false;
-
     bool ready = false;
+    bool debug = false;
 
-    void Start()
+    public async Task<WorldGenerator> GenerateLevelAsync(int level, int seed)
     {
-        Init();
-        CreateSeeds();
-        GenerateLevelAsync(CurrentLevel);
+        random = new System.Random(seed);
 
-        StartCoroutine(WaitForGeneration());
-
-        Debug.Log("Seed: " + Seed);
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Space))
+        await Task.Run(() =>
         {
-            Init();
-            CreateSeeds();
-            GenerateLevelAsync(CurrentLevel);
+            WorldGenerationParameters parameters = CalculateParameters(level, seed);
 
-            StartCoroutine(WaitForGeneration());
-
-            Debug.Log("Seed: " + Seed);
-        }
-    }
-
-    void Init()
-    {
-        if (autoSeed) {
-            Seed = new System.Random().Next();
-        }
-
-        random = new System.Random(Seed);
-
-        tilemapGenerator = TilemapGenerator.GetInstance();
-    }
-
-    public void CreateSeeds()
-    {
-        LevelSeeds = new int[Levels];
-
-        for (int i = 0; i < Levels; i++)
-        {
-            LevelSeeds[i] = random.Next();
-        }
-    }
-
-    public async void GenerateLevelAsync(int level)
-    {
-        var result = await Task.Run(() =>
-        {
-            if (LevelSeeds != null)
-            {
-                WorldGenerationParameters parameters = CalculateParameters(level);
-
-                generator = new WorldGenerator(parameters);
-                generator.GenerateWorld(debug);
-
-                ready = true;
-
-                Debug.Log(generator.ToString());
-            }
-
-            return 0;
+            generator = new WorldGenerator(parameters);
+            generator.GenerateWorld(debug);
         });
+
+        return generator;
     }
 
-    WorldGenerationParameters CalculateParameters(int level)
+    WorldGenerationParameters CalculateParameters(int level, int seed)
     {
         WorldGenerationParameters parameters = new WorldGenerationParameters();
 
         KeyRoomList keyRooms = CalculateKeyRooms(level);
-        GraphInput graphInput = CalculateGraphParameters(level, keyRooms);
+        GraphInput graphInput = CalculateGraphParameters(level, seed, keyRooms);
 
         float chanceOneWayLoop = .25f + ((float)level / Levels) * .4f;
         float chanceUnfairness = .1f + ((float)level / Levels) * .4f;
@@ -114,7 +62,7 @@ public class WorldManager : MonoBehaviour
         return parameters;
     }
 
-    GraphInput CalculateGraphParameters(int level, KeyRoomList keyRooms)
+    GraphInput CalculateGraphParameters(int level, int seed, KeyRoomList keyRooms)
     {
         GraphInput graphParameters;
 
@@ -139,7 +87,7 @@ public class WorldManager : MonoBehaviour
         minLoopLength = 3 + level;
         maxLoopLength = 4 + level;
 
-        graphParameters = new GraphInput(LevelSeeds[level], rooms, leaves, loops, minLoopLength, maxLoopLength);
+        graphParameters = new GraphInput(seed, rooms, leaves, loops, minLoopLength, maxLoopLength);
 
         return graphParameters;
     }
@@ -180,13 +128,6 @@ public class WorldManager : MonoBehaviour
             yield return null;
         }
 
-        if (!debug)
-        {
-            tilemapGenerator.LoadLevel(generator.RoomComposites);
-        }
-        else
-        {
-            tilemapGenerator.DebugLevel(generator.RoomComposites);
-        }
+        OnGenerationReady?.Invoke(generator);
     }
 }

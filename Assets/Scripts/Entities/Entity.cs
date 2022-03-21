@@ -83,7 +83,7 @@ public abstract class Entity : MonoBehaviour
     protected virtual void Start()
     {
 
-        whiteMat = GameManagerModule.GetInstance().assetContainer.whiteMat;
+        //whiteMat = GameManagerModule.GetInstance().assetContainer.whiteMat;
 
         if (!TryGetComponent(out sr))
         {

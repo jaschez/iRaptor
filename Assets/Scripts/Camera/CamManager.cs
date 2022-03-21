@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CamManager : MonoBehaviour
@@ -33,6 +32,9 @@ public class CamManager : MonoBehaviour
 
     void Start()
     {
+        //Cursor.lockState = CursorLockMode.Confined;
+        //Cursor.visible = false;
+
         movManager = Movement.GetInstance();
 
         target = GameObject.FindGameObjectWithTag("Player").transform;
