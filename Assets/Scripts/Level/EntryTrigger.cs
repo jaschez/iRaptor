@@ -5,11 +5,11 @@ using UnityEngine;
 public class EntryTrigger : MonoBehaviour
 {
     public GameObject RoomObject { get; private set; }
-    public Room AssociatedRoom { get; private set; }
+    public RoomNode AssociatedRoom { get; private set; }
 
     private WaveManager waveManager;
 
-    public void Initialize(Room associated, GameObject obj)
+    public void Initialize(RoomNode associated, GameObject obj)
     {
         AssociatedRoom = associated;
         RoomObject = obj;

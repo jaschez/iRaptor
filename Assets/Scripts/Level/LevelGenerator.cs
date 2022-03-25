@@ -142,7 +142,7 @@ public class LevelGenerator : MonoBehaviour
                     Coord entry = roomEntry.coord;
 
                     col = trigger.AddComponent<BoxCollider2D>();
-                    trigger.AddComponent<EntryTrigger>().Initialize(room, roomParent);
+                    //trigger.AddComponent<EntryTrigger>().Initialize(room, roomParent);
                     trigger.transform.position = new Vector3(worldPos.x + entry.x + .5f, -worldPos.y - entry.y + .5f, 1) * mapInfo.tileSize;
 
                     if (roomEntry.type == Room.EntryType.Vertical)

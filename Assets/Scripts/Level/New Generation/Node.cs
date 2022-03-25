@@ -86,9 +86,11 @@ public class RoomNode : Node<RoomNode>
     public int Right { get; private set; }
 
     public TileSkin[,] TileMap { get; private set; }
+    public TileType[,] TileTypeMap { get; private set; }
 
     //public List<Entry> Entries { get; private set; }
     public List<Coord> Floor { get; private set; }
+    public List<Coord> Entries { get; private set; }
     public List<Coord> Loot { get; private set; }
     public List<Coord> Chest { get; private set; }
     public List<Coord> InterestingPlaces { get; private set; }
@@ -115,13 +117,19 @@ public class RoomNode : Node<RoomNode>
         SetWorldPosition(new Coord(0, 0));
     }
 
-    public void Generate(TileSkin[,] tileMap, List<Coord> floor
+    public void Generate(TileSkin[,] tileMap, TileType[,] tileTypeMap, List<Coord> floor, List<Coord> entries
         /*,List<Coord> loot, List<Coord> chest,
         List<Coord> interestingPlaces, List<List<Coord>> enemies*/)
     {
         TileMap = tileMap;
 
+        TileTypeMap = tileTypeMap;
+
         Floor = floor;
+
+        Entries = entries;
+
+        Enemies = new List<List<Coord>>();
 
         /*Loot = loot;
         Chest = chest;

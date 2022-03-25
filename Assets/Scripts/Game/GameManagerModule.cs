@@ -71,6 +71,7 @@ public class GameManagerModule : MonoBehaviour
             case "Loading":
                 OnLoadingSceneFade();
                 Invoke("StartGeneration", 3f);
+                //StartGeneration();
                 break;
 
             case "Game":

@@ -8,7 +8,7 @@ public class WaveManager : MonoBehaviour
 
     GameObject enemy;
 
-    Room currentRoom;
+    RoomNode currentRoom;
 
     List<int> beatenRooms;
     List<GameObject> brokenRoomBarriers;
@@ -41,19 +41,31 @@ public class WaveManager : MonoBehaviour
         enemy = LevelGenerator.GetInstance().enemyPrefab;
     }
 
-    public void UpdateRoom(Room room)
+    public void UpdateRoom(RoomNode room)
     {
+        if (currentRoom == null)
+        {
+            currentRoom = room;
+        }
+
         if (room.ID != currentRoom.ID) {
             currentRoom = room;
 
-            if (room.Type == Room.RoomType.Normal) {
+            if (room.Type == RoomType.Normal) {
+                //Activate room
                 if (!beatenRooms.Contains(currentRoom.ID)) {
                     totalWaves = room.Enemies.Count;
                     beatenEnemies = 0;
                     currentWave = 0;
-                    
-                    BlockDoors(true);
-                    StartNextWave();
+
+                    if (totalWaves > 0) {
+                        BlockDoors(true);
+                        StartNextWave();
+                    }
+                    else
+                    {
+                        FinishWave();
+                    }
                 }
             }
         }
@@ -113,26 +125,28 @@ public class WaveManager : MonoBehaviour
             brokenRoomBarriers.Clear();
         }
 
-        foreach (GameObject barrierObj in roomBarriers[currentRoom.ID])
-        {
-            Barrier barrier = barrierObj.GetComponent<Barrier>();
-
-            if (blocked)
+        if (roomBarriers.ContainsKey(currentRoom.ID)) {
+            foreach (GameObject barrierObj in roomBarriers[currentRoom.ID])
             {
-                if (!barrierObj.activeSelf)
+                Barrier barrier = barrierObj.GetComponent<Barrier>();
+
+                if (blocked)
                 {
-                    brokenRoomBarriers.Add(barrierObj);
-                    barrierObj.SetActive(true);
+                    if (!barrierObj.activeSelf)
+                    {
+                        brokenRoomBarriers.Add(barrierObj);
+                        barrierObj.SetActive(true);
+                    }
                 }
-            }
-            else
-            {
-                if (brokenRoomBarriers.Contains(barrierObj)) {
-                    barrierObj.SetActive(false);
+                else
+                {
+                    if (brokenRoomBarriers.Contains(barrierObj)) {
+                        barrierObj.SetActive(false);
+                    }
                 }
-            }
 
-            barrier.Block(blocked);
+                barrier.Block(blocked);
+            }
         }
     }
 

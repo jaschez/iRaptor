@@ -37,7 +37,7 @@ public abstract class RoomGeneration
 
     public List<Coord> FloorCoords { get; private set; }
     public List<Coord> StartPoints { get; private set; }
-    public List<Coord> ScaledStartPoints { get; private set; }
+    protected List<Coord> ScaledStartPoints { get; private set; }
     public List<Coord> interestingPoints { get; private set; }
 
     public RoomGeneration(RoomNode room, int seed)
@@ -92,7 +92,7 @@ public abstract class RoomGeneration
         GenerateTileMap();
 
         //We transfer the generated data to the associated room
-        AssociatedRoom.Generate(TileMap, FloorCoords);
+        AssociatedRoom.Generate(TileMap, Map, FloorCoords, StartPoints);
     }
 
     protected abstract void GenerateMap();
@@ -137,6 +137,7 @@ public abstract class RoomGeneration
     {
         List<int> activeExplorers = new List<int>();
         List<Coord> scaledPoints = new List<Coord>();
+        List<Coord> centralEntries = new List<Coord>();
 
         Coord[] explorers;
 
@@ -156,9 +157,14 @@ public abstract class RoomGeneration
         //Firstly we check if there's only one starting point
         //If that's the case, we create another one in the middle of the room
 
+        //(We will get it out of the entry list after the map is generated)
+
         if (StartPoints.Count == 1)
         {
-            AddEntry(new Coord(Width / 2, Height / 2));
+            Coord centralEntry = new Coord(Width / 2, Height / 2);
+
+            AddEntry(centralEntry);
+            centralEntries.Add(centralEntry);
         }
 
         //Later, we scale the points to a smaller room format
@@ -251,6 +257,11 @@ public abstract class RoomGeneration
 
                 activeExplorerIndex = (activeExplorerIndex + 1) % activeExplorers.Count;
             }
+        }
+
+        foreach (Coord centralEntry in centralEntries)
+        {
+            StartPoints.Remove(centralEntry);
         }
     }
 
