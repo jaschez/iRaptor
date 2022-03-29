@@ -46,7 +46,7 @@ public class Numbrian : EnemyModule
         mover.InitMover(100);
         shooter.Init(cooldown, 200, 4, false);
 
-        SetEnemyType(EnemyType.Warship);
+        SetEnemyType(EnemyType.Numbrian);
         InitHealth(3);
 
         maxCarbonUnits = 4;

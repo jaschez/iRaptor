@@ -158,11 +158,8 @@ public class Minimap : MonoBehaviour
 
     void Update()
     {
-        if (Controls.GetMoveKey())//Debe arreglarse
-        {
-            if (tileMap != null && player != null) {
-                UpdateMapPosition(player.position);
-            }
+        if (tileMap != null && player != null) {
+            UpdateMapPosition(player.position);
         }
     }
 
@@ -186,11 +183,6 @@ public class Minimap : MonoBehaviour
                 }
             }
         }
-
-        /*foreach (Coord c in mapInfo.lootCoords)
-        {
-            colourMap[c.y * width + c.x] = Color.magenta;
-        }*/
     }
 
     public void UpdateMapRegion(RoomNode room)
@@ -276,6 +268,13 @@ public class Minimap : MonoBehaviour
             colourMap[(worldPos.y - c.y) * width + c.x + worldPos.x] = Color.magenta;
         }*/
 
+        foreach (Coord c in room.InterestingPoints)
+        {
+            colorIndex = (height - mapOrigin.y + worldPos.y - c.y - 1) * width + (c.x - mapOrigin.x) + worldPos.x;
+
+            discoveredColourMap[colorIndex] = Color.magenta;
+        }
+
         mapTexture.SetPixels(discoveredColourMap);
         mapTexture.Apply();
 
@@ -285,8 +284,6 @@ public class Minimap : MonoBehaviour
         minimapImg.rectTransform.sizeDelta = new Vector2(imgWidth, imgHeight);
 
         minimapImg.preserveAspect = true;
-
-        UpdateMapPosition(player.position);
     }
 
     void UpdateMapPosition(Vector2 playerPos)

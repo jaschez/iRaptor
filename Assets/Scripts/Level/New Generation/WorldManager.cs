@@ -12,14 +12,6 @@ public class WorldManager
     public delegate void GenerationReady(WorldGenerator output);
     public static event GenerationReady OnGenerationReady;
 
-    public int[] LevelSeeds { get; private set; }
-    public int Seed;
-
-    [Range(0,3)]
-    public int CurrentLevel = 0;
-
-    public readonly int Levels = 4;
-
     float loreSpawnChance = 0.4f;
     float extraLoopSpawnChance = 0.5f;
 
@@ -48,8 +40,8 @@ public class WorldManager
         KeyRoomList keyRooms = CalculateKeyRooms(level);
         GraphInput graphInput = CalculateGraphParameters(level, seed, keyRooms);
 
-        float chanceOneWayLoop = .25f + ((float)level / Levels) * .4f;
-        float chanceUnfairness = .1f + ((float)level / Levels) * .4f;
+        float chanceOneWayLoop = .25f + ((float)(level == 1? 0 : level) / GameManagerModule.GetInstance().TotalLevels) * .4f;
+        float chanceUnfairness = .1f + ((float)(level == 1 ? 0 : level) / GameManagerModule.GetInstance().TotalLevels) * .4f;
 
         parameters.Level = level;
         parameters.GraphParameters = graphInput;
@@ -75,6 +67,8 @@ public class WorldManager
         int loops = 2;
 
         totalKeyRooms += keyRooms.Lore + keyRooms.Minibosses + keyRooms.Rewards + keyRooms.Shops;
+
+        level = level == 1 ? 0 : level;
 
         if (level > 2 && random.NextDouble() % 1 < extraLoopSpawnChance)
         {

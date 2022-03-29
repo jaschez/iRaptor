@@ -1,11 +1,21 @@
-﻿using System.Collections;
+﻿using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine;
+using System;
 
 public class GameManagerModule : MonoBehaviour
 {
     static GameManagerModule instance;
+
+    public EnemyData[] Enemies;
+    public EnemyData[] EnemiesOrderedByDifficulty { get; private set; }
+
+    public EnemyRoomSettings[] enemyRoomSettings;
+
+    public Dictionary<EnemyType, EnemyData> EnemyDictionary { get; private set; }
+    public Dictionary<EnemyType, float>[] SpawnRateDictionaries { get; private set; }
 
     System.Random random;
 
@@ -22,7 +32,7 @@ public class GameManagerModule : MonoBehaviour
     public int UniversalSeed;
     public int CurrentLevel { get; private set; }
 
-    public int TotalLevels { get; private set; } = 3;
+    public int TotalLevels { get; private set; } = 4;
 
     public bool RandomSeed;
 
@@ -48,6 +58,7 @@ public class GameManagerModule : MonoBehaviour
         CurrentLevel = 0;
 
         CreateSeeds();
+        GenerateEnemyData();
     }
 
     void OnEnable()
@@ -64,6 +75,42 @@ public class GameManagerModule : MonoBehaviour
 
     }
 
+    void GenerateEnemyData()
+    {
+        //Create enemy dictionary
+        EnemyDictionary = new Dictionary<EnemyType, EnemyData>();
+
+        foreach (EnemyData enemy in Enemies)
+        {
+            if (!EnemyDictionary.ContainsKey(enemy.Type))
+            {
+                EnemyDictionary.Add(enemy.Type, enemy);
+            }
+        }
+
+        //Create enemy spawn rate dictionary
+        SpawnRateDictionaries = new Dictionary<EnemyType, float>[enemyRoomSettings.Length];
+
+        int levelIndex = 0;
+
+        foreach (EnemyRoomSettings spawnRate in enemyRoomSettings)
+        {
+            SpawnRateDictionaries[levelIndex] = new Dictionary<EnemyType, float>();
+
+            foreach (EnemyRoomSettings.SpawnRate enemyRate in spawnRate.Enemies)
+            {
+                if (!SpawnRateDictionaries[levelIndex].ContainsKey(enemyRate.Type))
+                {
+                    SpawnRateDictionaries[levelIndex].Add(enemyRate.Type, enemyRate.Rate);
+                }
+            }
+
+            levelIndex++;
+        }
+
+        //Order enemies by difficulty
+        EnemiesOrderedByDifficulty = Enemies.OrderBy(x => x.DifficultyPoints).ToArray();
+    }
     void OnLevelFinishedLoading(Scene scene, LoadSceneMode mode)
     {
         switch (scene.name)

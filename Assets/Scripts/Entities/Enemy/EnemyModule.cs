@@ -89,6 +89,7 @@ public abstract class EnemyModule : Entity
 
 public enum EnemyType
 {
-    Warship,
-    Egg
+    Numbrian,
+    Slime,
+    Fairy
 }

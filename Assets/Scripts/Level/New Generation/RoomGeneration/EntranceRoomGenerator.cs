@@ -1,6 +1,6 @@
-﻿public class EntranceGeneration : RoomGeneration
+﻿public class EntranceRoomGenerator : RoomGeneration
 {
-    public EntranceGeneration(RoomNode room, int seed) : base(room, seed)
+    public EntranceRoomGenerator(RoomNode room, int seed, int level) : base(room, seed, level)
     {
         Initialize(RoomType.Entrance, random.Next(3, 5) * 3, random.Next(3, 5) * 3, 3, .4f);
     }

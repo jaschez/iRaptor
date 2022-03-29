@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering.Universal;
 
 public class LevelManager : MonoBehaviour
 {
@@ -8,6 +10,15 @@ public class LevelManager : MonoBehaviour
     static LevelManager instance;
 
     System.Random random;
+
+    [Space]
+    public GameObject lootPrefab;
+    public GameObject lightPrefab;
+    public GameObject chestPrefab;
+    public GameObject barrierPrefab;
+    public GameObject exitPrefab;
+
+    GameManagerModule gameManager;
 
     WorldGenerator output;
 
@@ -21,12 +32,6 @@ public class LevelManager : MonoBehaviour
 
     PlayerModule player;
 
-    public GameObject enemyPrefab;
-    public GameObject lootPrefab;
-    public GameObject chestPrefab;
-    public GameObject barrierPrefab;
-    public GameObject exitPrefab;
-
     private void Awake()
     {
         if (instance == null)
@@ -38,6 +43,8 @@ public class LevelManager : MonoBehaviour
     public void Initialize(WorldGenerator output)
     {
         this.output = output;
+
+        gameManager = GameManagerModule.GetInstance();
 
         player = (PlayerModule)PlayerModule.GetInstance();
         camManager = CamManager.GetInstance();
@@ -91,6 +98,7 @@ public class LevelManager : MonoBehaviour
 
         GameObject roomParent;
         GameObject lootParent;
+        GameObject lightsParent;
         GameObject chestParent;
         GameObject enemyParent;
 
@@ -98,8 +106,7 @@ public class LevelManager : MonoBehaviour
         GameObject triggerParent = new GameObject("EntryRooms");
 
         //Se usará para crear las barreras de los pasadizos
-        /*List<Corridor> remainingCorridors = new List<Corridor>(mapInfo.corridors);
-        Dictionary<int, GameObject> barrierIndex = new Dictionary<int, GameObject>();*/
+        Dictionary<int, GameObject> barrierIndex = new Dictionary<int, GameObject>();
 
 
         //Sistema de oleadas
@@ -110,6 +117,7 @@ public class LevelManager : MonoBehaviour
             foreach (RoomNode room in composite)
             {
                 roomParent = new GameObject("Room" + room.ID);
+                lightsParent = new GameObject("Light");
                 lootParent = new GameObject("Loot");
                 chestParent = new GameObject("Chests");
                 enemyParent = new GameObject("Enemies");
@@ -123,8 +131,11 @@ public class LevelManager : MonoBehaviour
                 //Capa de recompensas
                 //InstantiateObjectList(room.Loot, room.Position, lootPrefab, lootParent);
 
+                InstantiateLights(room.LightPoints, room.Position, lightsParent);
+
                 enemyParent.transform.SetParent(roomParent.transform);
                 chestParent.transform.SetParent(roomParent.transform);
+                lightsParent.transform.SetParent(roomParent.transform);
                 lootParent.transform.SetParent(roomParent.transform);
                 roomParent.transform.SetParent(roomsParent.transform);
 
@@ -161,6 +172,34 @@ public class LevelManager : MonoBehaviour
             }
         }
 
+        //Barrier layer
+        foreach (int connectionID in output.Connections.Keys)
+        {
+            if (!barrierIndex.ContainsKey(connectionID))
+            {
+                EntryConnection connection = output.Connections[connectionID];
+
+                float middleX = (connection.EntryA.x + connection.EntryB.x) / 2f;
+                float middleY = (connection.EntryA.y + connection.EntryB.y) / 2f;
+
+                Vector3 barrierPos = new Vector3((middleX + .5f) * 16, (middleY + .5f) * 16, 1);
+                Quaternion barrierRotation = Quaternion.identity;
+
+                if (!connection.IsVertical)
+                {
+                    barrierRotation = Quaternion.Euler(0, 0, 90);
+                }
+
+                GameObject barrierObj = Instantiate(barrierPrefab, barrierPos, barrierRotation);
+
+                barrierObj.name = "Barrier" + connectionID;
+
+                barrierIndex.Add(connectionID, barrierObj);
+                waveManager.AddBarrierToRoom(connection.RoomAID, barrierObj);
+                waveManager.AddBarrierToRoom(connection.RoomBID, barrierObj);
+            }
+        }
+
         //Instantiate(exitPrefab, new Vector3(mapInfo.ExitPos.x + 0.5f, mapInfo.ExitPos.y + 0.5f, 1) * 16, Quaternion.identity);
     }
 
@@ -171,6 +210,28 @@ public class LevelManager : MonoBehaviour
             Vector3 position = CoordToVect(objCoord, origin);
 
             Instantiate(instantiable, position, Quaternion.identity, parentTo.transform);
+        }
+    }
+
+    public void InstantiateEnemyList(List<Tuple<EnemyType, Coord>> enemyList, Coord origin, GameObject parentTo = null)
+    {
+        foreach (Tuple<EnemyType, Coord> enemy in enemyList)
+        {
+            Vector3 position = CoordToVect(enemy.Item2, origin);
+
+            Instantiate(gameManager.EnemyDictionary[enemy.Item1].Prefab, position, Quaternion.identity, parentTo.transform);
+        }
+    }
+
+    public void InstantiateLights(List<Tuple<Coord, float>> lightList, Coord origin, GameObject parentTo = null)
+    {
+        foreach (Tuple<Coord, float> light in lightList)
+        {
+            Vector3 position = CoordToVect(light.Item1, origin);
+
+            GameObject lightObj = Instantiate(lightPrefab, position, Quaternion.identity, parentTo.transform);
+
+            lightObj.GetComponent<Light2D>().pointLightOuterRadius = light.Item2;
         }
     }
 
@@ -224,7 +285,7 @@ public class LevelManager : MonoBehaviour
 
     Vector3 CoordToVect(Coord c, Coord relativeTo, int tileSize = 16)
     {
-        return new Vector3(relativeTo.x + (c.x + .5f) * tileSize, relativeTo.y - (c.y + .5f) * tileSize, 1);
+        return new Vector3((relativeTo.x + (c.x + .5f)) * tileSize, (relativeTo.y - (c.y + .5f)) * tileSize, 1);
     }
 
     public static LevelManager GetInstance()

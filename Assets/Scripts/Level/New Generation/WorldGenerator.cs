@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 public class WorldGenerator
@@ -12,15 +13,21 @@ public class WorldGenerator
 
     public List<RoomNode> CorridorList { get; private set; }
 
+    public Dictionary<int, EntryConnection> Connections { get; private set; }
+
     List<RoomGeneration> roomGenerators;
     List<RootedNode> rootedNodeList;
     List<RoomLink> pendingRoomLinks;
 
     public WorldGraphOutput GraphInfo { get; private set; }
 
+    WorldGenerationParameters generationParameters;
+
     public WorldGenerator(WorldGenerationParameters param)
     {
         random = new System.Random(param.GraphParameters.Seed);
+
+        generationParameters = param;
 
         graphGenerator = new WorldGraphGenerator(param);
         GraphInfo = graphGenerator.GenerateWorldGraph();
@@ -28,6 +35,8 @@ public class WorldGenerator
         roomGenerators = new List<RoomGeneration>();
         CorridorList = new List<RoomNode>();
         pendingRoomLinks = new List<RoomLink>();
+
+        Connections = new Dictionary<int, EntryConnection>();
 
         compositeGenerator = new CompositeGenerator(GraphInfo);
 
@@ -394,7 +403,7 @@ public class WorldGenerator
                 return;
             }
 
-            corridor = new CorridorRoomGenerator(random.Next(), corridorTop, corridorBottom, corridorLeft, corridorRight);
+            corridor = new CorridorRoomGenerator(random.Next(), generationParameters.Level, corridorTop, corridorBottom, corridorLeft, corridorRight);
 
             //Set entry for roomA, roomB and corridor
             parallelLinkParameter = random.Next(min, max);
@@ -442,6 +451,9 @@ public class WorldGenerator
             if (corridor.IsValidCorridor())
             {
                 CorridorList.Add(corridor.AssociatedRoom);
+
+                AddConnection(roomA, corridor.AssociatedRoom, roomAEntry, corridorAEntry, direction);
+                AddConnection(corridor.AssociatedRoom, roomB, corridorBEntry, roomBEntry, direction);
             }
             else
             {
@@ -477,13 +489,13 @@ public class WorldGenerator
 
             //Set bounds for each corridor
 
-            corridorA = new CorridorRoomGenerator(random.Next(), 
+            corridorA = new CorridorRoomGenerator(random.Next(), generationParameters.Level,
                 dY > 0? roomB.Top : roomA.Bottom,
                 dY > 0? roomA.Top : roomB.Bottom,
                 dX > 0? roomA.Left : roomB.Right,
                 dX > 0? roomB.Left : roomA.Right);
 
-            corridorB = new CorridorRoomGenerator(random.Next(),
+            corridorB = new CorridorRoomGenerator(random.Next(), generationParameters.Level,
                 dY > 0 ? roomB.Bottom : roomA.Top,
                 dY > 0 ? roomA.Bottom : roomB.Top,
                 dX > 0 ? roomA.Right : roomB.Left,
@@ -594,6 +606,9 @@ public class WorldGenerator
 
                 roomGeneratorA.AddEntry(origin);
                 roomGeneratorB.AddEntry(destination);
+
+                AddConnection(roomA, corridor.AssociatedRoom, origin, corridor.StartPoints[0], dX > 0? new Coord(1, 0) : new Coord(-1, 0));
+                AddConnection(corridor.AssociatedRoom, roomB, corridor.StartPoints[1], destination, dY > 0? new Coord(0, 1) : new Coord(0, -1));
 
                 CorridorList.Add(corridor.AssociatedRoom);
             }
@@ -709,6 +724,9 @@ public class WorldGenerator
 
         roomGeneratorA.AddEntry(roomAEntry);
         roomGeneratorB.AddEntry(roomBEntry);
+
+        AddConnection(roomA, roomB, roomAEntry, roomBEntry, chosenDirection);
+
     }
 
     Coord PlaceRoom(RoomGeneration roomGenerator, RoomGeneration previousRoomGenerator, Coord[] directions, List<RoomNode> locatedRooms)
@@ -955,15 +973,15 @@ public class WorldGenerator
         switch (room.Type)
         {
             case RoomType.Normal:
-                generator = new NormalGeneration(room, generationSeed);
+                generator = new NormalRoomGenerator(room, generationSeed, generationParameters.Level);
                 break;
 
             case RoomType.Entrance:
-                generator = new EntranceGeneration(room, generationSeed);
+                generator = new EntranceRoomGenerator(room, generationSeed, generationParameters.Level);
                 break;
 
             default:
-                generator = new NormalGeneration(room, generationSeed);
+                generator = new NormalRoomGenerator(room, generationSeed, generationParameters.Level);
                 break;
         }
 
@@ -994,6 +1012,29 @@ public class WorldGenerator
         }
 
         return null;
+    }
+
+    public int GetConnectionID(int idA, int idB)
+    {
+        int x = Math.Min(idA, idB);
+        int y = Math.Max(idA, idB);
+
+        return (int)(Math.Pow(2, x) * (2 * y + 1));
+    }
+
+    void AddConnection(RoomNode roomA, RoomNode roomB, Coord entryA, Coord entryB, Coord direction)
+    {
+        int connectionID = GetConnectionID(roomA.ID, roomB.ID);
+
+        entryA.x += roomA.Position.x;
+        entryA.y = roomA.Position.y - entryA.y;
+
+        entryB.x += roomB.Position.x;
+        entryB.y = roomB.Position.y - entryB.y;
+
+        EntryConnection connection = new EntryConnection(roomA.ID, roomB.ID, entryA, entryB, direction.x == 0);
+
+        Connections.Add(connectionID, connection);
     }
 
     public override string ToString()
@@ -1063,5 +1104,27 @@ public class WorldGenerator
             RoomA = roomA;
             RoomB = roomB;
         }
+    }
+}
+
+public struct EntryConnection
+{
+    public Coord EntryA { get; private set; }
+    public Coord EntryB { get; private set; }
+
+    public bool IsVertical { get; private set; }
+
+    public int RoomAID;
+    public int RoomBID;
+
+    public EntryConnection(int roomAID, int roomBID, Coord entryA, Coord entryB, bool isVertical)
+    {
+        EntryA = entryA;
+        EntryB = entryB;
+
+        RoomAID = roomAID;
+        RoomBID = roomBID;
+
+        IsVertical = isVertical;
     }
 }

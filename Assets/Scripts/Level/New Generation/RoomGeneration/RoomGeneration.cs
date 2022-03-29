@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,7 +11,7 @@ public abstract class RoomGeneration
 
     public RoomNode AssociatedRoom { get; protected set; }
 
-    protected TileType[,] Map { get; private set; }
+    public TileType[,] Map { get; private set; }
 
     public TileSkin[,] TileMap { get; private set; }
 
@@ -38,11 +39,12 @@ public abstract class RoomGeneration
     public List<Coord> FloorCoords { get; private set; }
     public List<Coord> StartPoints { get; private set; }
     protected List<Coord> ScaledStartPoints { get; private set; }
-    public List<Coord> interestingPoints { get; private set; }
+    public List<Coord> InterestingPoints { get; private set; }
+    public List<Tuple<Coord, float>> LightPoints { get; private set; }
 
-    public RoomGeneration(RoomNode room, int seed)
+    public RoomGeneration(RoomNode room, int seed, int level)
     {
-        random = new System.Random(seed);
+        random = new Random(seed);
 
         AssociatedRoom = room;
 
@@ -89,15 +91,23 @@ public abstract class RoomGeneration
         GenerateMap();
         CalculateFloorCoordinates();
         CalculateInterestingCoords();
+        CalculateLightPoints();
         GenerateTileMap();
 
+        AdditionalGeneration();
+
         //We transfer the generated data to the associated room
-        AssociatedRoom.Generate(TileMap, Map, FloorCoords, StartPoints);
+        AssociatedRoom.Generate(this);
     }
 
     protected abstract void GenerateMap();
 
     protected abstract void GenerateTileMap();
+
+    protected virtual void AdditionalGeneration()
+    {
+
+    }
 
     protected void DefaultMapGeneration()
     {
@@ -386,16 +396,37 @@ public abstract class RoomGeneration
 
     void CalculateInterestingCoords()
     {
-        /*DensityMap densityMap = new DensityMap(Map, 1, 0, StartPoints);
+        DensityMap<TileType> densityMap = new DensityMap<TileType>(Map, TileType.Floor);
 
-        List<List<Coord>> interestingAreas = densityMap.GetHighPeaks(0.01f, 2).OrderBy(area => area.Count).ToList();
+        List<List<Coord>> interestingAreas = densityMap.GetHighPeaks(0.3f, 4);
 
-        interestingPoints = new List<Coord>();
+        InterestingPoints = new List<Coord>();
 
         foreach (List<Coord> area in interestingAreas)
         {
-            interestingPoints.Add(area[random.Next(0, area.Count)]);
-        }*/
+            foreach (Coord point in area)
+            {
+                InterestingPoints.Add(point);
+            }
+        }
+    }
+
+    void CalculateLightPoints()
+    {
+        LightPoints = new List<Tuple<Coord, float>>();
+
+        Coord averageCoord = new Coord();
+
+        foreach (Coord c in InterestingPoints)
+        {
+            averageCoord.x += c.x;
+            averageCoord.y += c.y;
+        }
+
+        averageCoord.x /= InterestingPoints.Count;
+        averageCoord.y /= InterestingPoints.Count;
+
+        LightPoints.Add(new Tuple<Coord, float>(averageCoord, InterestingPoints.Count * 2f));
     }
 
     public void AddEntry(Coord localCoord)

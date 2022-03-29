@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Barrier : Entity
+public class Barrier : MonoBehaviour
 {
     bool blocked = false;
 
@@ -11,17 +11,8 @@ public class Barrier : Entity
     Color originalColor;
     Color blockedColor = Color.gray;
 
-    protected override void InitEntity()
+    protected void Start()
     {
-        SetEntityType(EntityType.Barrier);
-        InitHealth(1);
-
-        units = 0;
-    }
-
-    protected override void Start()
-    {
-        base.Start();
 
         if (!TryGetComponent(out spriteRenderer))
         {
@@ -29,21 +20,6 @@ public class Barrier : Entity
         }
 
         originalColor = spriteRenderer.color;
-
-        transform.Rotate(Vector3.forward, Random.Range(-10, 10));
-    }
-
-    protected override void Die()
-    {
-        if (!blocked) {
-            CamManager.GetInstance().ShakeQuake(4, 2.5f, false);
-            SoundManager.Play(Sounds.Break, transform.position);
-            base.Die();
-        }
-        else
-        {
-            spriteRenderer.color = blockedColor;
-        }
     }
 
     public void Block(bool blocked)
@@ -60,9 +36,39 @@ public class Barrier : Entity
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnTriggerEnter2D(Collider2D other)
     {
+        if (other.tag.Equals("Bullet"))
+        {
+
+            if (!blocked)
+            {
+                other.gameObject.SetActive(false);
+                StartCoroutine(DamageFlash(.07f));
+            }
+            else
+            {
+                spriteRenderer.color = blockedColor;
+            }
+        }
+    }
+
+    IEnumerator DamageFlash(float flashTime)
+    {
+        Material spriteMat = spriteRenderer.material;
+
+        spriteRenderer.material = null;
+        spriteRenderer.color = Color.white;
+
+        yield return new WaitForSeconds(flashTime);
+
+        CamManager.GetInstance().ShakeQuake(4, 2.5f, false);
+        SoundManager.Play(Sounds.Break, transform.position);
+
+        spriteRenderer.material = spriteMat;
+        spriteRenderer.color = originalColor;
+        
+        gameObject.SetActive(false);
 
     }
 }

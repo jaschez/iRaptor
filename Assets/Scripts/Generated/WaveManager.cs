@@ -1,12 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public class WaveManager : MonoBehaviour
 {
     static WaveManager instance;
-
-    GameObject enemy;
 
     RoomNode currentRoom;
 
@@ -38,7 +37,7 @@ public class WaveManager : MonoBehaviour
 
     void Start()
     {
-        enemy = LevelGenerator.GetInstance().enemyPrefab;
+        
     }
 
     public void UpdateRoom(RoomNode room)
@@ -101,13 +100,15 @@ public class WaveManager : MonoBehaviour
     void StartNextWave()
     {
         totalWaveEnemies = currentRoom.Enemies[currentWave].Count;
+        beatenEnemies = 0;
+
         SpawnEnemies();
     }
 
     void SpawnEnemies()
     {
-        List<Coord> enemies = currentRoom.Enemies[currentWave];
-        LevelGenerator.GetInstance().InstantiateObjectList(enemies, currentRoom.Position, enemy, new GameObject("enemy"));
+        List<Tuple<EnemyType, Coord>> enemies = currentRoom.Enemies[currentWave];
+        LevelManager.GetInstance().InstantiateEnemyList(enemies, currentRoom.Position, new GameObject("enemy"));
     }
 
     void FinishWave()

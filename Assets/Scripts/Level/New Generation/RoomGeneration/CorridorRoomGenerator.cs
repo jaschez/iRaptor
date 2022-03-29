@@ -10,8 +10,8 @@ public class CorridorRoomGenerator : RoomGeneration
     bool[,] obstacleMap;
     bool valid;
 
-    public CorridorRoomGenerator(int seed, int top, int bottom, int left, int right)
-        : base(new RoomNode(CorridorCounter, RoomType.Corridor), seed)
+    public CorridorRoomGenerator(int seed, int level, int top, int bottom, int left, int right)
+        : base(new RoomNode(CorridorCounter, RoomType.Corridor), seed, level)
     {
         Initialize(RoomType.Corridor, right - left, top - bottom, 3, .4f);
 

@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DensityMap
+public class DensityMap<T>
 {
-    int[,] source;
+    T[,] source;
+
     int[,] density;
     int[,] highPeaksMap;
 
-    int filterTarget;
-    int filterGround;
+    T filterTarget;
 
     int width;
     int height;
@@ -19,7 +19,7 @@ public class DensityMap
 
     List<Coord> connections;
 
-    public DensityMap(int[,] map, int target, int ground, List<Coord> conns = null)
+    public DensityMap(T[,] map, T target, List<Coord> conns = null)
     {
         source = map;
 
@@ -29,7 +29,6 @@ public class DensityMap
         density = new int[width, height];
 
         filterTarget = target;
-        filterGround = ground;
 
         if (conns != null)
         {
@@ -39,6 +38,33 @@ public class DensityMap
             connections = new List<Coord>();
         }
     }
+
+    public List<Coord> GetBiasedAreas(float percentile, int radius)
+    {
+        int threshold;
+
+        List<Coord> area = new List<Coord>();
+
+        highPeaksMap = new int[width, height];
+
+        CalculateMap(radius);
+
+        threshold = (int)(maximumValue * (1.0f - percentile));
+
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++)
+            {
+                if (density[i, j] >= threshold)
+                {
+                    area.Add(new Coord(i, j));
+                }
+            }
+        }
+
+        return area;
+    }
+
 
     public List<List<Coord>> GetHighPeaks(float percentile, int radius)
     {
@@ -74,7 +100,7 @@ public class DensityMap
         {
             for (int j = 0; j < height; j++)
             {
-                if (source[i, j] == filterGround)
+                if (source[i, j].Equals(filterTarget)) //Filter ground for detecting dead end
                 {
 
                     int value = GetDensityAt(i, j, amplitude, filterTarget);
@@ -159,7 +185,7 @@ public class DensityMap
         return areas;
     }
 
-    int GetDensityAt(int x, int y, int amplitude, int target)
+    int GetDensityAt(int x, int y, int amplitude, T target)
     {
         int density = 0;
 
@@ -169,14 +195,10 @@ public class DensityMap
             {
                 if (xOff >= 0 && xOff < width && yOff >= 0 && yOff < height)
                 {
-                    if (source[xOff, yOff] == target)
+                    if (source[xOff, yOff].Equals(target))
                     {
                         density++;
                     }
-                }
-                else
-                {
-                    density++;
                 }
             }
         }

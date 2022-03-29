@@ -9435,7 +9435,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   minimapImg: {fileID: 54540129}
-  offset: {x: 9, y: 3.5}
 --- !u!1 &955455208
 GameObject:
   m_ObjectHideFlags: 0
@@ -10184,9 +10183,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903f64fac94de9849a3a63eae17c179e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyPrefab: {fileID: 3564616920174254140, guid: 34d7d79d49ffbbc41bf2069536d3fb2a,
-    type: 3}
   lootPrefab: {fileID: 1396650462001427531, guid: e25d9b66e13715c4b87b6024e93ba57a,
+    type: 3}
+  lightPrefab: {fileID: 1254404812495894868, guid: b6274fc51c6513342bd42e2a4d23f889,
     type: 3}
   chestPrefab: {fileID: 7436859949091087053, guid: 45c85d72714f527409efde71d6bbc521,
     type: 3}
@@ -11542,7 +11541,7 @@ MonoBehaviour:
   m_LightCookieSprite: {fileID: 0}
   m_UseNormalMap: 0
   m_LightOrder: 0
-  m_AlphaBlendOnOverlap: 0
+  m_AlphaBlendOnOverlap: 1
   m_ShadowIntensity: 1
   m_ShadowVolumeIntensity: 0
   m_PointLightInnerAngle: 360

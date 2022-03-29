@@ -327,9 +327,9 @@ public class RoomGenerator
 
     void CalculateInterestingCoords()
     {
-        DensityMap densityMap = new DensityMap(gameMap, 1, 0, startPoints);
+        DensityMap<int> densityMap = new DensityMap<int>(gameMap, 1, startPoints);
 
-        List<List<Coord>> interestingAreas = densityMap.GetHighPeaks(0.01f, 2).OrderBy(area => area.Count).ToList();
+        List<List<Coord>> interestingAreas = densityMap.GetHighPeaks(0.01f, 2);
 
         interestingPoints = new List<Coord>();
 

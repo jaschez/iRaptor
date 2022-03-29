@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 
 public class Node<T>
@@ -87,14 +87,14 @@ public class RoomNode : Node<RoomNode>
 
     public TileSkin[,] TileMap { get; private set; }
     public TileType[,] TileTypeMap { get; private set; }
-
-    //public List<Entry> Entries { get; private set; }
     public List<Coord> Floor { get; private set; }
     public List<Coord> Entries { get; private set; }
     public List<Coord> Loot { get; private set; }
     public List<Coord> Chest { get; private set; }
-    public List<Coord> InterestingPlaces { get; private set; }
-    public List<List<Coord>> Enemies { get; private set; }
+    public List<Coord> InterestingPoints { get; private set; }
+
+    public List<Tuple<Coord, float>> LightPoints { get; private set; }
+    public List<List<Tuple<EnemyType, Coord>>> Enemies { get; private set; } = new List<List<Tuple<EnemyType, Coord>>>();
 
     public Coord Position { get; private set; }
 
@@ -117,23 +117,17 @@ public class RoomNode : Node<RoomNode>
         SetWorldPosition(new Coord(0, 0));
     }
 
-    public void Generate(TileSkin[,] tileMap, TileType[,] tileTypeMap, List<Coord> floor, List<Coord> entries
-        /*,List<Coord> loot, List<Coord> chest,
-        List<Coord> interestingPlaces, List<List<Coord>> enemies*/)
+    public void Generate(RoomGeneration generator)
     {
-        TileMap = tileMap;
-
-        TileTypeMap = tileTypeMap;
-
-        Floor = floor;
-
-        Entries = entries;
-
-        Enemies = new List<List<Coord>>();
+        TileMap = generator.TileMap;
+        TileTypeMap = generator.Map;
+        Floor = generator.FloorCoords;
+        Entries = generator.StartPoints;
+        InterestingPoints = generator.InterestingPoints;
+        LightPoints = generator.LightPoints;
 
         /*Loot = loot;
         Chest = chest;
-        InterestingPlaces = interestingPlaces;
         Enemies = enemies;*/
     }
 
@@ -165,5 +159,10 @@ public class RoomNode : Node<RoomNode>
     public bool OverlapsValueY(int min, int max)
     {
         return Top > min && max > Bottom;
+    }
+
+    public void AddEnemyWave(List<Tuple<EnemyType, Coord>> wave)
+    {
+        Enemies.Add(wave);
     }
 }
