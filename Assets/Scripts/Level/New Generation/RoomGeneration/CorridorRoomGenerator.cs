@@ -13,7 +13,7 @@ public class CorridorRoomGenerator : RoomGeneration
     public CorridorRoomGenerator(int seed, int level, int top, int bottom, int left, int right)
         : base(new RoomNode(CorridorCounter, RoomType.Corridor), seed, level)
     {
-        Initialize(RoomType.Corridor, right - left, top - bottom, 3, .4f);
+        Initialize(RoomType.Corridor, 0, 3, .4f, new Coord(right - left, top - bottom));
 
         AssociatedRoom.SetWorldPosition(new Coord(left, top));
 
@@ -97,6 +97,7 @@ public class CorridorRoomGenerator : RoomGeneration
 
         int[,,] flags;
         int floorTiles = 0;
+        int failedDiscoveryAttempt = 0;
 
         int activeExplorerIndex = 0;
         int explorerIndex;
@@ -172,7 +173,22 @@ public class CorridorRoomGenerator : RoomGeneration
                         validPosition = !obstacleMap[currentExplorer.x + dir.x, currentExplorer.y + dir.y];
                     }
 
+                    if(!validPosition)
+                    {
+                        failedDiscoveryAttempt++;
+
+                        if (failedDiscoveryAttempt > 500)
+                        {
+                            break;
+                        }
+                    }
+
                 } while (!validPosition);
+
+                if (!validPosition)
+                {
+                    break;
+                }
 
                 //Move the explorer 1 unit in the chosen direction
 

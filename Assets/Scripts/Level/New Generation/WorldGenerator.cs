@@ -17,9 +17,12 @@ public class WorldGenerator
 
     List<RoomGeneration> roomGenerators;
     List<RootedNode> rootedNodeList;
-    List<RoomLink> pendingRoomLinks;
+
+    List<RoomLink> PendingRoomLinks;
 
     public WorldGraphOutput GraphInfo { get; private set; }
+
+    public int UnsuccessfulLinks { get; private set; }
 
     WorldGenerationParameters generationParameters;
 
@@ -34,7 +37,9 @@ public class WorldGenerator
 
         roomGenerators = new List<RoomGeneration>();
         CorridorList = new List<RoomNode>();
-        pendingRoomLinks = new List<RoomLink>();
+        PendingRoomLinks = new List<RoomLink>();
+
+        UnsuccessfulLinks = 0;
 
         Connections = new Dictionary<int, EntryConnection>();
 
@@ -69,7 +74,7 @@ public class WorldGenerator
 
     void LinkRooms()
     {
-        foreach (RoomLink link in pendingRoomLinks)
+        foreach (RoomLink link in PendingRoomLinks)
         {
             GenerateRoomLink(link.RoomA, link.RoomB);
         }
@@ -260,7 +265,7 @@ public class WorldGenerator
                 {
                     //Add to the list of pending links
                     RoomLink link = new RoomLink(previousRoomGenerator, roomGenerator);
-                    pendingRoomLinks.Add(link);
+                    PendingRoomLinks.Add(link);
                 }
 
                 lastDirection = directions[nearestIndex];
@@ -275,7 +280,7 @@ public class WorldGenerator
         //Finally, the start and the end of the loop are linked
         //We should add entries in a middle corridor if the rooms are separated
         RoomLink loopLink = new RoomLink(firstGenerator, previousRoomGenerator);
-        pendingRoomLinks.Add(loopLink);
+        PendingRoomLinks.Add(loopLink);
     }
 
     void GenerateBranch(RoomNode roomParent, List<RoomNode> composite, List<RoomNode> existingRooms)
@@ -458,6 +463,7 @@ public class WorldGenerator
             else
             {
                 //Add to collided rooms
+                UnsuccessfulLinks++;
             }
         }
         else
@@ -488,7 +494,7 @@ public class WorldGenerator
             CorridorRoomGenerator corridorB;
 
             //Set bounds for each corridor
-
+            //In case of error: rooms are too tiny to link
             corridorA = new CorridorRoomGenerator(random.Next(), generationParameters.Level,
                 dY > 0? roomB.Top : roomA.Bottom,
                 dY > 0? roomA.Top : roomB.Bottom,
@@ -595,6 +601,7 @@ public class WorldGenerator
             else
             {
                 //Add to collided rooms
+                UnsuccessfulLinks++;
             }
 
             if (corridor != null)
@@ -698,7 +705,7 @@ public class WorldGenerator
         if (min > max)
         {
             RoomLink link = new RoomLink(roomGeneratorA, roomGeneratorB);
-            pendingRoomLinks.Add(link);
+            PendingRoomLinks.Add(link);
 
             return;
         }
@@ -785,7 +792,7 @@ public class WorldGenerator
             {
                 //Add to the list of pending links
                 RoomLink link = new RoomLink(previousRoomGenerator, roomGenerator);
-                pendingRoomLinks.Add(link);
+                PendingRoomLinks.Add(link);
             }
         }
 
@@ -980,6 +987,14 @@ public class WorldGenerator
                 generator = new EntranceRoomGenerator(room, generationSeed, generationParameters.Level);
                 break;
 
+            case RoomType.Reward:
+                generator = new RewardRoomGenerator(room, generationSeed, generationParameters.Level);
+                break;
+
+            case RoomType.Shop:
+                generator = new ShopRoomGenerator(room, generationSeed, generationParameters.Level);
+                break;
+
             default:
                 generator = new NormalRoomGenerator(room, generationSeed, generationParameters.Level);
                 break;
@@ -1094,7 +1109,7 @@ public class WorldGenerator
         return result;
     }
 
-    struct RoomLink
+    public struct RoomLink
     {
         public RoomGeneration RoomA;
         public RoomGeneration RoomB;

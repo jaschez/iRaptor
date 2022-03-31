@@ -109,6 +109,22 @@ public class RoomNode : Node<RoomNode>
         Depth = node.Depth;
     }
 
+    public RoomNode(RoomNode room) : base(room.ID)
+    {
+        Type = room.Type;
+        Depth = room.Depth;
+
+        Neighbours = room.Neighbours;
+
+        Width = room.Width;
+        Height = room.Height;
+
+        Left = room.Left;
+        Right = room.Right;
+        Top = room.Top;
+        Bottom = room.Bottom;
+    }
+
     public void SetDimensions(int width, int height)
     {
         Width = width;
@@ -117,7 +133,7 @@ public class RoomNode : Node<RoomNode>
         SetWorldPosition(new Coord(0, 0));
     }
 
-    public void Generate(RoomGeneration generator)
+    public virtual void Generate(RoomGeneration generator)
     {
         TileMap = generator.TileMap;
         TileTypeMap = generator.Map;

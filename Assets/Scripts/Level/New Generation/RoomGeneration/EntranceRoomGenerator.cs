@@ -2,7 +2,7 @@
 {
     public EntranceRoomGenerator(RoomNode room, int seed, int level) : base(room, seed, level)
     {
-        Initialize(RoomType.Entrance, random.Next(3, 5) * 3, random.Next(3, 5) * 3, 3, .4f);
+        Initialize(RoomType.Entrance, random.Next(100, 150), 3, .5f);
     }
 
     protected override void GenerateMap()

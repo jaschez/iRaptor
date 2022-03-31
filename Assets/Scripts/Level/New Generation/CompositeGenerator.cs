@@ -139,6 +139,8 @@ public class CompositeGenerator
         return composite;
     }
 
+    //Coverts from RootedNode to RoomNode
+    //This is where RoomNode can be polymorphed
     void AddToRoomComposite(RootedNode node, List<RoomNode> composite)
     {
         RoomNode newRoom = FindRoomID(composite, node.ID);
@@ -147,6 +149,22 @@ public class CompositeGenerator
         if (newRoom == null)
         {
             newRoom = new RoomNode(node);
+
+            //We derive the room object depending on the type of room
+            switch (node.Type)
+            {
+                case RoomType.Reward:
+                    newRoom = new RewardRoom(newRoom);
+                    break;
+
+                case RoomType.Shop:
+                    newRoom = new ShopRoom(newRoom);
+                    break;
+
+                default:
+                    break;
+            }
+
             composite.Add(newRoom);
         }
 

@@ -15,3 +15,4 @@ MonoBehaviour:
   Type: 1
   Prefab: {fileID: 6689214963379416242, guid: cfcf72816cd205c46ac75647975ef7ca, type: 3}
   DifficultyPoints: 1
+  Size: 3

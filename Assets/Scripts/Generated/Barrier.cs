@@ -49,6 +49,7 @@ public class Barrier : MonoBehaviour
             else
             {
                 spriteRenderer.color = blockedColor;
+                other.gameObject.SetActive(false);
             }
         }
     }

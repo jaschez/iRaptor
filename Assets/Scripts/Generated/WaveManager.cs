@@ -42,12 +42,17 @@ public class WaveManager : MonoBehaviour
 
     public void UpdateRoom(RoomNode room)
     {
+        Debug.Log("Entered room: " + room.ID);
+
+        bool nullRoom = false;
+
         if (currentRoom == null)
         {
             currentRoom = room;
+            nullRoom = true;
         }
 
-        if (room.ID != currentRoom.ID) {
+        if (room.ID != currentRoom.ID || nullRoom) {
             currentRoom = room;
 
             if (room.Type == RoomType.Normal) {
@@ -149,6 +154,8 @@ public class WaveManager : MonoBehaviour
                 barrier.Block(blocked);
             }
         }
+
+        CamManager.GetInstance().ShakeQuake(10f, 3f, false);
     }
 
     public static WaveManager GetInstance()

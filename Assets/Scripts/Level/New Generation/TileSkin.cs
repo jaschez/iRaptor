@@ -2,5 +2,7 @@
 {
     Floor_Rock,
     Wall_Rock,
-    Empty
+    Wall_Shop,
+    Empty,
+    Floor_Reward
 }

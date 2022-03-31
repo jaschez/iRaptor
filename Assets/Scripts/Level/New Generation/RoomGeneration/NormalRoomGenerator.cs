@@ -4,12 +4,6 @@ using System.Collections.Generic;
 public class NormalRoomGenerator : RoomGeneration
 {
     int roomSize;
-
-    int roomWidth;
-    int roomHeight;
-
-    int minRoomSide;
-
     int scaleFactor = 3;
 
     int totalWaves;
@@ -35,18 +29,6 @@ public class NormalRoomGenerator : RoomGeneration
         //Dimensions calculations
         roomSize = random.Next(roomSettings.MinimumRoomSize, roomSettings.MaximumRoomSize + 1);
 
-        //Calculate the minimum length of a room side
-        minRoomSide = (int)Math.Sqrt(roomSize);
-        minRoomSide -= (int)(minRoomSide * .2f);
-
-        //Adjust width and height to chosen room size
-        roomWidth = random.Next(minRoomSide, roomSize / minRoomSide);
-        roomHeight = roomSize / roomWidth;
-
-        //Approximate width and height to multiple of scaleFactor
-        roomWidth = (roomWidth / scaleFactor) * scaleFactor;
-        roomHeight = (roomHeight / scaleFactor) * scaleFactor;
-
         totalWaves = random.Next(1, 3);
         difficultyPoints = roomSettings.MinimumDifficultyPoints;
         difficultyVariety = roomSettings.DifficultyVariety;
@@ -60,7 +42,7 @@ public class NormalRoomGenerator : RoomGeneration
             }
         }
 
-        Initialize(RoomType.Normal, roomWidth, roomHeight, scaleFactor, .5f);
+        Initialize(RoomType.Normal, roomSize, scaleFactor, .5f);
     }
 
     protected override void GenerateMap()
@@ -80,6 +62,10 @@ public class NormalRoomGenerator : RoomGeneration
 
     void GenerateEnemies()
     {
+        Coord placementStart = InterestingPoints[random.Next(0, InterestingPoints.Count)];
+
+        ObjectPlacement enemyPlacement = new ObjectPlacement(random.Next(), Map, FloorCoords, placementStart);
+
         for (int currentWave = 0; currentWave < totalWaves; currentWave++)
         {
             List<Tuple<EnemyType, Coord>> enemyWave = new List<Tuple<EnemyType, Coord>>();
@@ -116,11 +102,13 @@ public class NormalRoomGenerator : RoomGeneration
 
                 Tuple<EnemyType, Coord> currentEnemy;
 
-                EnemyType chosenEnemy = enemies[chosenEnemyIndex].Type;
+                EnemyData enemyData = enemies[chosenEnemyIndex];
+
+                EnemyType chosenEnemy = enemyData.Type;
                 Coord enemyCoord;
 
-                //Calculate position (would depend on the floor density? type of enemy?)
-                enemyCoord = FloorCoords[random.Next(0, FloorCoords.Count)];
+                //Calculate position
+                enemyCoord = enemyPlacement.GenerateNextPoint(enemyData.Size);
 
                 currentEnemy = new Tuple<EnemyType, Coord>(chosenEnemy, enemyCoord);
 

@@ -34,7 +34,11 @@ public class WorldGraphGenerator
 
         keyRoomList.Add(RoomType.Reward, parameters.SpecialRoomList.Rewards);
         keyRoomList.Add(RoomType.Shop, parameters.SpecialRoomList.Shops);
-        keyRoomList.Add(RoomType.Lore, parameters.SpecialRoomList.Lore);
+
+        if (parameters.SpecialRoomList.Lore > 0) {
+            keyRoomList.Add(RoomType.Lore, parameters.SpecialRoomList.Lore);
+        }
+
         keyRoomList.Add(RoomType.Miniboss, parameters.SpecialRoomList.Minibosses);
     }
 

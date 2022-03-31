@@ -8,6 +8,7 @@ TagManager:
   - Enemy
   - lvlmanager
   - cursor
+  - Bullet
   layers:
   - Default
   - TransparentFX

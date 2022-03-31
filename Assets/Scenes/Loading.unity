@@ -255,7 +255,7 @@ MonoBehaviour:
   enemyRoomSettings:
   - {fileID: 11400000, guid: 7d7136e00e828f24184f000c9343a52a, type: 2}
   - {fileID: 11400000, guid: b668bdd859e4f7b49977a2d6ebcd432f, type: 2}
-  UniversalSeed: 876269703
+  UniversalSeed: 261453065
   RandomSeed: 0
 --- !u!4 &344048510
 Transform:

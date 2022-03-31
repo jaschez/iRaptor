@@ -13,6 +13,7 @@ public class LevelManager : MonoBehaviour
 
     [Space]
     public GameObject lootPrefab;
+    public GameObject npcPrefab;
     public GameObject lightPrefab;
     public GameObject chestPrefab;
     public GameObject barrierPrefab;
@@ -60,6 +61,9 @@ public class LevelManager : MonoBehaviour
         movManager.SetStartMode();
         camManager.SetCamPos(movManager.gameObject.transform.position);
         uiVisualizer.InitUI();
+
+        Debug.Log("Unsuccessful links: " + output.UnsuccessfulLinks);
+        Debug.Log(output.ToString());
     }
 
     void Generate()
@@ -87,7 +91,7 @@ public class LevelManager : MonoBehaviour
             }
         }
 
-        playerCoord = entranceRoom.Floor[random.Next(0, entranceRoom.Floor.Count)];
+        playerCoord = entranceRoom.InterestingPoints[random.Next(0, entranceRoom.InterestingPoints.Count)];
 
         player.transform.position = CoordToVect(playerCoord, entranceRoom.Position);
     }
@@ -122,16 +126,19 @@ public class LevelManager : MonoBehaviour
                 chestParent = new GameObject("Chests");
                 enemyParent = new GameObject("Enemies");
 
-                //Capa de enemigos
-                //InstantiateObjectList(room.enemyCoords, room.GetWorldPosition(), enemyPrefab, enemyParent);
+                //Reward layer
+                if (room.Type == RoomType.Reward)
+                {
+                    Vector3 rewardPos = CoordToVect(((RewardRoom)room).Reward.Item2, room.Position);
+                    Instantiate(lootPrefab, rewardPos, Quaternion.identity);
+                }
+                else if(room.Type == RoomType.Shop)
+                {
+                    Vector3 rewardPos = CoordToVect(((ShopRoom)room).NPC, room.Position);
+                    Instantiate(npcPrefab, rewardPos, Quaternion.identity, lootParent.transform);
+                }
 
-                //Capa de cofres
-                //InstantiateObjectList(room.Chest, room.Position, chestPrefab, chestParent);
-
-                //Capa de recompensas
-                //InstantiateObjectList(room.Loot, room.Position, lootPrefab, lootParent);
-
-                InstantiateLights(room.LightPoints, room.Position, lightsParent);
+                InstantiateLights(room, lightsParent);
 
                 enemyParent.transform.SetParent(roomParent.transform);
                 chestParent.transform.SetParent(roomParent.transform);
@@ -185,7 +192,7 @@ public class LevelManager : MonoBehaviour
                 Vector3 barrierPos = new Vector3((middleX + .5f) * 16, (middleY + .5f) * 16, 1);
                 Quaternion barrierRotation = Quaternion.identity;
 
-                if (!connection.IsVertical)
+                if (connection.EntryA.x == 0 || connection.EntryA.x == connection.EntryB.x - 1 || connection.EntryA.x == connection.EntryB.x + 1)
                 {
                     barrierRotation = Quaternion.Euler(0, 0, 90);
                 }
@@ -223,16 +230,15 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    public void InstantiateLights(List<Tuple<Coord, float>> lightList, Coord origin, GameObject parentTo = null)
+    public void InstantiateLights(RoomNode room, GameObject parentTo = null)
     {
-        foreach (Tuple<Coord, float> light in lightList)
-        {
-            Vector3 position = CoordToVect(light.Item1, origin);
+        Vector3 position = new Vector3(
+            (room.Position.x + room.Width / 2f) * 16f,
+            (room.Position.y - room.Height / 2f) * 16f, 1);
 
-            GameObject lightObj = Instantiate(lightPrefab, position, Quaternion.identity, parentTo.transform);
+        GameObject lightObj = Instantiate(lightPrefab, position, Quaternion.identity, parentTo.transform);
 
-            lightObj.GetComponent<Light2D>().pointLightOuterRadius = light.Item2;
-        }
+        lightObj.transform.localScale = new Vector3(room.Width * 1.25f, room.Height * 1.25f);
     }
 
     void AdvanceLevel()

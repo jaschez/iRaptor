@@ -24,10 +24,13 @@ public class WorldManager
 
         await Task.Run(() =>
         {
-            WorldGenerationParameters parameters = CalculateParameters(level, seed);
+            do
+            {
+                WorldGenerationParameters parameters = CalculateParameters(level, random.Next());
 
-            generator = new WorldGenerator(parameters);
-            generator.GenerateWorld(debug);
+                generator = new WorldGenerator(parameters);
+                generator.GenerateWorld(debug);
+            } while (generator.UnsuccessfulLinks > 0);
         });
 
         return generator;

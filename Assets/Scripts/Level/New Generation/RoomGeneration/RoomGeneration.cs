@@ -5,7 +5,7 @@ using System.Linq;
 
 public abstract class RoomGeneration
 {
-    protected System.Random random;
+    protected Random random;
 
     public RoomType GenerationType { get; protected set; }
 
@@ -53,12 +53,23 @@ public abstract class RoomGeneration
         ScaledStartPoints = new List<Coord>();
     }
 
-    protected void Initialize(RoomType roomType, int width, int height, int scaleFactor, float fillPercentage)
+    protected void Initialize(RoomType roomType, int size, int scaleFactor, float fillPercentage, Coord knownDimensions = new Coord())
     {
         GenerationType = roomType;
 
-        Width = width;
-        Height = height;
+        if (knownDimensions.x == 0 && knownDimensions.y == 0)
+        {
+            Coord dimensions = CalculateDimensions(size, scaleFactor);
+
+            Width = dimensions.x;
+            Height = dimensions.y;
+        }
+        else
+        {
+            Width = knownDimensions.x;
+            Height = knownDimensions.y;
+        }
+
         ScaleFactor = scaleFactor;
 
         FillPercentage = fillPercentage;
@@ -84,6 +95,25 @@ public abstract class RoomGeneration
                 simpleMap[i, j] = TileType.Wall;
             }
         }
+    }
+
+    Coord CalculateDimensions(int size, int scaleFactor)
+    {
+        //Calculate the minimum length of a room side
+        int minRoomSide = (int)Math.Sqrt(size);
+        minRoomSide -= (int)(minRoomSide * .2f);
+
+        minRoomSide = Math.Max(minRoomSide, 6);
+
+        //Adjust width and height to chosen room size
+        int roomWidth = random.Next(minRoomSide, size / minRoomSide);
+        int roomHeight = size / roomWidth;
+
+        //Approximate width and height to multiple of scaleFactor
+        roomWidth = (roomWidth / scaleFactor) * scaleFactor;
+        roomHeight = (roomHeight / scaleFactor) * scaleFactor;
+
+        return new Coord(roomWidth, roomHeight);
     }
 
     public void Generate()
@@ -398,7 +428,7 @@ public abstract class RoomGeneration
     {
         DensityMap<TileType> densityMap = new DensityMap<TileType>(Map, TileType.Floor);
 
-        List<List<Coord>> interestingAreas = densityMap.GetHighPeaks(0.3f, 4);
+        List<List<Coord>> interestingAreas = densityMap.GetHighPeaks(0.05f, 4);
 
         InterestingPoints = new List<Coord>();
 
