@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -65,6 +66,26 @@ public class DensityMap<T>
         return area;
     }
 
+    public List<Tuple<Coord, float>> GetWeightedAreas(int radius)
+    {
+
+        List<Tuple<Coord, float>> area = new List<Tuple<Coord, float>>();
+
+        CalculateMap(radius);
+
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++)
+            {
+                float value =  density[i, j] / (float)maximumValue;
+                value *= value * value;
+                Tuple<Coord, float> tuple = new Tuple<Coord, float>(new Coord(i, j), value);
+                area.Add(tuple);
+            }
+        }
+
+        return area;
+    }
 
     public List<List<Coord>> GetHighPeaks(float percentile, int radius)
     {

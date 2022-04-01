@@ -40,6 +40,7 @@ public abstract class RoomGeneration
     public List<Coord> StartPoints { get; private set; }
     protected List<Coord> ScaledStartPoints { get; private set; }
     public List<Coord> InterestingPoints { get; private set; }
+    public List<Tuple<Coord, float>> WeightedAreas { get; private set; }
     public List<Tuple<Coord, float>> LightPoints { get; private set; }
 
     public RoomGeneration(RoomNode room, int seed, int level)
@@ -431,6 +432,7 @@ public abstract class RoomGeneration
         List<List<Coord>> interestingAreas = densityMap.GetHighPeaks(0.05f, 4);
 
         InterestingPoints = new List<Coord>();
+        WeightedAreas = densityMap.GetWeightedAreas(4);
 
         foreach (List<Coord> area in interestingAreas)
         {

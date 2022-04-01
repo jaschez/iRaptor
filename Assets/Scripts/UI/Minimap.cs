@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -268,12 +269,18 @@ public class Minimap : MonoBehaviour
             colourMap[(worldPos.y - c.y) * width + c.x + worldPos.x] = Color.magenta;
         }*/
 
-        /*foreach (Coord c in room.InterestingPoints)
+        /*foreach (Tuple<Coord, float> c in room.WeightedAreas)
+        {
+            colorIndex = (height - mapOrigin.y + worldPos.y - c.Item1.y - 1) * width + (c.Item1.x - mapOrigin.x) + worldPos.x;
+
+            discoveredColourMap[colorIndex] = new Color(c.Item2, c.Item2, c.Item2);
+        }*/
+
+        foreach (Coord c in room.InterestingPoints)
         {
             colorIndex = (height - mapOrigin.y + worldPos.y - c.y - 1) * width + (c.x - mapOrigin.x) + worldPos.x;
-
             discoveredColourMap[colorIndex] = Color.magenta;
-        }*/
+        }
 
         mapTexture.SetPixels(discoveredColourMap);
         mapTexture.Apply();

@@ -92,6 +92,7 @@ public class RoomNode : Node<RoomNode>
     public List<Coord> Loot { get; private set; }
     public List<Coord> Chest { get; private set; }
     public List<Coord> InterestingPoints { get; private set; }
+    public List<Tuple<Coord, float>> WeightedAreas { get; private set; }
 
     public List<Tuple<Coord, float>> LightPoints { get; private set; }
     public List<List<Tuple<EnemyType, Coord>>> Enemies { get; private set; } = new List<List<Tuple<EnemyType, Coord>>>();
@@ -141,6 +142,7 @@ public class RoomNode : Node<RoomNode>
         Entries = generator.StartPoints;
         InterestingPoints = generator.InterestingPoints;
         LightPoints = generator.LightPoints;
+        WeightedAreas = generator.WeightedAreas;
 
         /*Loot = loot;
         Chest = chest;
