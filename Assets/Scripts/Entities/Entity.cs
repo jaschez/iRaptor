@@ -5,8 +5,8 @@ using UnityEngine;
 public abstract class Entity : MonoBehaviour
 {
 
-    protected GameObject[] drops;
-    protected GameObject[] actualDrops;
+    protected Dictionary<DropType, GameObject> drops;
+    protected Drop[] actualDrops;
 
     Material spriteMat;
     Material whiteMat;
@@ -16,7 +16,7 @@ public abstract class Entity : MonoBehaviour
     Color origColor;
 
     protected int units = 1;
-    protected int dropIndex = 0;
+    protected DropType dropType = DropType.CarbonUnit;
 
     protected LevelManager levelManager;
 
@@ -26,7 +26,7 @@ public abstract class Entity : MonoBehaviour
 
     private int _health;
 
-    public delegate void EntityEvents(Entity sender, EntityEvent eventType, int param);
+    public delegate void EntityEvents(Entity sender, EntityEvent eventType, object param);
 
     public event EntityEvents OnEntityEvent;
 
@@ -73,7 +73,6 @@ public abstract class Entity : MonoBehaviour
     //Se llama al método antes que Start y antes de que se inicialicen los objectos
     protected virtual void Awake()
     {
-        drops = LevelGenerator.GetInstance()?.GetDrops();
 
         InitEntity();
 
@@ -95,16 +94,19 @@ public abstract class Entity : MonoBehaviour
 
         levelManager = LevelManager.GetInstance();
 
-        actualDrops = new GameObject[units];
-        GameObject actualDrop;
-
         if (entityType != EntityType.Player) {
-            for (int i = 0; i < units; i++)
-            {
-                actualDrop = Instantiate(drops[dropIndex], transform.position, Quaternion.identity);
-                actualDrop.SetActive(false);
+            if (actualDrops == null) {
+                drops = levelManager.Drops;
+                actualDrops = new Drop[units];
+                GameObject actualDrop;
 
-                actualDrops[i] = actualDrop;
+                for (int i = 0; i < units; i++)
+                {
+                    actualDrop = Instantiate(drops[dropType], transform.position, Quaternion.identity);
+                    actualDrop.SetActive(false);
+
+                    actualDrops[i] = actualDrop.GetComponent<Drop>();
+                }
             }
         }
     }
@@ -114,7 +116,7 @@ public abstract class Entity : MonoBehaviour
         this.entityType = entityType;
     }
 
-    protected virtual void SendEvent(EntityEvent e, int param = 0)
+    protected virtual void SendEvent(EntityEvent e, object param = null)
     {
         OnEntityEvent?.Invoke(this, e, param);
     }
@@ -178,10 +180,9 @@ public abstract class Entity : MonoBehaviour
 
     private void DropStuff()
     {
-        //int dropIndex = Random.Range(0, drops.Length);
-
-        foreach (GameObject dropGO in actualDrops)
+        foreach (Drop drop in actualDrops)
         {
+            GameObject dropGO = drop.gameObject;
             dropGO.transform.position = transform.position;
             dropGO.SetActive(true);
         }

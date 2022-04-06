@@ -7,6 +7,8 @@ public abstract class RoomGeneration
 {
     protected Random random;
 
+    protected GameManagerModule gameManager;
+
     public RoomType GenerationType { get; protected set; }
 
     public RoomNode AssociatedRoom { get; protected set; }
@@ -14,6 +16,8 @@ public abstract class RoomGeneration
     public TileType[,] Map { get; private set; }
 
     public TileSkin[,] TileMap { get; private set; }
+
+    protected int Level { get; private set; }
 
     //Dimensions
     public int Width { get; private set; }
@@ -47,7 +51,11 @@ public abstract class RoomGeneration
     {
         random = new Random(seed);
 
+        gameManager = GameManagerModule.GetInstance();
+
         AssociatedRoom = room;
+
+        Level = level;
 
         FloorCoords = new List<Coord>();
         StartPoints = new List<Coord>();

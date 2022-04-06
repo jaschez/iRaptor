@@ -4,18 +4,12 @@ using UnityEngine;
 
 public class Loot : Entity
 {
-
     protected override void InitEntity()
     {
         SetEntityType(EntityType.Loot);
         InitHealth(1);
 
-        dropIndex = (int)DropType.PowerUp;
-
-        if (dropIndex == (int)DropType.CarbonUnit)
-        {
-            units = Random.Range(10, 14);
-        }
+        dropType = DropType.Item;
     }
 
     protected override void Start()
@@ -25,10 +19,17 @@ public class Loot : Entity
         transform.Rotate(Vector3.forward, Random.Range(-180, 180));
     }
 
+    public void SetItem(ItemData item)
+    {
+        drops = LevelManager.GetInstance().Drops;
+        actualDrops = new Drop[1];
+        actualDrops[0] = Instantiate(drops[dropType], transform.position, Quaternion.identity).GetComponent<Drop>();
+        actualDrops[0].gameObject.SetActive(false);
+        ((ItemDrop)actualDrops[0]).SetItem(item);
+    }
+
     protected override void Die()
     {
-
-        //CamManager.GetInstance().ShakeQuake(4, 2.5f, false);
         SoundManager.Play(Sounds.Break, transform.position);
         base.Die();
     }

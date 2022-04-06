@@ -58,8 +58,9 @@ public class AttackModule : Shooter
     {
         StartCoroutine(MuzzleFlash(3));
 
-        Fire(player.GetBuffIndexes());
-        player.UseBuffs();
+        Bullet.Effect[] bulletEffects = GetInventoryEffects(player.GetInventory());
+
+        Fire(bulletEffects);
 
         movementManager.Recoil();
 
@@ -75,6 +76,29 @@ public class AttackModule : Shooter
     public void Unlock()
     {
         locked = false;
+    }
+
+    //Extract effects based on the items from an specific inventory
+    Bullet.Effect[] GetInventoryEffects(Inventory inventory)
+    {
+        List<Bullet.Effect> effects = new List<Bullet.Effect>();
+
+        if (inventory.IsItemStored(ItemID.Drill))
+        {
+            if (Random.Range(0, 10) < 2) {
+                effects.Add(Bullet.Effect.Perforing);
+            }
+        }
+
+        if (inventory.IsItemStored(ItemID.Molotovic))
+        {
+            if (Random.Range(0, 10) < 2)
+            {
+                effects.Add(Bullet.Effect.Burning);
+            }
+        }
+
+        return effects.ToArray();
     }
 
     public static AttackModule GetInstance()

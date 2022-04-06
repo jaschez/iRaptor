@@ -75,7 +75,7 @@ public abstract class Drop : MonoBehaviour
                 Destroy(trail.gameObject, .5f);
             }
 
-            if(dropType !=DropType.PowerUp)
+            if(dropType !=DropType.Item)
             gameObject.SetActive(false);
         }
     }
@@ -92,6 +92,6 @@ public enum DropType
 {
     HP,
     CarbonUnit,
-    PowerUp,
+    Item,
     DashUnit
 }

@@ -48,7 +48,7 @@ public class EnemyHealthUI : MonoBehaviour
         }
     }
 
-    void OnChangedHealth(Entity sender, Entity.EntityEvent eventType, int param)
+    void OnChangedHealth(Entity sender, Entity.EntityEvent eventType, object param)
     {
         if (eventType == Entity.EntityEvent.Damage)
         {

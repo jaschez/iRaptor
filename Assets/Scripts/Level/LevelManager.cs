@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering.Universal;
 
 public class LevelManager : MonoBehaviour
 {
@@ -12,12 +11,19 @@ public class LevelManager : MonoBehaviour
     System.Random random;
 
     [Space]
+    
     public GameObject lootPrefab;
     public GameObject npcPrefab;
     public GameObject lightPrefab;
     public GameObject chestPrefab;
     public GameObject barrierPrefab;
     public GameObject exitPrefab;
+
+    [Space]
+
+    public DropObject[] DropObjects;
+
+    public Dictionary<DropType, GameObject> Drops { get; private set; }
 
     GameManagerModule gameManager;
 
@@ -38,6 +44,16 @@ public class LevelManager : MonoBehaviour
         if (instance == null)
         {
             instance = this;
+        }
+
+        Drops = new Dictionary<DropType, GameObject>();
+
+        foreach (DropObject drop in DropObjects)
+        {
+            if (!Drops.ContainsKey(drop.Type))
+            {
+                Drops.Add(drop.Type, drop.Object);
+            }
         }
     }
 
@@ -129,8 +145,12 @@ public class LevelManager : MonoBehaviour
                 //Reward layer
                 if (room.Type == RoomType.Reward)
                 {
-                    Vector3 rewardPos = CoordToVect(((RewardRoom)room).Reward.Item2, room.Position);
-                    Instantiate(lootPrefab, rewardPos, Quaternion.identity);
+                    RewardRoom rewardRoom = (RewardRoom)room;
+
+                    Vector3 rewardPos = CoordToVect(rewardRoom.Reward.Item2, room.Position);
+                    Loot chest = Instantiate(lootPrefab, rewardPos, Quaternion.identity).GetComponent<Loot>();
+
+                    chest.SetItem(rewardRoom.Reward.Item1);
                 }
                 else if(room.Type == RoomType.Shop)
                 {
@@ -297,5 +317,18 @@ public class LevelManager : MonoBehaviour
     public static LevelManager GetInstance()
     {
         return instance;
+    }
+
+    [Serializable]
+    public struct DropObject{
+        public GameObject Object;
+        public DropType Type;
+    }
+
+    [Serializable]
+    public struct ItemObject
+    {
+        public ItemID ID;
+        public ItemData Data;
     }
 }

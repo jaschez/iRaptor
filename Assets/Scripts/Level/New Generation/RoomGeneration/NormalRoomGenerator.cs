@@ -16,13 +16,9 @@ public class NormalRoomGenerator : RoomGeneration
 
     Dictionary<EnemyType, float> enemyRates;
 
-    GameManagerModule gameManager;
-
     public NormalRoomGenerator(RoomNode room, int seed, int level) : base(room, seed, level)
     {
-        gameManager = GameManagerModule.GetInstance();
-
-        enemies = gameManager.EnemiesOrderedByDifficulty;
+        enemies = gameManager.Enemies;
         roomSettings = gameManager.enemyRoomSettings[level];
         enemyRates = gameManager.SpawnRateDictionaries[level];
 

@@ -13,7 +13,7 @@ public class PauseMenu : MonoBehaviour
     private void Start()
     {
         pauseMenu.SetActive(false);
-        seedText.text = "iRAPTOR-"+GameManagerModule.GetInstance().GetGameSeed();
+        seedText.text = GameManagerModule.GetInstance().GetGameSeed().ToString();
     }
 
     private void Update()

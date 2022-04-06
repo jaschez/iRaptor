@@ -9,8 +9,8 @@ public class PlayerModule : Entity
 
     private Gadget gadget;
 
-    Dictionary<int, int> buffUses;
-    List<int> currentBuffs;
+    private Inventory inventory;
+    private Dictionary<ItemData, int> items;
 
     private int _carbonUnits = 0;
 
@@ -50,8 +50,9 @@ public class PlayerModule : Entity
 
         InitHealth(20);
 
-        buffUses = new Dictionary<int, int>();
-        currentBuffs = new List<int>();
+        inventory = new Inventory();
+
+        items = new Dictionary<ItemData, int>();
     }
 
     //Método que se ejecuta al comenzar la escena
@@ -89,7 +90,7 @@ public class PlayerModule : Entity
 
     public PlayerState SavePlayerState()
     {
-        PlayerState playerState = new PlayerState(GetHP(), CarbonUnits, gadget.GetUsesLeft(), buffUses);
+        PlayerState playerState = new PlayerState(GetHP(), CarbonUnits, gadget.GetUsesLeft(), items);
 
         return playerState;
     }
@@ -99,25 +100,22 @@ public class PlayerModule : Entity
         LoadHealth(playerState.hp);
         CarbonUnits = playerState.carbonUnits;
         gadget.SetUsesLeft(playerState.gadgetUses);
-        buffUses.Clear();
-        currentBuffs.Clear() ;
+
+        items = playerState.items;
+
+        foreach (ItemData item in items.Keys)
+        {
+            for (int replica = 0; replica < items[item]; replica++)
+            {
+                inventory.AddItem(item.ID);
+            }
+        }
     }
 
-    public void ActivateBuff(int buffIndex)
+    public void AddItem(ItemData item)
     {
-
-        if (buffUses.ContainsKey(buffIndex))
-        {
-            buffUses[buffIndex] += 20;
-            SendEvent(PlayerEvent.BuffExtension, buffIndex);
-        }
-        else
-        {
-            buffUses.Add(buffIndex, 20);
-            currentBuffs.Add(buffIndex);
-
-            SendEvent(PlayerEvent.BuffActivation, buffIndex);
-        }
+        inventory.AddItem(item.ID);
+        SendEvent(PlayerEvent.ItemPicked, item);
     }
 
     public void AddCarbonUnits(int cu)
@@ -159,6 +157,11 @@ public class PlayerModule : Entity
         SendEvent(PlayerEvent.RechargedGadgetUse, currentGadgetUses);
     }
 
+    public Inventory GetInventory()
+    {
+        return inventory;
+    }
+
     public int GetCarbonUnits()
     {
         return CarbonUnits;
@@ -179,34 +182,6 @@ public class PlayerModule : Entity
         return gadget.GetCooldownPercLeft();
     }
 
-    public void UseBuffs()
-    {
-
-        SendEvent(PlayerEvent.BuffUse);
-
-        for (int i = 0; i < currentBuffs.Count; i++)
-        {
-            int currBuff = currentBuffs[i];
-
-            buffUses[currBuff]--;
-
-            if (buffUses[currBuff] <= 0)
-            {
-                buffUses.Remove(currBuff);
-                currentBuffs.RemoveAt(i);
-
-                SendEvent(PlayerEvent.EndBuff, currBuff);
-
-                i--;
-            }
-        }
-    }
-
-    public int[] GetBuffIndexes()
-    {
-        return currentBuffs.ToArray();
-    }
-
     protected override void Die()
     {
         base.Die();
@@ -223,10 +198,7 @@ public class PlayerModule : Entity
         public static readonly PlayerEvent AddedGadgetUse = new PlayerEvent("AddedDash");
         public static readonly PlayerEvent RechargedGadgetUse = new PlayerEvent("RechargedDash");
         public static readonly PlayerEvent SpentGadgetUse = new PlayerEvent("SpentDash");
-        public static readonly PlayerEvent BuffActivation = new PlayerEvent("BuffActivation");
-        public static readonly PlayerEvent BuffExtension = new PlayerEvent("BuffExtension");
-        public static readonly PlayerEvent BuffUse = new PlayerEvent("BuffUse");
-        public static readonly PlayerEvent EndBuff = new PlayerEvent("EndBuff");
+        public static readonly PlayerEvent ItemPicked = new PlayerEvent("ItemPicked");
 
         protected PlayerEvent(string name) : base(name){}
     }
@@ -236,13 +208,13 @@ public readonly struct PlayerState
 {
     public readonly int hp, carbonUnits, gadgetUses;
 
-    public readonly Dictionary<int, int> buffUses;
+    public readonly Dictionary<ItemData, int> items;
 
-    public PlayerState(int _hp, int _carbonUnits, int _gadgetUses, Dictionary<int, int> _buffUses)
+    public PlayerState(int _hp, int _carbonUnits, int _gadgetUses, Dictionary<ItemData, int> _items)
     {
         hp = _hp;
         carbonUnits = _carbonUnits;
         gadgetUses = _gadgetUses;
-        buffUses = _buffUses;
+        items = _items;
     }
 }

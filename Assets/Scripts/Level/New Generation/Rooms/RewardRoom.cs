@@ -2,7 +2,7 @@
 
 public class RewardRoom : RoomNode
 {
-    public Tuple<RewardType, Coord> Reward { get; private set; }
+    public Tuple<ItemData, Coord> Reward { get; private set; }
 
     public RewardRoom(RoomNode room) : base(room)
     {
@@ -19,6 +19,5 @@ public class RewardRoom : RoomNode
 public enum RewardType
 {
     Weapon,
-    Buff,
     Object
 }

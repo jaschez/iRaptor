@@ -25,7 +25,7 @@ public abstract class EnemyModule : Entity
 
         waveManager = WaveManager.GetInstance();
 
-        dropIndex = (int)DropType.CarbonUnit;
+        dropType = DropType.CarbonUnit;
 
         units = Random.Range((int)(maxCarbonUnits*.7f), maxCarbonUnits);
     }

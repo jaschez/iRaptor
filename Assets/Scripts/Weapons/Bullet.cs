@@ -1,13 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Bullet : MonoBehaviour, IPooledObject
 {
 
     Vector2 orientation;
-
-    int[] levels;
 
     int damage = 0;
     int hitNumber = 0;
@@ -17,8 +13,7 @@ public class Bullet : MonoBehaviour, IPooledObject
 
     bool enemyBullet = false;
 
-    //Lista de Buffs
-    bool[] buffs;
+    Effect[] effects;
 
     void Start()
     {
@@ -40,16 +35,11 @@ public class Bullet : MonoBehaviour, IPooledObject
 
         hitNumber = 0;
         maxHitNumber = 1;
-
-        buffs = new bool[PowerUpDrop.GetTotalPowerups()];
     }
 
-    public void SetBuffState(int[] buffIndexes)
+    public void SetEffects(Effect[] bulletEffects)
     {
-        foreach (int buffIndex in buffIndexes)
-        {
-            buffs[buffIndex] = true;
-        }
+        effects = bulletEffects;
     }
 
     void FixedUpdate()
@@ -68,20 +58,13 @@ public class Bullet : MonoBehaviour, IPooledObject
         {
             if (!IsAttackingHimself(otherEntity))
             {
-                if (!(enemyBullet && otherEntity.GetEntityType() == EntityType.Barrier))
-                {
-                    otherEntity.TakeDamage(damage);
+                otherEntity.TakeDamage(damage);
 
-                    ApplyDebuffs(otherEntity);
+                ApplyEffects(otherEntity);
 
-                    hitNumber++;
+                hitNumber++;
 
-                    if (hitNumber >= maxHitNumber)
-                    {
-                        Impact();
-                    }
-                }
-                else
+                if (hitNumber >= maxHitNumber)
                 {
                     Impact();
                 }
@@ -104,21 +87,28 @@ public class Bullet : MonoBehaviour, IPooledObject
         gameObject.SetActive(false);
     }
 
-    void ApplyDebuffs(Entity entity)
+    //Apply corresponding effects set by the shooter
+    void ApplyEffects(Entity entity)
     {
-        if (entity.GetEntityType() == EntityType.Enemy)
+        foreach (Effect effect in effects)
         {
-            EnemyModule enemy = (EnemyModule)entity;
-
-            if (IsBuffActive(PowerUpDrop.PowerUpType.Explosive))
+            switch (effect)
             {
-                enemy.Burn(1, 3);
-            }
-        }
+                case Effect.Burning:
+                    if (entity.GetEntityType() == EntityType.Enemy)
+                    {
+                        EnemyModule enemy = (EnemyModule)entity;
+                        enemy.Burn(1, 3);
+                    }
+                    break;
 
-        if (IsBuffActive(PowerUpDrop.PowerUpType.Drill))
-        {
-            maxHitNumber = 2;
+                case Effect.Perforing:
+                    maxHitNumber = 2;
+                    break;
+
+                default:
+                    break;
+            }
         }
     }
 
@@ -128,11 +118,6 @@ public class Bullet : MonoBehaviour, IPooledObject
             (otherEntity.GetEntityType() == EntityType.Enemy && enemyBullet);
     }
 
-    bool IsBuffActive(PowerUpDrop.PowerUpType type)
-    {
-        return buffs[(int)type];
-    }
-
     //ENEMIES DEBUFFS
 
     void Burn()
@@ -140,5 +125,9 @@ public class Bullet : MonoBehaviour, IPooledObject
 
     }
 
-
+    public enum Effect
+    {
+        Burning,
+        Perforing
+    }
 }

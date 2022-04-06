@@ -1,42 +1,23 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class PowerUpDrop : Drop
+public class ItemDrop : Drop
 {
-
-    PowerUpType powerUpType;
+    ItemData item;
 
     protected override void InitDrop()
     {
-        dropType = DropType.PowerUp;
-
-        powerUpType = (PowerUpType)Random.Range(0, GetTotalPowerups());
+        dropType = DropType.Item;
     }
 
     protected override void ActivateDrop()
     {
-        Debug.Log(powerUpType.ToString());
         StartCoroutine(ActivateAnimation());
-
-        //playerModule.ActivateBuff((int)powerUpType);
     }
 
-    public void SetPowerUpType(PowerUpType type)
+    public void SetItem(ItemData item)
     {
-        powerUpType = type;
-    }
-
-    public static int GetTotalPowerups() {
-        return (int)PowerUpType.Count;
-    }
-
-    public enum PowerUpType
-    {
-        Explosive = 0,
-        Toxic = 1,
-        Drill = 2,
-        Count = 3
+        this.item = item;
     }
 
     IEnumerator ActivateAnimation()
@@ -71,7 +52,7 @@ public class PowerUpDrop : Drop
             yield return new WaitForFixedUpdate();
         }
 
-        playerModule.ActivateBuff((int)powerUpType);
+        playerModule.AddItem(item);
 
         CamManager.GetInstance().ShakeQuake(4, 2f, false);
 

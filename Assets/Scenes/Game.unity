@@ -9917,6 +9917,17 @@ MonoBehaviour:
     type: 3}
   exitPrefab: {fileID: 2614000090703822607, guid: 3f594a05579b5a745a027a0f8f3d0421,
     type: 3}
+  DropObjects:
+  - Object: {fileID: 4865818851916458191, guid: 92dc9b790d2ba5249876383bd5fbfcaf,
+      type: 3}
+    Type: 0
+  - Object: {fileID: 1920843408055910762, guid: 146383148e1a0504d8b1a014555e8334,
+      type: 3}
+    Type: 1
+  - Object: {fileID: 73228800886540224, guid: f4e3f4326214a78468cd82fe265d72c9, type: 3}
+    Type: 2
+  - Object: {fileID: 208340427719842905, guid: 60cc2394ccf127c45b55e91ece834a9a, type: 3}
+    Type: 3
 --- !u!1 &1192085992
 GameObject:
   m_ObjectHideFlags: 0
@@ -12218,7 +12229,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7e069795cc9a9242bca5fa22b4f1c3f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  buffUIManager: {fileID: 1890024050}
+  UIItemManager: {fileID: 1890024050}
   textNotifier: {fileID: 53951676}
   gadgetVisualizer: {fileID: 1635317456}
   canvasParent: {fileID: 76806645}
@@ -12885,8 +12896,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   yOrigin: 150
   buffsOffset: 50
-  UIBuffPrefab: {fileID: 8617140344884748302, guid: 2d6af589022157547980171d8b3a5f34,
-    type: 3}
+  UIInventoryPrefab: {fileID: 0}
   buffImgs:
   - {fileID: 21300000, guid: 773cf355b0d8f9d40b4623716674d91b, type: 3}
   - {fileID: 21300000, guid: a348047a9317f1046b7b2ea4b8af170b, type: 3}

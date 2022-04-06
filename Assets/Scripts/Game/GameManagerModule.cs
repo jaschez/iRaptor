@@ -9,8 +9,12 @@ public class GameManagerModule : MonoBehaviour
 {
     static GameManagerModule instance;
 
-    public EnemyData[] Enemies;
-    public EnemyData[] EnemiesOrderedByDifficulty { get; private set; }
+    public ItemData[] GameItems;
+
+    public List<ItemData> AvailableItems { get; private set; }
+
+    public EnemyData[] GameEnemies;
+    public EnemyData[] Enemies { get; private set; }
 
     public EnemyRoomSettings[] enemyRoomSettings;
 
@@ -75,12 +79,17 @@ public class GameManagerModule : MonoBehaviour
 
     }
 
+    void GenerateItems()
+    {
+        AvailableItems = GameItems.OrderBy(x => x.Level).ToList();
+    }
+
     void GenerateEnemyData()
     {
         //Create enemy dictionary
         EnemyDictionary = new Dictionary<EnemyType, EnemyData>();
 
-        foreach (EnemyData enemy in Enemies)
+        foreach (EnemyData enemy in GameEnemies)
         {
             if (!EnemyDictionary.ContainsKey(enemy.Type))
             {
@@ -109,8 +118,9 @@ public class GameManagerModule : MonoBehaviour
         }
 
         //Order enemies by difficulty
-        EnemiesOrderedByDifficulty = Enemies.OrderBy(x => x.DifficultyPoints).ToArray();
+        Enemies = GameEnemies.OrderBy(x => x.DifficultyPoints).ToArray();
     }
+
     void OnLevelFinishedLoading(Scene scene, LoadSceneMode mode)
     {
         switch (scene.name)
@@ -135,6 +145,8 @@ public class GameManagerModule : MonoBehaviour
     async void StartGeneration()
     {
         worldManager = new WorldManager();
+
+        GenerateItems();
 
         var generationTask = await worldManager.GenerateLevelAsync(CurrentLevel, LevelSeeds[CurrentLevel]);
 

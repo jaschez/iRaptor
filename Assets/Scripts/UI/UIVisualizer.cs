@@ -10,7 +10,7 @@ public class UIVisualizer : MonoBehaviour
 
     PlayerModule player;
 
-    public BuffUIManager buffUIManager;
+    public InventoryUIManager UIItemManager;
 
     public TextMeshModifier textNotifier;
 
@@ -77,7 +77,7 @@ public class UIVisualizer : MonoBehaviour
         StartCoroutine("UpdateMaxHealthBar");
     }
 
-    void OnPlayerEvent(Entity sender, Entity.EntityEvent eventType, int param)
+    void OnPlayerEvent(Entity sender, Entity.EntityEvent eventType, object param)
     {
 
         if (eventType == Entity.EntityEvent.Heal)
@@ -97,7 +97,7 @@ public class UIVisualizer : MonoBehaviour
         if (eventType == PlayerModule.PlayerEvent.AddedCU)
         {
             cuText.text = player.GetCarbonUnits().ToString();
-            cuPopUp.UpdateValue(param);
+            cuPopUp.UpdateValue((int)param);
         }
 
         if (eventType == PlayerModule.PlayerEvent.SpentCU)
@@ -167,37 +167,16 @@ public class UIVisualizer : MonoBehaviour
             CamManager.GetInstance().ShakeQuake(20, 3f, true);
         }
 
-        if (eventType == PlayerModule.PlayerEvent.BuffActivation)
+        if (eventType == PlayerModule.PlayerEvent.ItemPicked)
         {
-            buffUIManager.AddUIBuff((PowerUpDrop.PowerUpType)param, 20);
+            ItemData item = (ItemData)param;
+
+            UIItemManager.AddUIItem(item.ID);
             StartCoroutine(AnimatePowerUp());
 
-            textNotifier.NotifyMessage("NEW MODULE INSTALLED");
-            PopUp(PopUpType.Info, ((PowerUpDrop.PowerUpType)param).ToString(), sender.transform, 1.5f, 30);
-            Debug.Log("Buff activado: " + ((PowerUpDrop.PowerUpType)param).ToString());
-        }
-
-        if (eventType == PlayerModule.PlayerEvent.BuffExtension)
-        {
-            buffUIManager.AddUIBuff((PowerUpDrop.PowerUpType)param, 20);
-            StartCoroutine(AnimatePowerUp());
-
-            textNotifier.NotifyMessage("MODULE USE EXTENDED");
-            PopUp(PopUpType.Info, ((PowerUpDrop.PowerUpType)param).ToString(), sender.transform, 1.5f, 30);
-            Debug.Log("Buff extendido: " + ((PowerUpDrop.PowerUpType)param).ToString());
-        }
-
-        if (eventType == PlayerModule.PlayerEvent.BuffUse)
-        {
-            buffUIManager.UseBuffs();
-        }
-
-        if (eventType == PlayerModule.PlayerEvent.EndBuff)
-        {
-
-            buffUIManager.DeleteUIBuff((PowerUpDrop.PowerUpType)param);
-
-            Debug.Log("Buff eliminado: " + ((PowerUpDrop.PowerUpType)param).ToString());
+            textNotifier.NotifyMessage(item.Description.ToUpper());
+            PopUp(PopUpType.Info, item.Name.ToUpper(), sender.transform, 1.5f, 30);
+            Debug.Log("Item recogido: " + item.Name);
         }
     }
 

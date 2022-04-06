@@ -24,15 +24,15 @@ public class Shooter : MonoBehaviour
         pooler = ObjectPooler.GetInstance();
     }
 
-    protected void Fire(int[] buffIndexes = null)
+    protected void Fire(Bullet.Effect[] bulletEffects = null)
     {
-        Fire(transform.rotation, buffIndexes);
+        Fire(transform.rotation, bulletEffects);
     }
 
-    protected void Fire(Quaternion orientation, int[] buffIndexes = null)
+    protected void Fire(Quaternion orientation, Bullet.Effect[] bulletEffects = null)
     {
 
-        buffIndexes = buffIndexes ?? new int[0];
+        bulletEffects = bulletEffects ?? new Bullet.Effect[0];
 
         if (Time.time > cooldownFinishTime) {
             cooldownFinishTime = Time.time + cooldown;
@@ -52,7 +52,7 @@ public class Shooter : MonoBehaviour
             if (bulletModule != null)
             {
                 bulletModule.InitBullet(velocity, damage, enemyBullet);
-                bulletModule.SetBuffState(buffIndexes);
+                bulletModule.SetEffects(bulletEffects);
             }
             else
             {
