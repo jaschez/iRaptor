@@ -47,8 +47,8 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDrag: 0
-  m_AngularDrag: 0.05
+  m_LinearDrag: 2
+  m_AngularDrag: 2
   m_GravityScale: 0
   m_Material: {fileID: 6200000, guid: b3ee99a832f21d047b119c3990fb49a6, type: 2}
   m_Interpolate: 0
@@ -93,6 +93,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7932d9edf35f6404a819cf80c7c3f248, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  particles: {fileID: 5152572285271017435, guid: 24e800f6776939c40a5257705e6ff448,
+    type: 3}
+  priceText: {fileID: 8055325531954052650, guid: b61d7528d04c109469e1c7d3ffe45739,
+    type: 3}
 --- !u!1 &1396650463792194297
 GameObject:
   m_ObjectHideFlags: 0

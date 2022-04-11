@@ -1,38 +1,33 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
 using UnityEngine;
 
 public class InventoryUIManager : MonoBehaviour
 {
+    public GameObject UIItemPrefab;
 
-    public float yOrigin = 150;
-    public float buffsOffset = 50;
-
-    public GameObject UIInventoryPrefab;
-
-    public Sprite[] buffImgs;
-
-    Dictionary<ItemID, int> UISkills;
+    Dictionary<ItemID, GameObject> UIItems;
 
     private void Awake()
     {
-        UISkills = new Dictionary<ItemID, int>();
+        UIItems = new Dictionary<ItemID, GameObject>();
     }
 
-    public void LoadBuffs(Dictionary<ItemID, int> UISkills)
+    public void LoadItems(Dictionary<ItemID, GameObject> UIItems)
     {
-        this.UISkills = UISkills;
+        this.UIItems = UIItems;
     }
 
-    public void AddUIItem(ItemID skill)
+    public void AddUIItem(ItemData item)
     {
-        if (!UISkills.ContainsKey(skill))
+        if (!UIItems.ContainsKey(item.ID))
         {
-            
-        }
-        else
-        {
-            
+            GameObject uiItem = Instantiate(UIItemPrefab, transform);
+
+            uiItem.GetComponent<Image>().sprite = item.Image;
+
+            UIItems.Add(item.ID, uiItem);
         }
     }
 }

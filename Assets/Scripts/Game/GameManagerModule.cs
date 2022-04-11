@@ -134,6 +134,12 @@ public class GameManagerModule : MonoBehaviour
             case "Game":
                 StartLevel();
                 break;
+
+            case "Lobby":
+                break;
+
+            default:
+                break;
         }
     }
 

@@ -180,11 +180,13 @@ public abstract class Entity : MonoBehaviour
 
     private void DropStuff()
     {
-        foreach (Drop drop in actualDrops)
-        {
-            GameObject dropGO = drop.gameObject;
-            dropGO.transform.position = transform.position;
-            dropGO.SetActive(true);
+        if (actualDrops != null) {
+            foreach (Drop drop in actualDrops)
+            {
+                GameObject dropGO = drop.gameObject;
+                dropGO.transform.position = transform.position;
+                dropGO.SetActive(true);
+            }
         }
     }
 

@@ -7,13 +7,20 @@ public class PauseMenu : MonoBehaviour
 {
     bool paused = false;
 
+    GameManagerModule gameManager;
+
     [SerializeField] GameObject pauseMenu;
     [SerializeField] TMP_Text seedText;
 
     private void Start()
     {
         pauseMenu.SetActive(false);
-        seedText.text = GameManagerModule.GetInstance().GetGameSeed().ToString();
+
+        gameManager = GameManagerModule.GetInstance();
+
+        if (gameManager != null) {
+            seedText.text = GameManagerModule.GetInstance().GetGameSeed().ToString();
+        }
     }
 
     private void Update()

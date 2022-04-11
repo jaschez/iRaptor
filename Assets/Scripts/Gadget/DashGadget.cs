@@ -13,7 +13,7 @@ public class DashGadget : Gadget
 
     SpriteRenderer sr;
 
-    float duration = .04f;
+    float duration = .1f;
 
     float maxDistance = 70;
 
@@ -78,7 +78,7 @@ public class DashGadget : Gadget
 
     Vector3 CalculateDashPoint(float maxDist)
     {
-        orientation = movement.GetPlayerOrientation();
+        orientation = movement.GetDirection();
 
         Vector3 auxPos = transform.position + (Vector3)(orientation * maxDist);
         Vector3 finalPos;
@@ -122,24 +122,28 @@ public class DashGadget : Gadget
 
         float dashFinishedTime = Time.time + duration;
 
-        transform.position = destPosition;
+        //transform.position = destPosition;
 
-        sr.enabled = false;
+        //sr.enabled = false;
 
-        movement.rb.simulated = false;
-
+        movement.rb.sharedMaterial.bounciness = 1;
+        movement.rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        yield return new WaitForEndOfFrame();
         movement.enabled = false;
+        yield return new WaitForEndOfFrame();
+        movement.rb.AddForce(movement.GetDirection() * 400, ForceMode2D.Impulse);
 
         while (Time.time < dashFinishedTime)
         {
             yield return null;
         }
 
-        sr.enabled = true;
+        //sr.enabled = true;
 
         movement.enabled = true;
-        movement.rb.simulated = true;
         movement.rb.velocity = orientation * movement.GetPlayerVelocity();
+        movement.rb.sharedMaterial.bounciness = 0;
+        movement.rb.collisionDetectionMode = CollisionDetectionMode2D.Discrete;
 
         yield return null;
     }

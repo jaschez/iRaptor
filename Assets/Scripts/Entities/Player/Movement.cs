@@ -234,6 +234,11 @@ public class Movement : MonoBehaviour
         return instance;
     }
 
+    public Vector2 GetDirection()
+    {
+        return movementOrientation;
+    }
+
     public Vector2 GetPlayerOrientationByMovement()
     {
         if (JoystickDropped())

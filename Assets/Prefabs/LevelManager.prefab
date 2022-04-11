@@ -1,0 +1,94 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5502033643283223098
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5502033643283223096}
+  - component: {fileID: 5502033643283223097}
+  - component: {fileID: 5502033643283223099}
+  m_Layer: 0
+  m_Name: LevelManager
+  m_TagString: lvlmanager
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5502033643283223096
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5502033643283223098}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5502033643283223097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5502033643283223098}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 903f64fac94de9849a3a63eae17c179e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lootPrefab: {fileID: 1396650462001427531, guid: e25d9b66e13715c4b87b6024e93ba57a,
+    type: 3}
+  npcPrefab: {fileID: 5745596133600405502, guid: 28932214b45b2e24abd2e1df73195770,
+    type: 3}
+  lightPrefab: {fileID: 1914616903238126478, guid: 1fbe21ec570a360479ec736da1df1c80,
+    type: 3}
+  chestPrefab: {fileID: 7436859949091087053, guid: 45c85d72714f527409efde71d6bbc521,
+    type: 3}
+  barrierPrefab: {fileID: 2078920958065518928, guid: 0adc4a302f832d6488540358bfef5629,
+    type: 3}
+  exitPrefab: {fileID: 2614000090703822607, guid: 3f594a05579b5a745a027a0f8f3d0421,
+    type: 3}
+  DropObjects:
+  - Object: {fileID: 4865818851916458191, guid: 92dc9b790d2ba5249876383bd5fbfcaf,
+      type: 3}
+    Type: 0
+  - Object: {fileID: 1920843408055910762, guid: 146383148e1a0504d8b1a014555e8334,
+      type: 3}
+    Type: 1
+  - Object: {fileID: 73228800886540224, guid: f4e3f4326214a78468cd82fe265d72c9, type: 3}
+    Type: 2
+  - Object: {fileID: 208340427719842905, guid: 60cc2394ccf127c45b55e91ece834a9a, type: 3}
+    Type: 3
+--- !u!114 &5502033643283223099
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5502033643283223098}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba0cc2f9c749bb143a4b07ef5be70a15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tilemap: {fileID: 0}
+  drops:
+  - {fileID: 4865818851916458191, guid: 92dc9b790d2ba5249876383bd5fbfcaf, type: 3}
+  - {fileID: 1920843408055910762, guid: 146383148e1a0504d8b1a014555e8334, type: 3}
+  - {fileID: 73228800886540224, guid: f4e3f4326214a78468cd82fe265d72c9, type: 3}
+  - {fileID: 208340427719842905, guid: 60cc2394ccf127c45b55e91ece834a9a, type: 3}
+  player: {fileID: 0}
+  npc: {fileID: 0}
+  enemyPrefab: {fileID: 0}
+  lootPrefab: {fileID: 0}
+  chestPrefab: {fileID: 0}
+  barrierPrefab: {fileID: 0}
+  exitPrefab: {fileID: 0}

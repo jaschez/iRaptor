@@ -171,7 +171,7 @@ public class UIVisualizer : MonoBehaviour
         {
             ItemData item = (ItemData)param;
 
-            UIItemManager.AddUIItem(item.ID);
+            UIItemManager.AddUIItem(item);
             StartCoroutine(AnimatePowerUp());
 
             textNotifier.NotifyMessage(item.Description.ToUpper());
