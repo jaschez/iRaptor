@@ -1,0 +1,23 @@
+title: Pancorb.Start
+tags: 
+colorID: 0
+position: 189,-1037
+---
+<<SetSpeaker Pancorb>>
+
+<<if $fiesta neq 1>>
+Ey, ¿Que tal {$name}?
+Hoy hacemos una fiesta, ¿Vas a venir?
+->Si
+    <<set $fiesta to 1>>
+    <<SetSpeaker John happy>>
+    Genial, te añadire a la lista de invitados.
+->No
+    Ohhh, que pena...
+    Si cambias de opinion estare por aqui.
+<<else>>
+¡Hola {$name}!
+<<SetSpeaker John happy>>
+Estoy deseando de que vengas.
+<<endif>>
+===

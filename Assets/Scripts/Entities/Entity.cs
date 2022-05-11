@@ -210,7 +210,6 @@ public abstract class Entity : MonoBehaviour
 
     public class EntityEvent
     {
-
         public static readonly EntityEvent Creation = new EntityEvent("Creation");
         public static readonly EntityEvent Heal = new EntityEvent("Heal");
         public static readonly EntityEvent Damage = new EntityEvent("Damage");

@@ -2,13 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using Yarn.Unity;
 
 [RequireComponent(typeof(DialogueRunner), typeof(DialogueUI))]
 public class DialogManager : MonoBehaviour
 {
 
-    public Text speakerNameText;
+    public TextMeshProUGUI speakerNameText;
     public Image speakerImage;
 
     DialogueRunner dialogueRunner;

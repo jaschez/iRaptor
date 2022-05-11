@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using DG.Tweening;
 using UnityEngine;
 
 public class CamManager : MonoBehaviour
@@ -57,8 +58,8 @@ public class CamManager : MonoBehaviour
 
     void FollowingCalculations()
     {
-        screenOffset = Vector2.Lerp(screenOffset,
-        movManager.GetPlayerOrientation() * sightOffset * (Controls.GetMoveKey() && !movManager.IsLocked()? 4 : 1), Time.deltaTime * 3);
+        screenOffset = Vector2.Lerp(screenOffset, movManager.IsLocked()? Vector2.zero :
+        movManager.GetPlayerOrientation() * sightOffset * (Controls.GetMoveKey()? 4 : 1), Time.deltaTime * 3);
 
         transform.position = Vector2.Lerp(transform.position, (Vector2)target.position + screenOffset, Time.deltaTime * 8);
     }
@@ -92,8 +93,17 @@ public class CamManager : MonoBehaviour
 
     public void Zoom(float target, float velocity)
     {
-
         StartCoroutine(ZoomTransition(target, velocity));
+    }
+
+    public void ZoomAnimation(float targetSize, float duration)
+    {
+        camComponent.DOOrthoSize(targetSize, duration).SetEase(Ease.OutQuad);
+    }
+
+    public void ShakeAnimation(float strength, float duration, int vibrato = 10, bool fadeOut = true)
+    {
+        camComponent.DOShakePosition(duration, strength, vibrato, 90, fadeOut);
     }
 
     public void ShockGame(float time)
@@ -170,6 +180,11 @@ public class CamManager : MonoBehaviour
         orientation = movManager.GetPlayerOrientationByMovement();
 
         screenOffset = Vector2.ClampMagnitude(screenOffset + orientation * magnitude, bounds);
+    }
+
+    public float GetCameraSize()
+    {
+        return camComponent.orthographicSize;
     }
 
     public static CamManager GetInstance()

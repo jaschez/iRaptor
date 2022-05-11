@@ -65,7 +65,10 @@ public class PlayerModule : Entity
 
     void Update()
     {
-        
+        if (Input.GetKeyDown(KeyCode.Delete))
+        {
+            SavingSystem.NewSave();
+        }
     }
 
     //Método que devuelve la instancia actual del jugador
@@ -77,15 +80,15 @@ public class PlayerModule : Entity
     public void Lock()
     {
         Movement.GetInstance().Lock();
-        AttackModule.GetInstance().Lock();
-        gadget.Lock();
+        AttackModule.GetInstance()?.Lock();
+        gadget?.Lock();
     }
 
     public void Unlock()
     {
         Movement.GetInstance().Unlock();
-        AttackModule.GetInstance().Unlock();
-        gadget.Unlock();
+        AttackModule.GetInstance()?.Unlock();
+        gadget?.Unlock();
     }
 
     public PlayerState SavePlayerState()
@@ -194,6 +197,7 @@ public class PlayerModule : Entity
 
         public static readonly PlayerEvent AddedCU = new PlayerEvent("AddedCU");
         public static readonly PlayerEvent SpentCU = new PlayerEvent("SpentCU");
+        public static readonly PlayerEvent SpentOrbs = new PlayerEvent("SpentOrbs");
         public static readonly PlayerEvent InsufficientCU = new PlayerEvent("InsufficientCU");
         public static readonly PlayerEvent AddedGadgetUse = new PlayerEvent("AddedDash");
         public static readonly PlayerEvent RechargedGadgetUse = new PlayerEvent("RechargedDash");

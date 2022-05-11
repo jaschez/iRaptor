@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: Molotovic
   Description: 20% percent chance of burning the target
+  Price: 3
   Level: 0
   Image: {fileID: 21300000, guid: 773cf355b0d8f9d40b4623716674d91b, type: 3}
   ID: 1

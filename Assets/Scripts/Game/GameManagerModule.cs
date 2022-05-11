@@ -3,13 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine;
-using System;
 
 public class GameManagerModule : MonoBehaviour
 {
     static GameManagerModule instance;
 
-    public ItemData[] GameItems;
+    public ItemDataDictionary itemDictionary;
 
     public List<ItemData> AvailableItems { get; private set; }
 
@@ -81,7 +80,8 @@ public class GameManagerModule : MonoBehaviour
 
     void GenerateItems()
     {
-        AvailableItems = GameItems.OrderBy(x => x.Level).ToList();
+        List<ItemID> unlockedIDs = SavingSystem.CurrentState.UnlockedItems;
+        AvailableItems = itemDictionary.GetItemsFromIDs(unlockedIDs);
     }
 
     void GenerateEnemyData()
@@ -133,9 +133,6 @@ public class GameManagerModule : MonoBehaviour
 
             case "Game":
                 StartLevel();
-                break;
-
-            case "Lobby":
                 break;
 
             default:

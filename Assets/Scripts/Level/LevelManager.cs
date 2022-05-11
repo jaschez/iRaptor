@@ -272,8 +272,6 @@ public class LevelManager : MonoBehaviour
 
         camManager.Zoom(10, 5);
 
-        uiVisualizer.TransitionScene();
-
         Invoke("FinishLevel", 1f);
     }
 

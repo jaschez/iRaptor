@@ -60,7 +60,7 @@ public class Movement : MonoBehaviour
         KeyCode attack = KeyCode.X;
         KeyCode dash = KeyCode.O;
         KeyCode interact = KeyCode.E;
-        KeyCode aim = KeyCode.P;
+        KeyCode aim = KeyCode.Escape;
 
         /* Inicializa los controles una vez comienza el juego (basado en un archivo externo para evitar
          * que un jugador pueda modificar los controles desde el programa y solo tengan acceso a ello

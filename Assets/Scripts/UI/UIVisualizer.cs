@@ -144,7 +144,6 @@ public class UIVisualizer : MonoBehaviour
 
         if (eventType == PlayerModule.PlayerEvent.SpentGadgetUse)
         {
-
             gadgetVisualizer.SpendUse();
         }
 
@@ -183,11 +182,6 @@ public class UIVisualizer : MonoBehaviour
     public void PopUpImportantMessage(string str)
     {
         textNotifier.NotifyMessage(str);
-    }
-
-    public void TransitionScene()
-    {
-        sceneTransitioner.SetTrigger("upgrade");
     }
 
     public void PopUp(PopUpType type, string msg, Transform target, float lifeTime = .3f, int size = 25, float movement = 6f, int blinks = 3){

@@ -14,5 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: Drill
   Description: 20% percent chance of perforing the target
+  Price: 4
+  Level: 0
   Image: {fileID: 21300000, guid: 8c67c054e76945743a23db9144b47d77, type: 3}
-  AssociatedSkill: 0
+  ID: 0

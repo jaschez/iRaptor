@@ -43,9 +43,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83083beba65746040ab366177664fd40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GameItems:
-  - {fileID: 11400000, guid: 50c3a99aa8118cb46bd2092b4c0744f6, type: 2}
-  - {fileID: 11400000, guid: 6fcd97c6aae639f43805f8dc2c00433a, type: 2}
+  itemDictionary: {fileID: 11400000, guid: 72ec5f0783248734e8ebc0f87a1fe9ea, type: 2}
   GameEnemies:
   - {fileID: 11400000, guid: d7977933fe860bb49b162197ff43a9f4, type: 2}
   - {fileID: 11400000, guid: 60546c086b513e849ba1e376f6fe073d, type: 2}

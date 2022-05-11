@@ -30,12 +30,18 @@ public class MenuInteraction : MonoBehaviour
     Material IntegrateMat;
     Material IntegrateMatMenu;
 
+    TransitionSystem transitionSystem;
+
     Vector3 camPos;
 
     MenuStates state = MenuStates.Intro;
 
     void Start()
     {
+        transitionSystem = TransitionSystem.GetInstance();
+        transitionSystem.SetTransitionColor(Color.white);
+        transitionSystem.Apply(TransitionSystem.Transition.FadeIn, .2f);
+
         InitializeButtonTexts();
         
         continueSequence = continueText.BounceIn().SetLoops(-1, LoopType.Restart).SetDelay(1.5f);
@@ -77,6 +83,24 @@ public class MenuInteraction : MonoBehaviour
     public void SwitchMenu(GameObject menu)
     {
         StartCoroutine(SwitchMenuAnimation(menu));
+    }
+
+    public void NewGame()
+    {
+        SavingSystem.NewSave();
+        TransitionToLobby();
+    }
+
+    public void LoadGame()
+    {
+        SavingSystem.Initialize();
+        TransitionToLobby();
+    }
+
+    void TransitionToLobby()
+    {
+        transitionSystem.SetTransitionColor(Color.black);
+        transitionSystem.SwitchToScene(SceneSystem.GameScenes.Lobby, TransitionSystem.Transition.FadeOut, .2f);
     }
 
     IEnumerator SwitchMenuAnimation(GameObject menu)
