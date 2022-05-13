@@ -111,7 +111,7 @@ public class UIGadgetVisualizer : MonoBehaviour
     void SendRanOutMsg()
     {
         UIVisualizer.GetInstance().PopUp(PopUpType.Info, "RAN OUT", PlayerModule.GetInstance().transform, .4f, 25, 4, 2);
-        SoundManager.Play(Sounds.RunOut, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
+        SoundManager.Play(Sound.RunOut, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
     }
 
     public void AddUse(int use = 1)

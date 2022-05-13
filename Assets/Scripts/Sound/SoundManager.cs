@@ -1,10 +1,19 @@
 ﻿using UnityEngine;
+using UnityEngine.Audio;
+using System.Collections.Generic;
+using DG.Tweening;
 
 public class SoundManager : MonoBehaviour
 {
     static SoundManager instance;
 
-    public AudioClip[] sounds;
+    public AudioAssets audioAssets;
+
+    AudioMixer mixer;
+
+    Dictionary<Sound, AudioClip> soundDictionary;
+    Dictionary<AudioMixerType, AudioMixerGroup> mixerDictionary;
+    Dictionary<AudioMixerType, string> volumeDictionary;
 
     private void Awake()
     {
@@ -15,11 +24,16 @@ public class SoundManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+
+        soundDictionary = audioAssets.GenerateSoundDictionary();
+        mixerDictionary = audioAssets.GenerateMixerDictionary();
+        volumeDictionary = audioAssets.GenerateVolumeParameterDictionary();
+        mixer = audioAssets.Mixer;
     }
 
-    public static AudioSource Play(Sounds sound, Vector3 emittingPoint, Transform parent = null, bool destroy = true, bool playOnAwake = true)
+    public static AudioSource Play(Sound sound, Vector3 emittingPoint, Transform parent = null, bool destroy = true, bool playOnAwake = true)
     {
-        return PlayClipAt(instance.sounds[(int)sound], emittingPoint, parent, destroy, playOnAwake);
+        return PlayClipAt(instance.soundDictionary[sound], emittingPoint, parent, destroy, playOnAwake);
     }
 
     public static SoundManager GetInstance()
@@ -40,6 +54,7 @@ public class SoundManager : MonoBehaviour
         }
 
         aSource.clip = clip;
+        aSource.outputAudioMixerGroup = instance.mixerDictionary[AudioMixerType.GameSound];
 
         aSource.playOnAwake = playOnAwake;
 
@@ -55,9 +70,50 @@ public class SoundManager : MonoBehaviour
 
         return aSource;
     }
+
+    public static void SetMixerVolume(AudioMixerType mixer, float volume)
+    {
+        volume = MapVolume(volume);
+
+        instance.mixer.SetFloat(instance.volumeDictionary[mixer] ,Mathf.Log10(volume) * 20f);
+    }
+
+    public static void FadeMixerVolume(AudioMixerType mixer, float endValue, float time)
+    {
+        foreach(AudioSource audio in FindObjectsOfType<AudioSource>())
+        {
+            if (mixer != AudioMixerType.None)
+            {
+                if (audio.outputAudioMixerGroup.GetHashCode() == instance.mixerDictionary[mixer].GetHashCode())
+                {
+                    FadeVolume(audio, endValue, time);
+                }
+            }
+            else
+            {
+                FadeVolume(audio, endValue, time);
+            }
+        } 
+    }
+
+    static float MapVolume(float volume)
+    {
+        volume = Mathf.Max(0.0001f, volume);
+        volume = Mathf.Min(volume, 1f);
+
+        return volume;
+    }
+
+    public static void FadeVolume(AudioSource audio, float volume, float time)
+    {
+        volume = Mathf.Max(0.0001f, volume);
+        volume = Mathf.Min(volume, 1f);
+
+        audio.DOFade(volume, time);
+    }
 }
 
-public enum Sounds{
+public enum Sound{
     Shoot,
     ShipDeath,
     ChargePowerup,
@@ -72,5 +128,17 @@ public enum Sounds{
     RunOut,
     NoEnergy,
     EnemyImpact,
-    PlayerImpact
+    PlayerImpact,
+    Audio_ShipAmbience,
+    None
+}
+
+public enum AudioMixerType
+{
+    Music,
+    Sound,
+    GameMusic,
+    GameSound,
+    Master,
+    None
 }

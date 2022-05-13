@@ -7,8 +7,12 @@ using TMPro;
 
 public class MenuInteraction : MonoBehaviour
 {
+    static MenuInteraction instance;
+
     public Image logo;
     public Image logoMenu;
+    public Image blackBg;
+    public Image consoleBg;
 
     public Animator particlesAnim;
     public Animator planet;
@@ -35,6 +39,21 @@ public class MenuInteraction : MonoBehaviour
     Vector3 camPos;
 
     MenuStates state = MenuStates.Intro;
+
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            if (instance != this)
+            {
+                Destroy(this);
+            }
+        }
+    }
 
     void Start()
     {
@@ -85,6 +104,26 @@ public class MenuInteraction : MonoBehaviour
         StartCoroutine(SwitchMenuAnimation(menu));
     }
 
+    public void DissolveMenu()
+    {
+        FadeOutMenu(currentMenuAnimators);
+        IntegrateMatMenu.DOFloat(0, "_Fade", .5f);
+        parallax.EnableParallax(false);
+        planet.SetTrigger("arrival");
+        particlesAnim.SetTrigger("arrival");
+
+        Tweener shake = planet.gameObject.transform.DOShakePosition(6f, .4f, 30);
+        shake.Goto(6f);
+        shake.PlayBackwards();
+
+        SoundManager.FadeMixerVolume(AudioMixerType.None, 0, 3f);
+
+        blackBg.DOFade(1, 2).SetDelay(3).OnComplete(()=>
+        {
+            DialogManager.GetInstance().StartDialogue("Console.Start");
+        });
+    }
+
     public void NewGame()
     {
         SavingSystem.NewSave();
@@ -100,7 +139,8 @@ public class MenuInteraction : MonoBehaviour
     void TransitionToLobby()
     {
         transitionSystem.SetTransitionColor(Color.black);
-        transitionSystem.SwitchToScene(SceneSystem.GameScenes.Lobby, TransitionSystem.Transition.FadeOut, .2f);
+        transitionSystem.SwitchToScene(SceneSystem.GameScenes.Lobby, TransitionSystem.Transition.FadeOut, .5f);
+        SoundManager.FadeMixerVolume(AudioMixerType.None, 0, .8f);
     }
 
     IEnumerator SwitchMenuAnimation(GameObject menu)
@@ -158,6 +198,11 @@ public class MenuInteraction : MonoBehaviour
         }
     }
 
+    public void ShowConsole()
+    {
+        consoleBg.DOFade(.5f, 3f);
+    }
+
     TextAnimator[] GetTextAnimatorsFromMenu(GameObject menu)
     {
         List<TextAnimator> animators = new List<TextAnimator>();
@@ -206,6 +251,11 @@ public class MenuInteraction : MonoBehaviour
 
         IntegrateMat.SetFloat("_Fade", 0);
         IntegrateMatMenu.SetFloat("_Fade", 1);
+    }
+
+    public static MenuInteraction GetInstance()
+    {
+        return instance;
     }
 
     public enum MenuStates

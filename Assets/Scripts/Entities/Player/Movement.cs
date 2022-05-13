@@ -46,7 +46,7 @@ public class Movement : MonoBehaviour
 
         cam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
 
-        engineSound = SoundManager.Play(Sounds.EngineLoop, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform, false, false);
+        engineSound = SoundManager.Play(Sound.EngineLoop, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform, false, false);
         engineSound.loop = true;
 
         Axis joystickAxis = new Axis(
@@ -153,7 +153,7 @@ public class Movement : MonoBehaviour
         {
             CamManager.GetInstance().ShakeQuake(5f, 1.5f, false);
 
-            SoundManager.Play(Sounds.EngineStart, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
+            SoundManager.Play(Sound.EngineStart, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
             engineSound.Play();
             trailParticle.Play();
         }
@@ -186,7 +186,7 @@ public class Movement : MonoBehaviour
         {
             if (engineSound.isPlaying)
             {
-                SoundManager.Play(Sounds.EngineOff, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
+                SoundManager.Play(Sound.EngineOff, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
                 engineSound.Stop();
             }
         }

@@ -35,7 +35,7 @@ public class ItemDrop : Drop
             c.enabled = false;
         }
 
-        AudioSource chargeSound = SoundManager.Play(Sounds.ChargePowerup, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
+        AudioSource chargeSound = SoundManager.Play(Sound.ChargePowerup, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
 
         while (sinValue >= 0) {
 
@@ -57,7 +57,7 @@ public class ItemDrop : Drop
         CamManager.GetInstance().ShakeQuake(4, 2f, false);
 
         chargeSound.Stop();
-        SoundManager.Play(Sounds.ActivatePU, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
+        SoundManager.Play(Sound.ActivatePU, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
 
         gameObject.SetActive(false);
         yield return null;

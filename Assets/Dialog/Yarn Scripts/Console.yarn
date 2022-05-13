@@ -1,0 +1,21 @@
+title: Console.Start
+tags: 
+colorID: 0
+position: 390,-626
+---
+<<SetSpeed 100>>
+<<SkipLines 5>>
+System initializing XIRAPTOR registry
+<<wait 1>>
+..
+..
+..
+<<wait 0.2>>
+Landing sequence initiaded...
+<<wait 1>>
+Adjusting propulsors...
+
+<<SetSpeaker Console>>
+<<ShowConsole>>
+Funciona
+===

@@ -38,7 +38,10 @@ public class TransitionSystem : MonoBehaviour
 
 	public void SetTransitionColor(Color textureColor)
     {
+		float alpha = guiColor.a;
+
 		guiColor = textureColor;
+		guiColor.a = alpha;
 	}
 
 	public void SetTransitionTexture(Texture2D texture)
@@ -69,6 +72,11 @@ public class TransitionSystem : MonoBehaviour
 		StartCoroutine(WaitForScene(time + .1f, scene));
     }
 
+	public void ApplyDelayed(Transition transitionType, float delay, float time)
+	{
+		StartCoroutine(WaitForTransition(delay, transitionType, time));
+	}
+
 	//Transitions
 
 	void FadeIn(float time)
@@ -84,6 +92,12 @@ public class TransitionSystem : MonoBehaviour
 	}
 
 	//////////////
+
+	IEnumerator WaitForTransition(float wait, Transition transition, float time)
+	{
+		yield return new WaitForSeconds(wait);
+		Apply(transition, time);
+	}
 
 	IEnumerator WaitForScene(float time, SceneSystem.GameScenes scene)
     {
@@ -106,6 +120,7 @@ public class TransitionSystem : MonoBehaviour
     {
 		FadeIn,
 		FadeOut,
+		FadeColor,
 		None
     }
 }

@@ -47,7 +47,7 @@ public class AttackModule : Shooter
         if (Controls.GetAttackKeyDown() && CanShoot() && !locked)
         {
 
-            SoundManager.Play(Sounds.Shoot, camManager.transform.position, camManager.transform);
+            SoundManager.Play(Sound.Shoot, camManager.transform.position, camManager.transform);
 
             PlayerFire();
 

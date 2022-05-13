@@ -7172,7 +7172,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 650859efe38cc6949a1e1da9657a03ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speakerNameText: {fileID: 216486558}
+  speakerNameText: {fileID: 0}
   speakerImage: {fileID: 581134647}
 --- !u!114 &1843711943
 MonoBehaviour:
@@ -8272,6 +8272,12 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3947430410515900675, guid: ea6d138d4bf56d143a97559d8c8fe944,
+        type: 3}
+      propertyPath: audioAssets
+      value: 
+      objectReference: {fileID: 11400000, guid: 38518979d42b5004597f6e25028f437a,
+        type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ea6d138d4bf56d143a97559d8c8fe944, type: 3}
 --- !u!1001 &5502033644401166530

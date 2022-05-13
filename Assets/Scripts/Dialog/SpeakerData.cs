@@ -9,6 +9,7 @@ public class SpeakerData : ScriptableObject
 {
 
     [SerializeField] private string speakerName;
+    [SerializeField] private Sound talkingSound = Sound.None;
     [SerializeField] private EmotionPortrait[] emotionPortraits;
 
     private Dictionary<string, Sprite> speakerEmotions;
@@ -42,6 +43,11 @@ public class SpeakerData : ScriptableObject
             Debug.LogError("No se ha encontrado el sprite para el estado de ánimo " + emotion);
             return null;
         }
+    }
+
+    public Sound GetTalkingSound()
+    {
+        return talkingSound;
     }
 
     public string EmotionsInfo()

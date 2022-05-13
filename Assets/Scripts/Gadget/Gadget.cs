@@ -63,7 +63,7 @@ public abstract class Gadget : MonoBehaviour
             {
                 if (exhausted) {
                     UIVisualizer.GetInstance().PopUp(PopUpType.Bad, "No energy", transform, .6f, 25);
-                    SoundManager.Play(Sounds.NoEnergy, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
+                    SoundManager.Play(Sound.NoEnergy, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
                 }
 
                 CamManager.GetInstance().ShakeSingle(5f);
@@ -83,7 +83,7 @@ public abstract class Gadget : MonoBehaviour
                     if (gadgetUnits == maxGadgetUnits && exhausted)
                     {
                         UIVisualizer.GetInstance().PopUp(PopUpType.Info, "DASH RELOADED!", transform, Color.yellow, 1);
-                        SoundManager.Play(Sounds.Pump, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
+                        SoundManager.Play(Sound.Pump, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
                         exhausted = false;
                     }
                 }

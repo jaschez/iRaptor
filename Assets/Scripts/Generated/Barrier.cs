@@ -63,7 +63,7 @@ public class Barrier : MonoBehaviour
         yield return new WaitForSeconds(flashTime);
 
         CamManager.GetInstance().ShakeQuake(4, 2.5f, false);
-        SoundManager.Play(Sounds.Break, transform.position);
+        SoundManager.Play(Sound.Break, transform.position);
 
         spriteRenderer.material = spriteMat;
         spriteRenderer.color = originalColor;

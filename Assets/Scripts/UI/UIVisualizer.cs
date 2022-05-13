@@ -152,7 +152,7 @@ public class UIVisualizer : MonoBehaviour
 
             //Indicar daño producido
             PopUp(PopUpType.Bad, param.ToString(), sender.transform, .6f, 25);
-            SoundManager.Play(Sounds.PlayerImpact, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
+            SoundManager.Play(Sound.PlayerImpact, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
 
             CamManager.GetInstance().ShakeQuake(10, 1.5f, false);
             CamManager.GetInstance().ShockGame(.1f);

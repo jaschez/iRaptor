@@ -51,7 +51,7 @@ public abstract class EnemyModule : Entity
 
     protected override void OnTakeDamage(int dmg)
     {
-        SoundManager.Play(Sounds.EnemyImpact, transform.position);
+        SoundManager.Play(Sound.EnemyImpact, transform.position);
         UIVisualizer.GetInstance().PopUp(PopUpType.Bad, dmg.ToString(), transform);
 
         if (!damaged && GetHP() != 0)

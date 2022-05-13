@@ -61,7 +61,7 @@ public class Loot : Entity
     {
         if (CanPurchase())
         {
-            SoundManager.Play(Sounds.Break, transform.position);
+            SoundManager.Play(Sound.Break, transform.position);
             base.Die();
             player.SpendCarbonUnits(price);
 

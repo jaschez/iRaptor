@@ -6,6 +6,8 @@ public class LobbyManager : MonoBehaviour
 {
     static LobbyManager instance;
 
+    TransitionSystem transitionSystem;
+
     [SerializeField]
     ItemDataDictionary itemDictionary;
 
@@ -38,6 +40,10 @@ public class LobbyManager : MonoBehaviour
 
     public void Start()
     {
+        transitionSystem = TransitionSystem.GetInstance();
+        transitionSystem.SetTransitionColor(Color.black);
+        transitionSystem.Apply(TransitionSystem.Transition.FadeIn, 1);
+
         //Link each itemID to an item object
         List<ItemID> stockIDs = SavingSystem.CurrentState.StockItems;
 

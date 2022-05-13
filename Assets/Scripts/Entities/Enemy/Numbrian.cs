@@ -223,7 +223,7 @@ public class Numbrian : EnemyModule
 
     protected override void OnEnemyDead()
     {
-        SoundManager.Play(Sounds.ShipDeath, transform.position);
+        SoundManager.Play(Sound.ShipDeath, transform.position);
         CamManager.GetInstance().ShockGame(.05f);
         CamManager.GetInstance().ShakeQuake(5, 1f, false);
     }

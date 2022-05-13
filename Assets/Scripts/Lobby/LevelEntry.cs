@@ -7,7 +7,7 @@ public class LevelEntry : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player")) {
-            SceneSystem.LoadScene(SceneSystem.GameScenes.Level);
+            TransitionSystem.GetInstance()?.SwitchToScene(SceneSystem.GameScenes.Level, TransitionSystem.Transition.FadeOut, .5f);
         }
     }
 }

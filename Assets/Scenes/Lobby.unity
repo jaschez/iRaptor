@@ -98,7 +98,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_UseShadowmask: 0
+  m_UseShadowmask: 1
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -2452,6 +2452,12 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3947430410515900675, guid: ea6d138d4bf56d143a97559d8c8fe944,
+        type: 3}
+      propertyPath: audioAssets
+      value: 
+      objectReference: {fileID: 11400000, guid: 38518979d42b5004597f6e25028f437a,
+        type: 2}
     - target: {fileID: 3947430410808216090, guid: ea6d138d4bf56d143a97559d8c8fe944,
         type: 3}
       propertyPath: m_audioClip
@@ -2472,7 +2478,8 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 3947430410808216294, guid: ea6d138d4bf56d143a97559d8c8fe944, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: ea6d138d4bf56d143a97559d8c8fe944, type: 3}
 --- !u!1 &825127410
 GameObject:
@@ -3035,6 +3042,7 @@ GameObject:
   m_Component:
   - component: {fileID: 897654627}
   - component: {fileID: 897654626}
+  - component: {fileID: 897654628}
   m_Layer: 0
   m_Name: LobbyManager
   m_TagString: Untagged
@@ -3069,6 +3077,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &897654628
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 897654625}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4bebd7163c8eaa4a87a71d9a85e4871, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &916400251
 GameObject:
   m_ObjectHideFlags: 0

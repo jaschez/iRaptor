@@ -66,7 +66,7 @@ public class DashGadget : Gadget
 
         SpendUse();
 
-        SoundManager.Play(Sounds.Dash, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
+        SoundManager.Play(Sound.Dash, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
 
         if (GetUsesLeft() == 0)
         {

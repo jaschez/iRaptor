@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72931f5009941c945a4bdb221e890e9c, type: 3}
+  m_Name: iRaptorAudio
+  m_EditorClassIdentifier: 
+  AudioList:
+  - Audio: {fileID: 8300000, guid: c858be5e4485bc94dbd2a2c41173e11e, type: 3}
+    SoundType: 0
+  - Audio: {fileID: 8300000, guid: 65bfed356c92abd4c8cc4a99804fdfc2, type: 3}
+    SoundType: 1
+  - Audio: {fileID: 8300000, guid: 1d19a99a840efe242a301ab70d90ba1b, type: 3}
+    SoundType: 2
+  - Audio: {fileID: 8300000, guid: 9b39487abeafd2e4cae4824a210c6477, type: 3}
+    SoundType: 3
+  - Audio: {fileID: 8300000, guid: fa7bdf90f0f94b349aaa1180c8cd3f6d, type: 3}
+    SoundType: 4
+  - Audio: {fileID: 8300000, guid: 1b928ebc87f587345a0dd209d9fba424, type: 3}
+    SoundType: 5
+  - Audio: {fileID: 8300000, guid: 1d731e6acd6347d4fa6e563cf6afcfd4, type: 3}
+    SoundType: 6
+  - Audio: {fileID: 8300000, guid: ad22a329704172d4db4de0211e7cdeba, type: 3}
+    SoundType: 7
+  - Audio: {fileID: 8300000, guid: 6e0849820b770544b9da8d600eb8f8bf, type: 3}
+    SoundType: 8
+  - Audio: {fileID: 8300000, guid: 74e626210cc08654480f1ba8a6d3b740, type: 3}
+    SoundType: 9
+  - Audio: {fileID: 8300000, guid: 5e24351a810b45a4c9ee47181d77a6b5, type: 3}
+    SoundType: 10
+  - Audio: {fileID: 8300000, guid: 78bfb0e9017ddac47932073988d69b50, type: 3}
+    SoundType: 11
+  - Audio: {fileID: 8300000, guid: 7cae1a971299f8f48abac5ae890cab10, type: 3}
+    SoundType: 12
+  - Audio: {fileID: 8300000, guid: f2653d021971a4647b35d90961fe5d90, type: 3}
+    SoundType: 13
+  - Audio: {fileID: 8300000, guid: 19f749faf9e0e3547909cd7db82d664c, type: 3}
+    SoundType: 14
+  Mixer: {fileID: 24100000, guid: d078c6288c8c6bf4486b7b9a99204111, type: 2}
+  MixerList:
+  - Mixer: {fileID: -104537008102140031, guid: d078c6288c8c6bf4486b7b9a99204111, type: 2}
+    MixerType: 0
+  - Mixer: {fileID: -7510712178969708057, guid: d078c6288c8c6bf4486b7b9a99204111,
+      type: 2}
+    MixerType: 1
+  - Mixer: {fileID: -4457231089641259646, guid: d078c6288c8c6bf4486b7b9a99204111,
+      type: 2}
+    MixerType: 2
+  - Mixer: {fileID: -5776978441288845387, guid: d078c6288c8c6bf4486b7b9a99204111,
+      type: 2}
+    MixerType: 3
+  VolumeParameters:
+  - Parameter: masterVol
+    MixerType: 4
+  - Parameter: musicVol
+    MixerType: 0
+  - Parameter: soundVol
+    MixerType: 1
+  - Parameter: gameMusicVol
+    MixerType: 2
+  - Parameter: gameSoundVol
+    MixerType: 3

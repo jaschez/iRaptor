@@ -63,7 +63,7 @@ public abstract class Drop : MonoBehaviour
             ActivateDrop();
 
             CamManager.GetInstance().ShakeQuake(4f, 1.5f, false);
-            SoundManager.Play(Sounds.Drop, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
+            SoundManager.Play(Sound.Drop, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
 
             if (transform.childCount > 0) {
                 Transform trail = transform.GetChild(0);
