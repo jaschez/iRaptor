@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class UIVisualizer : MonoBehaviour
 {
@@ -58,11 +59,10 @@ public class UIVisualizer : MonoBehaviour
 
         originalHealthbarWidth = healthBarTransform.sizeDelta.x;
 
-        healthBarComponent.value = 0;
+        healthBarComponent.value = 1;
         currentHealth = player.GetHP();
 
         healthText.text = currentHealth + "/" + player.GetMaxHP();
-        healthBarTransform.sizeDelta = new Vector2(0, healthBarTransform.sizeDelta.y);
 
         cuText.text = player.GetCarbonUnits().ToString();
 
@@ -73,8 +73,8 @@ public class UIVisualizer : MonoBehaviour
         minimap = Minimap.GetInstance();
         minimap.Generate();
 
-        StartCoroutine("UpdateHealthBar");
-        StartCoroutine("UpdateMaxHealthBar");
+        UpdateHealthBar(false);
+        UpdateMaxHealthBar();
     }
 
     void OnPlayerEvent(Entity sender, Entity.EntityEvent eventType, object param)
@@ -91,7 +91,7 @@ public class UIVisualizer : MonoBehaviour
 
             PopUp(PopUpType.Good, param.ToString(), sender.transform, .7f, 20);
 
-            StartCoroutine("UpdateHealthBar");
+            UpdateHealthBar();
         }
 
         if (eventType == PlayerModule.PlayerEvent.AddedCU)
@@ -156,7 +156,7 @@ public class UIVisualizer : MonoBehaviour
 
             CamManager.GetInstance().ShakeQuake(10, 1.5f, false);
             CamManager.GetInstance().ShockGame(.1f);
-            StartCoroutine("UpdateHealthBar");
+            UpdateHealthBar();
         }
 
         if (eventType == Entity.EntityEvent.Death)
@@ -209,51 +209,32 @@ public class UIVisualizer : MonoBehaviour
         enemyUI.AttachTarget(enemy);
     }
 
-    IEnumerator UpdateHealthBar()
+    void UpdateHealthBar(bool animated = true)
     {
         currentHealth = player.GetHP();
-
-        int sign = healthBarComponent.value < currentHealth ? 1 : -1;
 
         healthBarComponent.maxValue = player.GetMaxHP();
 
         healthText.text = currentHealth + "/" + player.GetMaxHP();
 
-        while ( sign * (currentHealth - healthBarComponent.value) > 0)
-        {
-            healthBarComponent.value = Mathf.Lerp(healthBarComponent.value, currentHealth + 1 * sign, Time.deltaTime * 2);
-            yield return null;
+        if (animated) {
+            healthBarComponent.DOValue(currentHealth, .5f).SetEase(Ease.OutElastic);
         }
-
-        healthBarComponent.value = currentHealth;
-
-        yield return null;
+        else
+        {
+            healthBarComponent.value = currentHealth;
+        }
     }
 
-    IEnumerator UpdateMaxHealthBar()
+    void UpdateMaxHealthBar()
     {
         //Realizamos este cálculo con el objetivo de que la barra no exceda su ancho por la derecha
         float barWidth = Mathf.Log(player.GetMaxHP(), 25) * originalHealthbarWidth;
 
-        int sign = healthBarTransform.sizeDelta.x < barWidth ? 1 : -1;
-
         Vector2 healthSize = healthBarTransform.sizeDelta;
-
-        healthText.text = currentHealth + "/" + player.GetMaxHP();
-
-        while (sign * (barWidth - healthBarTransform.rect.width) > 0)
-        {
-            healthSize.x = Mathf.Lerp(healthSize.x, barWidth + 1 * sign, Time.deltaTime * 3);
-
-            healthBarTransform.sizeDelta = healthSize;
-
-            yield return null;
-        }
 
         healthSize.x = barWidth;
         healthBarTransform.sizeDelta = healthSize;
-
-        yield return null;
     }
 
     IEnumerator AnimatePowerUp()

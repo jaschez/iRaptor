@@ -146,9 +146,9 @@ public class WaveManager : MonoBehaviour
                 }
                 else
                 {
-                    if (brokenRoomBarriers.Contains(barrierObj)) {
+                    //if (brokenRoomBarriers.Contains(barrierObj)) {
                         barrierObj.SetActive(false);
-                    }
+                    //}
                 }
 
                 barrier.Block(blocked);

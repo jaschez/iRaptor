@@ -10,7 +10,7 @@ public class Barrier : MonoBehaviour
     Color originalColor;
     Color blockedColor = Color.gray;
 
-    protected void Start()
+    protected void OnEnable()
     {
 
         if (!TryGetComponent(out spriteRenderer))

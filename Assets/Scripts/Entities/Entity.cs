@@ -90,6 +90,7 @@ public abstract class Entity : MonoBehaviour
         }
 
         spriteMat = sr.material;
+        whiteMat = new Material(Shader.Find("GUI/Text Shader"));
         origColor = sr.color;
 
         levelManager = LevelManager.GetInstance();

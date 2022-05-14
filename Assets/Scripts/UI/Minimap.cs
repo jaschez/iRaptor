@@ -276,11 +276,11 @@ public class Minimap : MonoBehaviour
             discoveredColourMap[colorIndex] = new Color(c.Item2, c.Item2, c.Item2);
         }*/
 
-        foreach (Coord c in room.InterestingPoints)
+        /*foreach (Coord c in room.InterestingPoints)
         {
             colorIndex = (height - mapOrigin.y + worldPos.y - c.y - 1) * width + (c.x - mapOrigin.x) + worldPos.x;
             discoveredColourMap[colorIndex] = Color.magenta;
-        }
+        }*/
 
         mapTexture.SetPixels(discoveredColourMap);
         mapTexture.Apply();

@@ -56,6 +56,11 @@ public class GameManagerModule : MonoBehaviour
             UniversalSeed = new System.Random().Next();
         }
 
+        if (!SavingSystem.Loaded())
+        {
+            SavingSystem.Initialize();
+        }
+
         random = new System.Random(UniversalSeed);
 
         CurrentLevel = 0;

@@ -220,6 +220,7 @@ public class LevelManager : MonoBehaviour
                 GameObject barrierObj = Instantiate(barrierPrefab, barrierPos, barrierRotation);
 
                 barrierObj.name = "Barrier" + connectionID;
+                barrierObj.SetActive(false);
 
                 barrierIndex.Add(connectionID, barrierObj);
                 waveManager.AddBarrierToRoom(connection.RoomAID, barrierObj);
