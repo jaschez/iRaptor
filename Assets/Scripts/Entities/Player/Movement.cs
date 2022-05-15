@@ -58,16 +58,16 @@ public class Movement : MonoBehaviour
 
         KeyCode move = KeyCode.Z;
         KeyCode attack = KeyCode.X;
-        KeyCode dash = KeyCode.O;
+        KeyCode dash = KeyCode.Space;
         KeyCode interact = KeyCode.E;
-        KeyCode aim = KeyCode.Escape;
+        KeyCode gadget = KeyCode.Escape;
 
         /* Inicializa los controles una vez comienza el juego (basado en un archivo externo para evitar
          * que un jugador pueda modificar los controles desde el programa y solo tengan acceso a ello
          * los propietarios)
          */
 
-        Controls.SetupControls(joystickAxis, move, attack, dash, aim, interact);
+        Controls.SetupControls(joystickAxis, move, attack, dash, interact, gadget);
 
         playerVelocity = acceleration * 50;
     }

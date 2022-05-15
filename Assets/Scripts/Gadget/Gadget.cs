@@ -54,7 +54,7 @@ public abstract class Gadget : MonoBehaviour
 
     protected virtual void Update()
     {
-        if (Controls.GetDashKeyDown() && !locked)
+        if (Controls.GetGadgetKeyDown() && !locked)
         {
             if (gadgetUnits >= spentPerUse && canUse && !exhausted) {
                 Use();
@@ -65,8 +65,6 @@ public abstract class Gadget : MonoBehaviour
                     UIVisualizer.GetInstance().PopUp(PopUpType.Bad, "No energy", transform, .6f, 25);
                     SoundManager.Play(Sound.NoEnergy, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
                 }
-
-                CamManager.GetInstance().ShakeSingle(5f);
             }
         }
 

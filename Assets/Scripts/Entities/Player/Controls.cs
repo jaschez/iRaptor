@@ -10,7 +10,7 @@ public class Controls
     static private KeyCode attack;
     static private KeyCode interact;
     static private KeyCode dash;
-    static private KeyCode aim;
+    static private KeyCode gadget;
 
     static private bool trigger = false;
     static private bool triggerUp = true;
@@ -18,14 +18,14 @@ public class Controls
     static private bool enabled = true;
 
     //Actualiza o inicializa los controles para el juego
-    public static void SetupControls(Axis axis, KeyCode mov, KeyCode att, KeyCode das, KeyCode ai, KeyCode inter)
+    public static void SetupControls(Axis axis, KeyCode mov, KeyCode att, KeyCode das, KeyCode inter, KeyCode gadg)
     {
         joyAxis = axis;
         attack = att;
         move = mov;
         dash = das;
-        aim = ai;
         interact = inter;
+        gadget = gadg;
     }
 
     //TODO: Actualiza los controles desde un archivo
@@ -104,8 +104,6 @@ public class Controls
         }
 
         return false;
-
-        //return Input.GetKeyUp(move);
     }
 
     public static bool GetMoveKeyDown()
@@ -145,20 +143,10 @@ public class Controls
         return (Input.GetKeyDown(dash) || Input.GetButtonDown("Dash")) && enabled;
     }
 
-    //Detección para tecla AIM
-    public static bool GetAimKey()
+    //Detección para tecla GADGET
+    public static bool GetGadgetKeyDown()
     {
-        return Input.GetKey(aim) && enabled;
-    }
-
-    public static bool GetAimKeyUp()
-    {
-        return Input.GetKeyUp(aim) && enabled;
-    }
-
-    public static bool GetAimKeyDown()
-    {
-        return Input.GetKeyDown(aim) && enabled;
+        return (Input.GetKeyDown(gadget) || Input.GetButtonDown("Gadget")) && enabled;
     }
 
     //Detección para ejes de joystick

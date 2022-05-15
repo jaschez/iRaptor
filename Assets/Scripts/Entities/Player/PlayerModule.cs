@@ -8,6 +8,7 @@ public class PlayerModule : Entity
     private static Entity instance;
 
     private Gadget gadget;
+    private DashModule dash;
 
     private Inventory inventory;
     private Dictionary<ItemData, int> items;
@@ -82,6 +83,7 @@ public class PlayerModule : Entity
         Movement.GetInstance().Lock();
         AttackModule.GetInstance()?.Lock();
         gadget?.Lock();
+        dash?.Lock();
     }
 
     public void Unlock()
@@ -89,6 +91,7 @@ public class PlayerModule : Entity
         Movement.GetInstance().Unlock();
         AttackModule.GetInstance()?.Unlock();
         gadget?.Unlock();
+        dash?.Unlock();
     }
 
     public PlayerState SavePlayerState()

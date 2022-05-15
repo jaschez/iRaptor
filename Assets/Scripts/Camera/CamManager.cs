@@ -50,7 +50,7 @@ public class CamManager : MonoBehaviour
         Zoom(80, 2);
     }
 
-    void FixedUpdate()
+    void LateUpdate()
     {
         FollowingCalculations();
         ShakeCalculations();
@@ -58,10 +58,13 @@ public class CamManager : MonoBehaviour
 
     void FollowingCalculations()
     {
-        screenOffset = Vector2.Lerp(screenOffset, movManager.IsLocked()? Vector2.zero :
-        movManager.GetPlayerOrientation() * sightOffset * (Controls.GetMoveKey()? 4 : 1), Time.deltaTime * 3);
+        screenOffset = movManager.IsLocked() ? Vector2.zero : GetMousePosition() * 15;
+        //Vector2.Lerp(screenOffset, movManager.IsLocked()? Vector2.zero :
+        //movManager.GetPlayerOrientation() * sightOffset * (Controls.GetMoveKey()? 4 : 1), Time.deltaTime * 3);
 
-        transform.position = Vector2.Lerp(transform.position, (Vector2)target.position + screenOffset, Time.deltaTime * 8);
+        transform.position = (Vector2)target.position + screenOffset;
+            //Vector2.Lerp(transform.position, (Vector2)target.position + screenOffset, Time.deltaTime * 8)
+            //+ GetMousePosition() * 7;
     }
 
     public void SetCamPos(Vector2 pos)
@@ -180,6 +183,48 @@ public class CamManager : MonoBehaviour
         orientation = movManager.GetPlayerOrientationByMovement();
 
         screenOffset = Vector2.ClampMagnitude(screenOffset + orientation * magnitude, bounds);
+    }
+
+    Vector2 GetMousePosition()
+    {
+        Vector2 mousePosition;
+        Vector2 normalizedPosition;
+
+        mousePosition = Input.mousePosition;
+        normalizedPosition = Vector2.zero;
+
+        /*float rectangleSize = .3f;
+
+        if (mousePosition.x > Screen.width / 2)
+        {
+            normalizedPosition.x = (mousePosition.x - (Screen.width / 2) - (Screen.width / 2) * rectangleSize) / ((Screen.width / 2) - (Screen.width / 2) * rectangleSize);
+            normalizedPosition.x = Mathf.Clamp01(normalizedPosition.x);
+            normalizedPosition.x = normalizedPosition.x * normalizedPosition.x;
+        }
+        else
+        {
+            normalizedPosition.x = (-mousePosition.x + (Screen.width / 2) - (Screen.width / 2) * rectangleSize) / ((Screen.width / 2) - (Screen.width / 2) * rectangleSize);
+            normalizedPosition.x = -Mathf.Clamp01(normalizedPosition.x);
+            normalizedPosition.x = normalizedPosition.x * -normalizedPosition.x;
+        }
+
+        if (mousePosition.y > Screen.height / 2)
+        {
+            normalizedPosition.y = (mousePosition.y - (Screen.height / 2) - (Screen.height / 2) * rectangleSize) / ((Screen.height / 2) - (Screen.height / 2) * rectangleSize);
+            normalizedPosition.y = Mathf.Clamp01(normalizedPosition.y);
+            normalizedPosition.y = normalizedPosition.y * normalizedPosition.y;
+        }
+        else
+        {
+            normalizedPosition.y = (-mousePosition.y + (Screen.height / 2) - (Screen.height / 2) * rectangleSize) / ((Screen.height / 2) - (Screen.height / 2) * rectangleSize);
+            normalizedPosition.y = -Mathf.Clamp01(normalizedPosition.y);
+            normalizedPosition.y = normalizedPosition.y * -normalizedPosition.y;
+        }*/
+
+        normalizedPosition.x = (mousePosition.x - Screen.width / 2) / (Screen.width / 2);
+        normalizedPosition.y = (mousePosition.y - Screen.height / 2) / (Screen.height / 2);
+
+        return normalizedPosition;
     }
 
     public float GetCameraSize()

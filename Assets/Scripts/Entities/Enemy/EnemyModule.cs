@@ -41,6 +41,8 @@ public abstract class EnemyModule : Entity
 
     protected override void Die()
     {
+        CamManager.GetInstance().ShakeAnimation(10, .03f, 1);
+        CamManager.GetInstance().ShockGame(.05f);
 
         OnEnemyDead();
 

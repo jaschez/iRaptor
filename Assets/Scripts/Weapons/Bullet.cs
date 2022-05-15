@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using DG.Tweening;
 
 public class Bullet : MonoBehaviour, IPooledObject
 {
@@ -35,6 +36,11 @@ public class Bullet : MonoBehaviour, IPooledObject
 
         hitNumber = 0;
         maxHitNumber = 1;
+
+        Vector2 originalScale = transform.localScale;
+        transform.localScale = new Vector2(originalScale.x * .2f, originalScale.y * 5f);
+
+        transform.DOScale(originalScale, .2f).SetEase(Ease.OutCubic);
     }
 
     public void SetEffects(Effect[] bulletEffects)

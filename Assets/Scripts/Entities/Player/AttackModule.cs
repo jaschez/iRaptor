@@ -56,7 +56,7 @@ public class AttackModule : Shooter
 
     void PlayerFire()
     {
-        StartCoroutine(MuzzleFlash(3));
+        StartCoroutine(MuzzleFlash(2));
 
         Bullet.Effect[] bulletEffects = GetInventoryEffects(player.GetInventory());
 
@@ -64,8 +64,7 @@ public class AttackModule : Shooter
 
         movementManager.Recoil();
 
-        camManager.ShakeSingle(5);
-        camManager.Recoil();
+        camManager.ShakeAnimation(1, .05f, 1);
     }
 
     public void Lock()
