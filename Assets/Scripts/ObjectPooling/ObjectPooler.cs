@@ -9,13 +9,13 @@ public class ObjectPooler : MonoBehaviour
     [System.Serializable]
     public class Pool
     {
-        public string tag;
+        public ProjectileType tag;
         public GameObject prefab;
         public int size;
     }
 
     public List<Pool> pools;
-    public Dictionary<string, Queue<GameObject>> poolDictionary;
+    public Dictionary<ProjectileType, Queue<GameObject>> poolDictionary;
 
     private static ObjectPooler instance;
     
@@ -26,7 +26,7 @@ public class ObjectPooler : MonoBehaviour
 
     void Start()
     {
-        poolDictionary = new Dictionary<string, Queue<GameObject>>();
+        poolDictionary = new Dictionary<ProjectileType, Queue<GameObject>>();
 
         foreach (Pool pool in pools)
         {
@@ -43,11 +43,11 @@ public class ObjectPooler : MonoBehaviour
         }
     }
 
-    public GameObject Spawn(string tag, Vector3 position, Quaternion rotation)
+    public GameObject Spawn(ProjectileType tag, Vector3 position, Quaternion rotation)
     {
         if (!poolDictionary.ContainsKey(tag))
         {
-            Debug.LogWarning("No existe la piscina con el tag " + tag);
+            Debug.LogWarning("No existe la piscina con el tag " + tag.ToString());
             return null;
         }
 

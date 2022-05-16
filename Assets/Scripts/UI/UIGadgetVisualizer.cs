@@ -2,16 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class UIGadgetVisualizer : MonoBehaviour
 {
     public GameObject unitPrefab;
+    public Slider chargeIndicator;
 
     RectTransform origin;
 
     List<Slider> units;
-
     List<Slider> unitsCooldown;
+
     Color origUnitColor;
 
     Vector2 origUnitSize;
@@ -41,6 +43,11 @@ public class UIGadgetVisualizer : MonoBehaviour
 
         this.currentUses = currentUses;
         this.maxUses = maxUses;
+
+        RectTransform chargeRT = chargeIndicator.GetComponent<RectTransform>();
+
+        chargeRT.sizeDelta = new Vector2(width, chargeRT.sizeDelta.y);
+        chargeIndicator.value = 0;
 
         for (int i = 0; i < maxUses; i++)
         {
@@ -133,10 +140,19 @@ public class UIGadgetVisualizer : MonoBehaviour
                 }
             }
 
-            if (currentUses == maxUses)
-            {
-                StartCoroutine(RefuelAnimation());
-            }
+            StartCoroutine(RefuelAnimation());
+        }
+    }
+
+    public void SetPortion(float percentage)
+    {
+        if (percentage > chargeIndicator.value) {
+            chargeIndicator.DOValue(percentage, .3f);
+        }
+        else
+        {
+            chargeIndicator.DOKill();
+            chargeIndicator.value = percentage;
         }
     }
 

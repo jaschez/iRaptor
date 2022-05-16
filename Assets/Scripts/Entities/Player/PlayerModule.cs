@@ -15,6 +15,9 @@ public class PlayerModule : Entity
 
     private int _carbonUnits = 0;
 
+    int chargeContainer = 0;
+    int chargeMax = 10;
+
     //Propiedad que gestiona las unidades de carbono disponibles del jugador
     private int CarbonUnits
     {
@@ -62,6 +65,7 @@ public class PlayerModule : Entity
         base.Start();
 
         gadget = GetComponent<Gadget>();
+        dash = GetComponent<DashModule>();
     }
 
     void Update()
@@ -128,6 +132,16 @@ public class PlayerModule : Entity
     {
         CarbonUnits += cu;
 
+        chargeContainer += cu;
+
+        if (chargeContainer >= chargeMax)
+        {
+            chargeContainer -= chargeMax;
+
+            AddGadgetUnit();
+        }
+
+        SendEvent(PlayerEvent.AddedGadgetPortion, (float)chargeContainer / chargeMax);
         SendEvent(PlayerEvent.AddedCU, cu);
     }
 
@@ -202,7 +216,8 @@ public class PlayerModule : Entity
         public static readonly PlayerEvent SpentCU = new PlayerEvent("SpentCU");
         public static readonly PlayerEvent SpentOrbs = new PlayerEvent("SpentOrbs");
         public static readonly PlayerEvent InsufficientCU = new PlayerEvent("InsufficientCU");
-        public static readonly PlayerEvent AddedGadgetUse = new PlayerEvent("AddedDash");
+        public static readonly PlayerEvent AddedGadgetUse = new PlayerEvent("AddedGadgetUse");
+        public static readonly PlayerEvent AddedGadgetPortion = new PlayerEvent("AddedGadgetPortion");
         public static readonly PlayerEvent RechargedGadgetUse = new PlayerEvent("RechargedDash");
         public static readonly PlayerEvent SpentGadgetUse = new PlayerEvent("SpentDash");
         public static readonly PlayerEvent ItemPicked = new PlayerEvent("ItemPicked");

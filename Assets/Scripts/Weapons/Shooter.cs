@@ -2,63 +2,96 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Shooter : MonoBehaviour
+public abstract class Shooter : MonoBehaviour
 {
-
     public Transform projectileStartingPos;
 
     ObjectPooler pooler;
 
     Vector3 position;
 
-    protected int damage = 1;
+    protected int Damage { get; private set; } = 1;
 
-    protected float cooldown = 0.1f;
-    protected float velocity = 20;
-    float cooldownFinishTime = 0;
+    protected float Cooldown { get; private set; } = 0.1f;
+    protected float Velocity { get; private set; } = 20;
+
+    protected ProjectileType BulletT { get; private set; } = ProjectileType.Main;
+
+    protected List<Projectile.Effect> ProjectileEffects { get; private set; } = new List<Projectile.Effect>();
+
+    private float cooldownFinishTime = 0;
 
     protected bool enemyBullet = true;
 
-    protected virtual void Start()
+    public virtual void Initialize()
     {
         pooler = ObjectPooler.GetInstance();
     }
 
-    protected void Fire(Bullet.Effect[] bulletEffects = null)
+    protected void FireBullet(float angle)
     {
-        Fire(transform.rotation, bulletEffects);
+        FireBullet(Quaternion.Euler(0,0, angle));
     }
 
-    protected void Fire(Quaternion orientation, Bullet.Effect[] bulletEffects = null)
+    protected void FireBullet(Quaternion orientation)
+    {
+        cooldownFinishTime = Time.time + Cooldown;
+
+        if (!enemyBullet) {
+            position = projectileStartingPos.position;
+        }
+        else
+        {
+            position = transform.position + orientation * Vector2.up * 8;
+        }
+
+        GameObject projectile = pooler.Spawn(BulletT, position, orientation);
+        Projectile projectileModule = projectile.GetComponent<Projectile>();
+
+        if (projectileModule != null)
+        {
+            projectileModule.InitBullet();
+            ModifyProjectile(projectileModule);
+        }
+        else
+        {
+            Debug.LogError("Bullet component is null!");
+        }
+    }
+
+    protected virtual void ModifyProjectile(Projectile projectile)
     {
 
-        bulletEffects = bulletEffects ?? new Bullet.Effect[0];
+    }
 
-        if (Time.time > cooldownFinishTime) {
-            cooldownFinishTime = Time.time + cooldown;
+    protected void SetDamage(int damage)
+    {
+        Damage = damage;
+    }
 
-            if (!enemyBullet) {
-                position = projectileStartingPos.position;
-            }
-            else
-            {
-                position = transform.position + orientation * Vector2.up * 8;
-            }
+    protected void SetCooldown(float cooldown)
+    {
+        Cooldown = cooldown;
+    }
 
-            GameObject projectile = pooler.Spawn("bullet", position, orientation);
+    protected void SetVelocity(float velocity)
+    {
+        Velocity = velocity;
+    }
 
-            Bullet bulletModule = projectile.GetComponent<Bullet>();
+    protected void SetProjectileType(ProjectileType bulletType)
+    {
+        BulletT = bulletType;
+    }
 
-            if (bulletModule != null)
-            {
-                bulletModule.InitBullet(velocity, damage, enemyBullet);
-                bulletModule.SetEffects(bulletEffects);
-            }
-            else
-            {
-                Debug.LogError("Bullet component is null!");
-            }
-        }
+    protected void SetEffects(List<Projectile.Effect> bulletEffects)
+    {
+        ProjectileEffects = bulletEffects;
+    }
+
+    protected void AddEffect(Projectile.Effect effect)
+    {
+        ProjectileEffects.Add(effect);
     }
 
     public bool CanShoot()

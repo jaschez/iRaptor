@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public abstract class Entity : MonoBehaviour
 {
@@ -144,18 +145,35 @@ public abstract class Entity : MonoBehaviour
     //Método que resta vida al jugador
     public void TakeDamage(int damage)
     {
-        health -= damage;
+        if (health > 0) {
+            health -= damage;
 
-        StartCoroutine(DamageFlash(.07f));
+            StartCoroutine(DamageFlash(.07f));
+            Flinch();
 
-        SendEvent(EntityEvent.Damage, damage);
+            SendEvent(EntityEvent.Damage, damage);
 
-        OnTakeDamage(damage);
+            OnTakeDamage(damage);
 
-        if (health == 0)
-        {
-            Invoke("Die", .07f);
+            if (health == 0)
+            {
+                Invoke("Die", .07f);
+            }
         }
+    }
+
+    void Flinch()
+    {
+        Transform render = sr.transform;
+        
+        render.DOScaleX(.8f, .05f).OnComplete(() =>
+        {
+            render.DOScaleX(1f, .1f).SetEase(Ease.OutElastic);
+        });
+        render.DOScaleY(1.2f, .05f).OnComplete(() =>
+        {
+            render.DOScaleY(1f, .1f).SetEase(Ease.OutElastic);
+        });
     }
 
     //Método que le añade puntos de salud a la entidad
@@ -189,6 +207,11 @@ public abstract class Entity : MonoBehaviour
                 dropGO.SetActive(true);
             }
         }
+    }
+
+    public SpriteRenderer GetSpriteRenderer()
+    {
+        return sr;
     }
 
     public EntityType GetEntityType()

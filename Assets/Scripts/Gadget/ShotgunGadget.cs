@@ -4,33 +4,21 @@ using UnityEngine;
 
 public class ShotgunGadget : Gadget
 {
+    Shotgun shotgun;
+
     protected override void Start()
     {
         base.Start();
 
-        SetUsesLeft(GetMaxUses());
-    }
-
-    protected override void Update()
-    {
-
-        canUse = Time.time > finishCooldownTime;
-
-        base.Update();
+        shotgun = gameObject.AddComponent<Shotgun>();
+        shotgun.projectileStartingPos = AttackModule.GetInstance().projectileStartingPos;
+        shotgun.muzzleGO = AttackModule.GetInstance().muzzleGO;
+        shotgun.Initialize();
     }
 
     protected override void Use()
     {
-        finishCooldownTime = Time.time + cooldown;
-        rechargeCooldownTime = finishCooldownTime + rechargeCooldown;
-
         SpendUse();
-
-        SoundManager.Play(Sound.Break, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
-
-        if (GetUsesLeft() == 0)
-        {
-            exhausted = true;
-        }
+        shotgun.Fire(transform.rotation.eulerAngles.z);
     }
 }

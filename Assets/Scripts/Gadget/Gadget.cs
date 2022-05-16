@@ -50,25 +50,33 @@ public abstract class Gadget : MonoBehaviour
     protected virtual void Start()
     {
         playerModule = GetComponent<PlayerModule>();
+        SetUsesLeft(GetMaxUses());
     }
 
     protected virtual void Update()
     {
         if (Controls.GetGadgetKeyDown() && !locked)
         {
-            if (gadgetUnits >= spentPerUse && canUse && !exhausted) {
+            if (gadgetUnits >= spentPerUse && Time.time > finishCooldownTime && !exhausted) {
+                
+                finishCooldownTime = Time.time + cooldown;
+                //rechargeCooldownTime = finishCooldownTime + rechargeCooldown;
                 Use();
             }
-            else
+            else if(gadgetUnits < spentPerUse)
             {
-                if (exhausted) {
-                    UIVisualizer.GetInstance().PopUp(PopUpType.Bad, "No energy", transform, .6f, 25);
-                    SoundManager.Play(Sound.NoEnergy, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
-                }
+                UIVisualizer.GetInstance().PopUp(PopUpType.Bad, "NO AMMO", transform, .6f, 25);
+                SoundManager.Play(Sound.NoEnergy, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
             }
         }
 
-        if (gadgetUnits < maxGadgetUnits) {
+        if (Input.GetKeyDown(KeyCode.Backspace))
+        {
+            gadgetUnits = maxGadgetUnits;
+            playerModule.NotifyGadgetRecharge(gadgetUnits);
+        }
+
+        /*if (gadgetUnits < maxGadgetUnits) {
             if (finishCooldownTime < Time.time)
             {
                 if (rechargeCooldownTime < Time.time)
@@ -86,7 +94,7 @@ public abstract class Gadget : MonoBehaviour
                     }
                 }
             }
-        }
+        }*/
     }
 
     public void Lock()

@@ -112,20 +112,25 @@ public class UIVisualizer : MonoBehaviour
             PopUp(PopUpType.Info, "INSUFFICIENT CU", player.transform, Color.white, 1, 25, 6, 0);
         }
 
+        if (eventType == PlayerModule.PlayerEvent.AddedGadgetPortion)
+        {
+            gadgetVisualizer.SetPortion((float)param);
+        }
+
         if (eventType == PlayerModule.PlayerEvent.AddedGadgetUse)
         {
             string msg;
 
             if (player.GetGadgetUnits() < player.GetMaxGadgetUnits())
             {
-                msg = "+1 ENERGY CAPSULE";
+                msg = "+1 AMMO";
             }
             else
             {
-                msg = "FULL!";
+                msg = "FULL";
             }
 
-            PopUp(PopUpType.Info, msg, player.transform, Color.yellow, 1);
+            PopUp(PopUpType.Info, msg, player.transform, Color.yellow, .3f, 25, 6, 2);
 
             CamManager.GetInstance().ShakeQuake(2, 2f, false);
             gadgetVisualizer.AddUse();
@@ -139,7 +144,9 @@ public class UIVisualizer : MonoBehaviour
                 CamManager.GetInstance().ShakeQuake(4, 2f, false);
             }
 
-            gadgetVisualizer.AddUse();
+            for (int i = 0; i < (int)param; i++) {
+                gadgetVisualizer.AddUse();
+            }
         }
 
         if (eventType == PlayerModule.PlayerEvent.SpentGadgetUse)

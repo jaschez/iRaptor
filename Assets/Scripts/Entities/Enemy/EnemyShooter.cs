@@ -4,22 +4,22 @@ using UnityEngine;
 
 public class EnemyShooter : Shooter
 {
-
     float autoStartFire = 0;
     bool automatic = false;
 
-    protected override void Start()
+    protected void Start()
     {
-        base.Start();
+        Initialize();
 
         autoStartFire = Time.time + Random.Range(0f, 2f);
     }
 
-    public void Init(float cooldown, float velocity, int damage, bool automatic)
+    public void Init(float cooldown, float velocity, int damage, ProjectileType bulletType, bool automatic)
     {
-        this.cooldown = cooldown;
-        this.velocity = velocity;
-        this.damage = damage;
+        SetCooldown(cooldown);
+        SetVelocity(velocity);
+        SetDamage(damage);
+        SetProjectileType(bulletType);
         this.automatic = automatic;
     }
 
@@ -29,7 +29,7 @@ public class EnemyShooter : Shooter
         {
             if (CanShoot() && Time.time > autoStartFire)
             {
-                Fire();
+                FireBullet(0);
             }
         }
     }
@@ -38,7 +38,7 @@ public class EnemyShooter : Shooter
     {
         if (CanShoot())
         {
-            Fire(rotation);
+            FireBullet(rotation);
         }
     }
 

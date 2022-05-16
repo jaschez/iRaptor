@@ -44,7 +44,7 @@ public class Numbrian : EnemyModule
         player = (PlayerModule)PlayerModule.GetInstance();
 
         mover.InitMover(100);
-        shooter.Init(cooldown, 200, 4, false);
+        shooter.Init(cooldown, 200, 4, ProjectileType.Numbrian, false);
 
         SetEnemyType(EnemyType.Numbrian);
         InitHealth(3);

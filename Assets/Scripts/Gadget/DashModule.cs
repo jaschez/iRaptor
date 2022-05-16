@@ -8,6 +8,8 @@ public class DashModule : MonoBehaviour
 
     Movement movement;
 
+    Transform renderObj;
+
     float duration = .15f;
     float finishCooldownTime = 0f;
     float cooldown = .3f;
@@ -44,7 +46,7 @@ public class DashModule : MonoBehaviour
 
     private void Use()
     {
-        if (movement.GetPlayerOrientation() != Vector2.zero) {
+        if (Controls.GetMoveKey()) {
             finishCooldownTime = Time.time + cooldown;
 
             SoundManager.Play(Sound.Dash, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
@@ -53,63 +55,130 @@ public class DashModule : MonoBehaviour
         }
     }
 
-    Vector3 CalculateDashPoint(float maxDist)
+    Vector3 CalculateDashPoint(float maxDist, out bool hit, out Vector3 slide)
     {
         Vector2 orientation = movement.GetDirection().normalized;
-
-        Vector3 auxPos = transform.position + (Vector3)(orientation * maxDist);
+        Vector3 destination = transform.position + (Vector3)(orientation * maxDist);
         Vector3 finalPos;
 
-        float radio = 10f;
+        float radio = 6f;
 
-        RaycastHit2D ray = Physics2D.Raycast(transform.position, orientation, maxDist, collisionMask);
+        RaycastHit2D ray = Physics2D.CircleCast(transform.position, radio, orientation, maxDist, collisionMask);
 
-        if (ray.point != Vector2.zero)
+        if (ray.collider != null)
         {
-            finalPos = ray.point + ray.normal * radio;
+            finalPos = ray.centroid;
+            hit = true;
+
+            Vector2 deltaSlide = destination - finalPos;
+            Vector2 normal = new Vector2(Mathf.Abs(ray.normal.x), Mathf.Abs(ray.normal.y));
+            Vector2 slidePosition = new Vector2(deltaSlide.x * normal.y, deltaSlide.y * normal.x);
+            Vector2 slideDir = slidePosition.normalized;
+
+            RaycastHit2D slideRay = Physics2D.CircleCast(finalPos, radio - .1f, slideDir, slidePosition.magnitude, collisionMask);
+
+            if (slideRay.collider != null)
+            {
+                slide = slideRay.centroid;
+            }
+            else
+            {
+                slide = finalPos + (Vector3)slidePosition;
+            }
         }
         else
         {
-            finalPos = auxPos;
+            hit = false;
+            finalPos = destination;
+            slide = Vector3.zero;
         }
 
         finalPos.z = 1;
+        slide.z = 1;
 
         return finalPos;
     }
 
     private void DashProcess()
     {
-
-        float dashFinishedTime = Time.time + duration;
         float finalDistance;
+        float finalDuration = duration;
 
-        Vector3 dashPoint = CalculateDashPoint(distance);
+        Vector3 dashPoint = CalculateDashPoint(distance, out bool hit, out Vector3 slidePoint);
 
-        Vector3[] path = new Vector3[] {
-            transform.position, dashPoint
-        };
+        Vector3[] path = new Vector3[hit? 3 : 2];
 
-        finalDistance = Vector2.Distance(transform.position, dashPoint);
+        path[0] = transform.position;
 
-        movement.enabled = false;
-        movement.rb.bodyType = RigidbodyType2D.Kinematic;
+        if (!hit)
+        {
+            path[1] = dashPoint;
 
-        transform.DOPath(path, duration * (finalDistance / distance), PathType.Linear, PathMode.TopDown2D).SetEase(Ease.Linear)
+            finalDistance = Vector2.Distance(transform.position, dashPoint);
+        }
+        else
+        {
+            path[1] = dashPoint;
+            path[2] = slidePoint;
+
+            finalDistance = Vector2.Distance(transform.position, slidePoint) + Vector2.Distance(slidePoint, dashPoint);
+
+            if (finalDistance < distance)
+            {
+                finalDuration = duration * (finalDistance / distance);
+            }
+        }
+
+        if (renderObj == null) {
+            renderObj = PlayerModule.GetInstance().GetSpriteRenderer().transform;
+        }
+        
+        Vector2 direction = movement.GetDirection().normalized;
+        Vector2 orientation = movement.GetPlayerOrientation().normalized;
+
+        float angle = Vector2.SignedAngle(direction, orientation);
+        float oppositeAngle = Vector2.SignedAngle(-direction, orientation);
+        float result;
+
+        if (Mathf.Abs(angle) < Mathf.Abs(oppositeAngle))
+        {
+            result = angle;
+        }
+        else
+        {
+            result = oppositeAngle;
+        }
+
+        renderObj.DOLocalRotate(new Vector3(result, 90, 0), .05f);
+
+        transform.DOPath(path, finalDuration, PathType.Linear).SetEase(Ease.Linear)
             .OnComplete(()=>
             {
-                movement.enabled = true;
-                movement.rb.bodyType = RigidbodyType2D.Dynamic;
+                renderObj.DOLocalRotate(Vector3.zero, .05f);
 
-                transform.DOScaleX(.4f, .05f).OnComplete(() =>
+                renderObj.DOScaleX(.4f, .05f).OnComplete(() =>
                 {
-                    transform.DOScaleX(1f, .2f).SetEase(Ease.OutElastic);
+                    renderObj.DOScaleX(1f, .2f).SetEase(Ease.OutElastic);
                 });
-                transform.DOScaleY(1.5f, .08f).OnComplete(() =>
+                renderObj.DOScaleY(1.5f, .08f).OnComplete(() =>
                 {
-                    transform.DOScaleY(1f, .3f).SetEase(Ease.OutElastic);
+                    renderObj.DOScaleY(1f, .3f).SetEase(Ease.OutElastic);
                 });
 
             });
+    }
+
+    private void OnDrawGizmos()
+    {
+        /*Gizmos.color = Color.cyan;
+
+        Vector3 dash = CalculateDashPoint(distance, out bool hit, out Vector3 slide);
+
+        Gizmos.DrawWireSphere(dash, 6);
+
+        if (hit)
+        {
+            Gizmos.DrawWireSphere(slide, 4);
+        }*/
     }
 }
