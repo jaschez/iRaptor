@@ -10,10 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 3450523877008764465}
   - component: {fileID: 7309090075453648796}
-  - component: {fileID: 8119598861612878311}
   - component: {fileID: 959508190840546691}
   - component: {fileID: 4011138719797874842}
-  m_Layer: 0
+  m_Layer: 15
   m_Name: MainBullet
   m_TagString: Bullet
   m_Icon: {fileID: 0}
@@ -85,27 +84,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!50 &8119598861612878311
-Rigidbody2D:
-  serializedVersion: 4
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6489871368510451333}
-  m_BodyType: 0
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 0.0001
-  m_LinearDrag: 0
-  m_AngularDrag: 0
-  m_GravityScale: 0
-  m_Material: {fileID: 0}
-  m_Interpolate: 0
-  m_SleepingMode: 1
-  m_CollisionDetection: 1
-  m_Constraints: 4
 --- !u!61 &959508190840546691
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -154,7 +132,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5853817875420880584}
   - component: {fileID: 7032223337572473413}
-  m_Layer: 0
+  m_Layer: 15
   m_Name: Point Light 2D
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -132,7 +132,28 @@ public class DashModule : MonoBehaviour
         if (renderObj == null) {
             renderObj = PlayerModule.GetInstance().GetSpriteRenderer().transform;
         }
-        
+
+        ResizeAnimation();
+
+        transform.DOPath(path, finalDuration, PathType.Linear).SetEase(Ease.Linear)
+            .OnComplete(()=>
+            {
+                renderObj.DOLocalRotate(Vector3.zero, .05f);
+
+                renderObj.DOScaleX(.4f, .05f).OnComplete(() =>
+                {
+                    renderObj.DOScaleX(1f, .2f).SetEase(Ease.OutElastic);
+                });
+                renderObj.DOScaleY(1.5f, .08f).OnComplete(() =>
+                {
+                    renderObj.DOScaleY(1f, .3f).SetEase(Ease.OutElastic);
+                });
+
+            });
+    }
+
+    void ResizeAnimation()
+    {
         Vector2 direction = movement.GetDirection().normalized;
         Vector2 orientation = movement.GetPlayerOrientation().normalized;
 
@@ -150,22 +171,6 @@ public class DashModule : MonoBehaviour
         }
 
         renderObj.DOLocalRotate(new Vector3(result, 90, 0), .05f);
-
-        transform.DOPath(path, finalDuration, PathType.Linear).SetEase(Ease.Linear)
-            .OnComplete(()=>
-            {
-                renderObj.DOLocalRotate(Vector3.zero, .05f);
-
-                renderObj.DOScaleX(.4f, .05f).OnComplete(() =>
-                {
-                    renderObj.DOScaleX(1f, .2f).SetEase(Ease.OutElastic);
-                });
-                renderObj.DOScaleY(1.5f, .08f).OnComplete(() =>
-                {
-                    renderObj.DOScaleY(1f, .3f).SetEase(Ease.OutElastic);
-                });
-
-            });
     }
 
     private void OnDrawGizmos()

@@ -16,7 +16,6 @@ public class ShellBullet : Projectile
 
     protected override void MovementUpdate()
     {
-        transform.Translate(Time.deltaTime * Velocity * Orientation);
         DOTween.To(() => Velocity, x => Velocity = x, 0, Random.Range(.1f, .6f));
     }
 

@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3966803364641104299}
   - component: {fileID: 551518526015464742}
-  m_Layer: 0
+  m_Layer: 15
   m_Name: Point Light 2D
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -85,7 +85,7 @@ GameObject:
   - component: {fileID: 1629888370145556100}
   - component: {fileID: 7737396841455164128}
   - component: {fileID: -2339002879253155264}
-  m_Layer: 0
+  m_Layer: 15
   m_Name: EnemyBullet
   m_TagString: Bullet
   m_Icon: {fileID: 0}

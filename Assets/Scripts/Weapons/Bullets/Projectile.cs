@@ -5,6 +5,11 @@ public abstract class Projectile : MonoBehaviour, IPooledObject
     int hitNumber = 0;
     int maxHitNumber = 1;
 
+    Vector2 lastStep;
+    Vector2 firstStep;
+
+    protected Rigidbody2D rb;
+
     public Vector2 Orientation { get; private set; }
     public int Damage { get; private set; }
     public int MaxBounces { get; protected set; }
@@ -16,6 +21,11 @@ public abstract class Projectile : MonoBehaviour, IPooledObject
     public bool EnemyBullet { get; private set; } = false;
 
     Effect[] effects;
+
+    void Awake()
+    {
+        rb = GetComponent<Rigidbody2D>();
+    }
 
     //Método perteneciente a la interfaz del Object Pooling, se encarga de crear una nueva bala en la escena
     public void OnObjectSpawn()
@@ -39,15 +49,42 @@ public abstract class Projectile : MonoBehaviour, IPooledObject
     void FixedUpdate()
     {
         MovementUpdate();
+        Move();
+    }
+
+    void Move()
+    {
+
+        Vector2 step = Time.fixedDeltaTime * Velocity * Orientation;
+        CheckForCollision(step);
+        transform.Translate(step);
+    }
+
+    void CheckForCollision(Vector2 invStep)
+    {
+        Vector2 step = new Vector2(invStep.y, invStep.x);
+        int layerMask = ~((1 << gameObject.layer) | (EnemyBullet ? 0 : (1 << LayerMask.NameToLayer("Player")) | (1 << LayerMask.NameToLayer("Entry"))));
+
+        RaycastHit2D[] ray = Physics2D.CircleCastAll(transform.position, 3f, Orientation, step.magnitude, layerMask);
+
+        firstStep = transform.position;
+        lastStep = firstStep + new Vector2(Orientation.y, Orientation.x) * step.magnitude;
+
+        if (ray.Length != 0)
+        {
+            Debug.Log(ray.Length + "," + ray[0].collider.name);
+            OnImpactTrigger(ray[0]);
+        }
     }
 
     protected abstract void MovementUpdate();
 
     //Método que se encarga de detectar posibles impactos con otros cuerpos
     //  other: Cuerpo con el que ha impactado
-    void OnTriggerEnter2D(Collider2D other)
+    void OnImpactTrigger(RaycastHit2D ray)
     {
         //Evaluamos qué tipo de cuerpo es con el que ha chocado para hacer una cosa u otra
+        Collider2D other = ray.collider;
         Entity otherEntity = other.GetComponent<Entity>();
 
         if (otherEntity != null)
@@ -66,7 +103,9 @@ public abstract class Projectile : MonoBehaviour, IPooledObject
                 }
                 else
                 {
-                    Flip(other.transform);
+                    transform.position = lastStep - Orientation*Velocity*Time.fixedDeltaTime*10;
+                    Orientation *= -1;
+                    //Flip(ray.normal);
                     CurrentBounces++;
                 }
             }
@@ -91,7 +130,12 @@ public abstract class Projectile : MonoBehaviour, IPooledObject
     protected void Flip(Transform flipper)
     {
         Vector2 flipDir = -flipper.up;
-        Quaternion flippedRotation = Quaternion.LookRotation(Vector3.forward, flipDir);
+        Flip(flipDir);
+    }
+
+    protected void Flip(Vector2 direction)
+    {
+        Quaternion flippedRotation = Quaternion.LookRotation(Vector3.forward, direction);
 
         Orientation = flippedRotation * Vector2.up;
         transform.rotation = flippedRotation;
@@ -174,6 +218,12 @@ public abstract class Projectile : MonoBehaviour, IPooledObject
     {
         Burning,
         Perforing
+    }
+
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawLine(lastStep, firstStep);
     }
 }
 

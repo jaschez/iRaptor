@@ -16,6 +16,6 @@ public class EnemyBullet : Projectile
 
     protected override void MovementUpdate()
     {
-        transform.Translate(Time.deltaTime * Velocity * Orientation);
+
     }
 }

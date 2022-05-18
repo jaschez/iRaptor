@@ -25,6 +25,6 @@ public class MainBullet : Projectile
 
     protected override void MovementUpdate()
     {
-        transform.Translate(Time.deltaTime * Velocity * Orientation);
+        
     }
 }
