@@ -12,11 +12,16 @@ public class ShellBullet : Projectile
         SetProjectileType(ProjectileType.Shell);
         SetEnemyBullet(false);
         MaxBounces = 1;
+
+        DOTween.To(() => Velocity, x => Velocity = x, 0, Random.Range(.1f, .6f)).OnComplete(()=>
+        {
+            Impact();
+        });
     }
 
     protected override void MovementUpdate()
     {
-        DOTween.To(() => Velocity, x => Velocity = x, 0, Random.Range(.1f, .6f));
+        //DOTween.To(() => Velocity, x => Velocity = x, 0, Random.Range(.1f, .6f));
     }
 
     protected override void OnWallImpact()

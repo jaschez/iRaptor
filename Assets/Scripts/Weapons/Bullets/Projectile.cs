@@ -5,7 +5,7 @@ public abstract class Projectile : MonoBehaviour, IPooledObject
     int hitNumber = 0;
     int maxHitNumber = 1;
 
-    Vector2 lastStep;
+    Vector3 lastStep;
     Vector2 firstStep;
 
     protected Rigidbody2D rb;
@@ -30,7 +30,7 @@ public abstract class Projectile : MonoBehaviour, IPooledObject
     //Método perteneciente a la interfaz del Object Pooling, se encarga de crear una nueva bala en la escena
     public void OnObjectSpawn()
     {
-        Orientation = Quaternion.Euler(0, 0, transform.rotation.z) * Vector2.up;
+        Orientation = (transform.rotation * Vector2.up).normalized;
     }
 
     //Método que inicializa los valores del proyectil una vez creado en la escena
@@ -39,6 +39,7 @@ public abstract class Projectile : MonoBehaviour, IPooledObject
         hitNumber = 0;
         maxHitNumber = 1;
         CurrentBounces = 0;
+        lastStep = transform.position;;
     }
 
     public void SetEffects(Effect[] bulletEffects)
@@ -57,23 +58,19 @@ public abstract class Projectile : MonoBehaviour, IPooledObject
 
         Vector2 step = Time.fixedDeltaTime * Velocity * Orientation;
         CheckForCollision(step);
-        transform.Translate(step);
+        lastStep = transform.position;
+        transform.position = transform.position + (Vector3)step;
     }
 
-    void CheckForCollision(Vector2 invStep)
+    void CheckForCollision(Vector2 step)
     {
-        Vector2 step = new Vector2(invStep.y, invStep.x);
         int layerMask = ~((1 << gameObject.layer) | (EnemyBullet ? 0 : (1 << LayerMask.NameToLayer("Player")) | (1 << LayerMask.NameToLayer("Entry"))));
 
-        RaycastHit2D[] ray = Physics2D.CircleCastAll(transform.position, 3f, Orientation, step.magnitude, layerMask);
+        RaycastHit2D ray = Physics2D.Raycast(transform.position, Orientation, step.magnitude, layerMask);
 
-        firstStep = transform.position;
-        lastStep = firstStep + new Vector2(Orientation.y, Orientation.x) * step.magnitude;
-
-        if (ray.Length != 0)
+        if (ray.collider != null)
         {
-            Debug.Log(ray.Length + "," + ray[0].collider.name);
-            OnImpactTrigger(ray[0]);
+            OnImpactTrigger(ray);
         }
     }
 
@@ -103,9 +100,9 @@ public abstract class Projectile : MonoBehaviour, IPooledObject
                 }
                 else
                 {
-                    transform.position = lastStep - Orientation*Velocity*Time.fixedDeltaTime*10;
-                    Orientation *= -1;
-                    //Flip(ray.normal);
+                    Flip(ray.normal);
+                    transform.position = lastStep;
+
                     CurrentBounces++;
                 }
             }
@@ -133,12 +130,10 @@ public abstract class Projectile : MonoBehaviour, IPooledObject
         Flip(flipDir);
     }
 
-    protected void Flip(Vector2 direction)
+    protected void Flip(Vector2 normal)
     {
-        Quaternion flippedRotation = Quaternion.LookRotation(Vector3.forward, direction);
-
-        Orientation = flippedRotation * Vector2.up;
-        transform.rotation = flippedRotation;
+        Orientation = Vector2.Reflect(Orientation, normal);
+        transform.rotation = Quaternion.LookRotation(Vector3.forward, Orientation);
     }
 
     protected virtual void OnEntityImpact(Entity entity) {
@@ -151,7 +146,7 @@ public abstract class Projectile : MonoBehaviour, IPooledObject
     }
 
     //Método que define el comportamiento de lo que pasa al impactar con un cuerpo
-    void Impact()
+    protected void Impact()
     {
         gameObject.SetActive(false);
     }
@@ -218,12 +213,6 @@ public abstract class Projectile : MonoBehaviour, IPooledObject
     {
         Burning,
         Perforing
-    }
-
-    void OnDrawGizmos()
-    {
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawLine(lastStep, firstStep);
     }
 }
 

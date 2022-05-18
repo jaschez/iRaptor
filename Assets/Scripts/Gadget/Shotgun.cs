@@ -18,5 +18,6 @@ public class Shotgun : Gun
             FireBullet(angle + Random.Range(-30,30));
         }
         camManager.ShakeAnimation(2f, .2f, 30);
+        Movement.GetInstance().Recoil();
     }
 }

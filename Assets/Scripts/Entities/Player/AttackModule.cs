@@ -5,7 +5,7 @@ using UnityEngine;
 public class AttackModule : Gun
 {
     static AttackModule instance;
-    //Movement movementManager;
+    Movement movementManager;
 
     private void Awake()
     {
@@ -33,6 +33,8 @@ public class AttackModule : Gun
         SetFireSound(Sound.Shoot);
 
         player.OnEntityEvent += OnPlayerEvent;
+
+        movementManager = Movement.GetInstance();
     }
 
     void Update()
@@ -47,6 +49,7 @@ public class AttackModule : Gun
     {
         FireBullet(angle);
         camManager.ShakeAnimation(1f, .05f);
+        movementManager.Recoil();
     }
 
     protected override void ModifyProjectile(Projectile projectile)
