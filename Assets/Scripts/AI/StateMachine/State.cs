@@ -8,6 +8,7 @@ public class State
     public readonly Action AssignedAction;
     public readonly StateMachine.States StateType;
     public List<State> NextStates { get; private set; }
+    public List<StateTrigger> TriggerConditions { get; private set; }
     public State TriggerState { get; private set; } = null;
 
     public readonly float MinCompletionTime;
@@ -20,11 +21,19 @@ public class State
         MinCompletionTime = minCompletionTime;
         MaxCompletionTime = maxCompletionTime;
         NextStates = new List<State>();
+        TriggerConditions = new List<StateTrigger>();
     }
 
-    public void AddNextState(State state)
+    public void AddNextState(State state, Func<bool> condition = null)
     {
-        NextStates.Add(state);
+        if (condition == null) {
+            NextStates.Add(state);
+        }
+        else
+        {
+            StateTrigger conditionalState = new StateTrigger(state, condition);
+            TriggerConditions.Add(conditionalState);
+        }
     }
 
     public void SetTriggerState(State state)
@@ -35,5 +44,17 @@ public class State
     public void ResetTriggerState()
     {
         TriggerState = null;
+    }
+}
+
+public class StateTrigger
+{
+    public readonly State ResultingState;
+    public Func<bool> Trigger { get; private set; }
+
+    public StateTrigger(State resultingState, Func<bool> condition)
+    {
+        ResultingState = resultingState;
+        Trigger = condition;
     }
 }

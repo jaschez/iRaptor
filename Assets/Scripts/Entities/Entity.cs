@@ -16,16 +16,20 @@ public abstract class Entity : MonoBehaviour
 
     Color origColor;
 
-    protected int units = 1;
     protected DropType dropType = DropType.CarbonUnit;
 
     protected LevelManager levelManager;
 
     private EntityType entityType;
 
+    protected int units = 1;
+
     private int maxHealth = 8;
 
     private int _health;
+
+    protected float takingDamageCooldown = -1;
+    private float takingDamageCooldownTime = 0;
 
     public delegate void EntityEvents(Entity sender, EntityEvent eventType, object param);
 
@@ -82,9 +86,6 @@ public abstract class Entity : MonoBehaviour
 
     protected virtual void Start()
     {
-
-        //whiteMat = GameManagerModule.GetInstance().assetContainer.whiteMat;
-
         if (!TryGetComponent(out sr))
         {
             sr = GetComponentInChildren<SpriteRenderer>(true);
@@ -145,21 +146,29 @@ public abstract class Entity : MonoBehaviour
     //Método que resta vida al jugador
     public void TakeDamage(int damage)
     {
-        if (health > 0) {
-            health -= damage;
+        if (takingDamageCooldownTime < Time.time) {
+            if (health > 0) {
+                health -= damage;
 
-            StartCoroutine(DamageFlash(.07f));
-            Flinch();
+                Flash();
 
-            SendEvent(EntityEvent.Damage, damage);
+                SendEvent(EntityEvent.Damage, damage);
 
-            OnTakeDamage(damage);
+                OnTakeDamage(damage);
 
-            if (health == 0)
-            {
-                Invoke("Die", .07f);
+                if (health == 0)
+                {
+                    Invoke("Die", .07f);
+                }
             }
+
+            takingDamageCooldownTime = Time.time + takingDamageCooldown;
         }
+    }
+
+    public void Flash()
+    {
+        StartCoroutine(DamageFlash(.07f));
     }
 
     void Flinch()
@@ -221,6 +230,9 @@ public abstract class Entity : MonoBehaviour
 
     IEnumerator DamageFlash(float flashTime)
     {
+        while (sr == null && whiteMat == null) yield return null;
+
+        Flinch();
 
         sr.material = whiteMat;
         sr.color = Color.white;

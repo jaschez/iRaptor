@@ -17,6 +17,8 @@ public class UIVisualizer : MonoBehaviour
 
     public UIGadgetVisualizer gadgetVisualizer;
 
+    public GameOverUI gameOverUI;
+
     public Transform canvasParent;
 
     public GameObject healthBarGO;
@@ -75,6 +77,9 @@ public class UIVisualizer : MonoBehaviour
 
         UpdateHealthBar(false);
         UpdateMaxHealthBar();
+
+        TransitionSystem.GetInstance().SetTransitionColor(Color.black);
+        TransitionSystem.GetInstance().Apply(TransitionSystem.Transition.FadeIn, .3f);
     }
 
     void OnPlayerEvent(Entity sender, Entity.EntityEvent eventType, object param)
@@ -171,6 +176,11 @@ public class UIVisualizer : MonoBehaviour
             //Indicar daño producido
 
             CamManager.GetInstance().ShakeQuake(20, 3f, true);
+
+            if (sender.GetEntityType() == EntityType.Player)
+            {
+                gameOverUI.Show();
+            }
         }
 
         if (eventType == PlayerModule.PlayerEvent.ItemPicked)

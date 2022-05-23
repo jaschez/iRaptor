@@ -42,7 +42,7 @@ public class WaveManager : MonoBehaviour
 
     public void UpdateRoom(RoomNode room)
     {
-        Debug.Log("Entered room: " + room.ID);
+        Debug.Log("Entered room: " + room.ID + ", type: " + room.Type.ToString());
 
         bool nullRoom = false;
 
@@ -102,18 +102,19 @@ public class WaveManager : MonoBehaviour
         roomBarriers[roomID].Add(barrier);
     }
 
+    //Start summoning enemies in case it is not the first wave
     void StartNextWave()
     {
         totalWaveEnemies = currentRoom.Enemies[currentWave].Count;
         beatenEnemies = 0;
 
-        SpawnEnemies();
+        SpawnEnemies(currentWave > 0);
     }
 
-    void SpawnEnemies()
+    void SpawnEnemies(bool summoning = false)
     {
         List<Tuple<EnemyType, Coord>> enemies = currentRoom.Enemies[currentWave];
-        LevelManager.GetInstance().InstantiateEnemyList(enemies, currentRoom.Position, new GameObject("enemy"));
+        LevelManager.GetInstance().InstantiateEnemyList(enemies, currentRoom.Position, summoning, new GameObject("enemy"));
     }
 
     void FinishWave()

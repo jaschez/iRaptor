@@ -60,7 +60,7 @@ public class Movement : MonoBehaviour
         KeyCode attack = KeyCode.X;
         KeyCode dash = KeyCode.Space;
         KeyCode interact = KeyCode.E;
-        KeyCode gadget = KeyCode.Escape;
+        KeyCode gadget = KeyCode.P;
 
         /* Inicializa los controles una vez comienza el juego (basado en un archivo externo para evitar
          * que un jugador pueda modificar los controles desde el programa y solo tengan acceso a ello
@@ -182,7 +182,7 @@ public class Movement : MonoBehaviour
             }
         }
 
-        if (Controls.GetMoveKeyUp() || locked)
+        if (Controls.GetMoveKeyUp())
         {
             if (engineSound.isPlaying)
             {
@@ -212,6 +212,12 @@ public class Movement : MonoBehaviour
     public void Lock()
     {
         locked = true;
+
+        if (engineSound.isPlaying)
+        {
+            SoundManager.Play(Sound.EngineOff, CamManager.GetInstance().transform.position, CamManager.GetInstance().transform);
+            engineSound.Stop();
+        }
     }
 
     public void Unlock()

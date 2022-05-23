@@ -8,8 +8,6 @@ public class ForceField : MonoBehaviour
 
     public Camera cam;
 
-    public FadeInAndOutScript_Csharp fade;
-
     GameObject[,] forceObjs;
 
     public TextMeshModifier textNotifier;
@@ -108,9 +106,6 @@ public class ForceField : MonoBehaviour
     void StartFade()
     {
         canFade = true;
-
-        fade.fadeTime = .2f;
-        fade.FadeOut();
     }
 
     IEnumerator Glitch()

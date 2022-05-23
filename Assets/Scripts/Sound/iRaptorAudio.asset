@@ -43,6 +43,14 @@ MonoBehaviour:
     SoundType: 13
   - Audio: {fileID: 8300000, guid: 19f749faf9e0e3547909cd7db82d664c, type: 3}
     SoundType: 14
+  - Audio: {fileID: 8300000, guid: 9327bf4c425df6e4e8defe8ee763b940, type: 3}
+    SoundType: 17
+  - Audio: {fileID: 8300000, guid: 158b42c7d1422934eb67e75650bc4a70, type: 3}
+    SoundType: 18
+  - Audio: {fileID: 8300000, guid: bc735915f4a054d459c0d0ffa0b268b2, type: 3}
+    SoundType: 19
+  - Audio: {fileID: 8300000, guid: 73cdcbf8ea2fe204481d574287d3c851, type: 3}
+    SoundType: 16
   Mixer: {fileID: 24100000, guid: d078c6288c8c6bf4486b7b9a99204111, type: 2}
   MixerList:
   - Mixer: {fileID: -104537008102140031, guid: d078c6288c8c6bf4486b7b9a99204111, type: 2}

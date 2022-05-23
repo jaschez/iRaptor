@@ -130,6 +130,10 @@ public enum Sound{
     EnemyImpact,
     PlayerImpact,
     Audio_ShipAmbience,
+    Numbrian_alert,
+    Numbrian_talk1,
+    Numbrian_damage,
+    Numbrian_death,
     None
 }
 

@@ -16,7 +16,7 @@ public class TransitionSystem : MonoBehaviour
         {
 			instance = this;
         }
-        else
+        else if(instance != this)
         {
 			Destroy(this);
         }
@@ -34,6 +34,8 @@ public class TransitionSystem : MonoBehaviour
 		}
 
 		guiColor = Color.white;
+
+		DontDestroyOnLoad(instance);
 	}
 
 	public void SetTransitionColor(Color textureColor)

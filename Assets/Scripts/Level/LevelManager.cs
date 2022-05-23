@@ -18,6 +18,7 @@ public class LevelManager : MonoBehaviour
     public GameObject chestPrefab;
     public GameObject barrierPrefab;
     public GameObject exitPrefab;
+    public GameObject summonPrefab;
 
     [Space]
 
@@ -241,13 +242,23 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    public void InstantiateEnemyList(List<Tuple<EnemyType, Coord>> enemyList, Coord origin, GameObject parentTo = null)
+    public void InstantiateEnemyList(List<Tuple<EnemyType, Coord>> enemyList, Coord origin, bool summoning = false, GameObject parentTo = null)
     {
+        float summoningDelay = .3f;
+
         foreach (Tuple<EnemyType, Coord> enemy in enemyList)
         {
             Vector3 position = CoordToVect(enemy.Item2, origin);
 
-            Instantiate(gameManager.EnemyDictionary[enemy.Item1].Prefab, position, Quaternion.identity, parentTo.transform);
+            GameObject enemyObj = Instantiate(gameManager.EnemyDictionary[enemy.Item1].Prefab, position, Quaternion.identity, parentTo.transform);
+
+            if (summoning)
+            {
+                Summoner summoner = Instantiate(summonPrefab, position, Quaternion.identity).GetComponent<Summoner>();
+                summoner.Initialize(enemyObj, summoningDelay, .5f);
+            }
+
+            summoningDelay += .2f;
         }
     }
 

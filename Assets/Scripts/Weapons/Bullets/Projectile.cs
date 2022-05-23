@@ -6,7 +6,6 @@ public abstract class Projectile : MonoBehaviour, IPooledObject
     int maxHitNumber = 1;
 
     Vector3 lastStep;
-    Vector2 firstStep;
 
     protected Rigidbody2D rb;
 
@@ -112,15 +111,18 @@ public abstract class Projectile : MonoBehaviour, IPooledObject
 
     protected void ImpactEntity(Entity entity)
     {
-        entity.TakeDamage(Damage);
-
-        ApplyEffects(entity);
-
-        hitNumber++;
-
-        if (hitNumber >= maxHitNumber)
+        if (entity.GetHP() > 0)
         {
-            Impact();
+            entity.TakeDamage(Damage);
+
+            ApplyEffects(entity);
+
+            hitNumber++;
+
+            if (hitNumber >= maxHitNumber)
+            {
+                Impact();
+            }
         }
     }
 

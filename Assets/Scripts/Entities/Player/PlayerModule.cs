@@ -51,6 +51,7 @@ public class PlayerModule : Entity
         SetEntityType(EntityType.Player);
 
         units = 0;
+        takingDamageCooldown = .3f;
 
         InitHealth(20);
 
@@ -205,7 +206,7 @@ public class PlayerModule : Entity
     protected override void Die()
     {
         base.Die();
-
+        Lock();
         Debug.Log("Player died");
     }
 

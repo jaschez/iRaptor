@@ -5,25 +5,30 @@ using UnityEngine;
 public class StateMachine : MonoBehaviour
 {
     public State[] EntryStates { get; private set; }
-    State currentState;
+    public State CurrentState { get; private set; }
 
-    System.Action OnStateStart;
+    //System.Action OnStateStart;
+
+    public delegate void StartedState(State state);
+    // Event declaration
+    public event StartedState OnStateStart;
 
     Coroutine currentCoroutine;
 
     float stateTime;
     float timer;
 
-    public void Init(List<State> entryStates, System.Action StateStart)
+    public void Init(List<State> entryStates)
     {
         EntryStates = entryStates.ToArray();
-        State selectedState = EntryStates[Random.Range(0, EntryStates.Length - 1)];
-        OnStateStart = StateStart;
 
-        currentCoroutine = StartCoroutine(DoState(selectedState));
+        if (EntryStates.Length > 0) {
+            State selectedState = EntryStates[Random.Range(0, EntryStates.Length - 1)];
+            currentCoroutine = StartCoroutine(DoState(selectedState));
+        }
     }
 
-    public void ResetTimer(float min, float max)
+    private void ResetTimer(float min, float max)
     {
         stateTime = Random.Range(min, max);
         timer = Time.time + stateTime;
@@ -40,6 +45,19 @@ public class StateMachine : MonoBehaviour
             while (timer > Time.time)
             {
                 state.AssignedAction.Invoke();
+
+                if (state.TriggerState == null) {
+                    foreach (StateTrigger stateTrigger in state.TriggerConditions)
+                    {
+                        if (stateTrigger.Trigger.Invoke())
+                        {
+                            State resultingState = stateTrigger.ResultingState;
+                            ResetTimer(0, 0);
+                            state.SetTriggerState(resultingState);
+                        }
+                    }
+                }
+
                 yield return null;
             }
         }
@@ -53,25 +71,25 @@ public class StateMachine : MonoBehaviour
 
     void StartState(State state)
     {
-        currentState = state;
+        CurrentState = state;
         stateTime = Random.Range(state.MinCompletionTime, state.MaxCompletionTime);
         timer = Time.time + stateTime;
 
-        OnStateStart.Invoke();
+        OnStateStart?.Invoke(state);
     }
 
     void NextState()
     {
         State selectedState;
 
-        if (currentState.TriggerState == null) {
-            State[] possibleStates = currentState.NextStates.ToArray();
+        if (CurrentState.TriggerState == null) {
+            State[] possibleStates = CurrentState.NextStates.ToArray();
             selectedState = possibleStates[Random.Range(0, possibleStates.Length - 1)];
         }
         else
         {
-            selectedState = currentState.TriggerState;
-            currentState.ResetTriggerState();
+            selectedState = CurrentState.TriggerState;
+            CurrentState.ResetTriggerState();
         }
 
         currentCoroutine = StartCoroutine(DoState(selectedState));
@@ -79,7 +97,7 @@ public class StateMachine : MonoBehaviour
 
     private void OnEnable()
     {
-        currentCoroutine = StartCoroutine(DoState(currentState));
+        currentCoroutine = StartCoroutine(DoState(CurrentState));
     }
 
     private void OnDisable()

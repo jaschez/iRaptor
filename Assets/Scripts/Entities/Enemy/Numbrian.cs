@@ -4,14 +4,7 @@ using UnityEngine;
 
 public class Numbrian : EnemyModule
 {
-    EnemyShooter shooter;
-    Mover mover;
-
-    PlayerModule player;
-
     //IA
-    StateMachine stateMachine;
-    List<State> initialStates;
 
     State patrolIdle;
     State patrolWandering;
@@ -20,37 +13,28 @@ public class Numbrian : EnemyModule
     State alertWandering;
     State alertAttack;
 
-    Vector2 moveDirection;
+    //Shooting parameters
+
+    EnemyShooter shooter;
+
     Quaternion rotationToPlayer;
     Quaternion shootingDirection;
 
-    public LayerMask playerDetectionLayer;
-
-    float playerDetectionRadius = 300;
-    float bumpRadius = 10;
     float shootingAccuracy = .8f;
     float cooldown = .4f;
     float shootingDelta;
 
-    bool playerSeen = false;
     bool hasShoot = false;
 
     protected override void InitEnemy()
     {
-        mover = gameObject.AddComponent<Mover>();
+        base.InitEnemy();
+
         shooter = gameObject.AddComponent<EnemyShooter>();
-        stateMachine = gameObject.AddComponent<StateMachine>();
-
-        player = (PlayerModule)PlayerModule.GetInstance();
-
-        mover.InitMover(100);
         shooter.Init(cooldown, 200, 4, ProjectileType.Numbrian, false);
-
-        SetEnemyType(EnemyType.Numbrian);
-        InitHealth(3);
-
-        maxCarbonUnits = 4;
         shootingDelta = 180 * (1 - shootingAccuracy);
+
+        SetupValues(EnemyType.Numbrian, 3, 100, 4);
 
         //MAQUINA DE ESTADOS
 
@@ -79,58 +63,44 @@ public class Numbrian : EnemyModule
         alertAttack.AddNextState(alertIdle);
         alertAttack.AddNextState(alertAttack);
 
+        //Asignacion de las transiciones condicionales de estados
+        patrolWandering.AddNextState(alertWandering, IsLookingAtPlayer);
+        patrolIdle.AddNextState(alertWandering, 
+            ()=> {return IsLookingAtPlayer(); });
+
+        alertIdle.AddNextState(patrolIdle, () => !IsLookingAtPlayer());
+
         //Asignamos estados iniciales
-        initialStates = new List<State>();
         initialStates.Add(patrolIdle);
         initialStates.Add(patrolWandering);
 
-        stateMachine.Init(initialStates, OnStateStart);
+        StateMachine.Init(initialStates);
+
+        //Añadir sonidos de enemigo
+        //AddTalkingSound(Sound.Numbrian_talk1);
+        //AddTalkingSound(Sound.Numbrian_talk2);
     }
 
-    void Update()
+    protected override void OnStateStart(State startingState)
     {
+        base.OnStateStart(startingState);
 
-    }
+        switch (startingState.StateType)
+        {
+            case StateMachine.States.Attack:
+                rotationToPlayer = RotationToPlayer();
+                hasShoot = false;
+                break;
 
-    void OnStateStart()
-    {
-        moveDirection = Random.insideUnitCircle.normalized;
-        rotationToPlayer = RotationToPlayer();
-        hasShoot = false;
-    }
-
-    void Idle()
-    {
-
-        mover.Move(Vector2.zero);
-
-        if (patrolIdle.TriggerState == null && alertIdle.TriggerState == null) {
-            if (!playerSeen)
-            {
-                if (IsLookingAtPlayer())
-                {
-                    playerSeen = true;
-                    stateMachine.ResetTimer(alertIdle.MinCompletionTime, alertIdle.MaxCompletionTime);
-                    patrolIdle.SetTriggerState(alertWandering);
-                }
-            }
-            else
-            {
-                if (!IsLookingAtPlayer())
-                {
-                    playerSeen = false;
-                    stateMachine.ResetTimer(patrolIdle.MinCompletionTime, patrolIdle.MaxCompletionTime);
-                    alertIdle.SetTriggerState(patrolIdle);
-                }
-            }
+            default:
+                break;
         }
     }
 
-    void Wandering()
+    protected override void OnTakeDamage(int dmg)
     {
-        mover.Move(moveDirection);
-
-        BounceOffWalls();
+        base.OnTakeDamage(dmg);
+        Talk(Sound.Numbrian_damage, true);
     }
 
     void Attack()
@@ -144,85 +114,8 @@ public class Numbrian : EnemyModule
         }
     }
 
-    Vector2 DirectionToPlayer()
-    {
-        return (player.transform.position - transform.position).normalized;
-    }
-
-    Quaternion RotationToPlayer()
-    {
-        return Quaternion.Euler(0, 0, Vector2.SignedAngle(Vector2.up, DirectionToPlayer()));
-    }
-
-    bool IsLookingAtPlayer()
-    {
-        RaycastHit2D ray = Physics2D.Raycast(transform.position, DirectionToPlayer(), playerDetectionRadius, playerDetectionLayer);
-        if (ray.collider != null) {
-            return ray.collider.tag.CompareTo("Player") == 0;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    void BounceOffWalls()
-    {
-        if (BumpTop() && BumpLeft())
-        {
-            moveDirection = Mathf.Abs(moveDirection.x) < Mathf.Abs(moveDirection.y) ? Vector2.down : Vector2.right;
-        }
-        else if (BumpTop() && BumpRight())
-        {
-            moveDirection = Mathf.Abs(moveDirection.x) > Mathf.Abs(moveDirection.y) ? Vector2.down : Vector2.left;
-        }
-        else if (BumpBottom() && BumpLeft())
-        {
-            moveDirection = Mathf.Abs(moveDirection.y) < Mathf.Abs(moveDirection.x) ? Vector2.up : Vector2.right;
-        }
-        else if (BumpBottom() && BumpRight())
-        {
-            moveDirection = Mathf.Abs(moveDirection.y) < Mathf.Abs(moveDirection.x) ? Vector2.up : Vector2.left;
-        }
-        else if (BumpLeft() || BumpRight())
-        {
-            moveDirection.x = 0;
-            moveDirection.Normalize();
-        }
-        else if (BumpTop() || BumpBottom())
-        {
-            moveDirection.y = 0;
-            moveDirection.Normalize();
-        }
-
-        if (moveDirection == Vector2.zero)
-        {
-            moveDirection = Random.insideUnitCircle.normalized;
-        }
-    }
-
-    bool BumpTop()
-    {
-        return Physics2D.Raycast(transform.position, Vector2.up, bumpRadius, LayerMask.GetMask("Scenario"));
-    }
-
-    bool BumpBottom()
-    {
-        return Physics2D.Raycast(transform.position, Vector2.down, bumpRadius, LayerMask.GetMask("Scenario"));
-    }
-
-    bool BumpLeft()
-    {
-        return Physics2D.Raycast(transform.position, Vector2.left, bumpRadius, LayerMask.GetMask("Scenario"));
-    }
-
-    bool BumpRight()
-    {
-        return Physics2D.Raycast(transform.position, Vector2.right, bumpRadius, LayerMask.GetMask("Scenario"));
-    }
-
     protected override void OnEnemyDead()
     {
-        SoundManager.Play(Sound.ShipDeath, transform.position);
+        Talk(Sound.Numbrian_death);
     }
 }

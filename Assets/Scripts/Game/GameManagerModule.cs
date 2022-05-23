@@ -69,6 +69,15 @@ public class GameManagerModule : MonoBehaviour
         GenerateEnemyData();
     }
 
+    private void Start()
+    {
+        if (TransitionSystem.GetInstance() != null)
+        {
+            TransitionSystem.GetInstance().Apply(TransitionSystem.Transition.FadeIn, 0);
+            TransitionSystem.GetInstance().SetTransitionColor(Color.black);
+        }
+    }
+
     void OnEnable()
     {
         //Start listening for a scene change as soon as this script is enabled.
@@ -132,8 +141,8 @@ public class GameManagerModule : MonoBehaviour
         {
             case "Loading":
                 OnLoadingSceneFade();
-                Invoke("StartGeneration", 3f);
-                //StartGeneration();
+                //Invoke("StartGeneration", 3f);
+                StartGeneration();
                 break;
 
             case "Game":
@@ -173,8 +182,8 @@ public class GameManagerModule : MonoBehaviour
         //Do something
 
         //////////////
-        
-        SceneManager.LoadScene("Game");
+        ///
+        TransitionSystem.GetInstance().SwitchToScene(SceneSystem.GameScenes.LoadedLevel, TransitionSystem.Transition.FadeOut, 0.3f);
     }
 
     public void FinishLevel(PlayerState state)

@@ -98,7 +98,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_UseShadowmask: 1
+  m_UseShadowmask: 0
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -220,6 +220,49 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1 &579546671
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 579546673}
+  - component: {fileID: 579546672}
+  m_Layer: 0
+  m_Name: TransitionSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &579546672
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 579546671}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4bebd7163c8eaa4a87a71d9a85e4871, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &579546673
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 579546671}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.76015466, y: -16.315899, z: 2404.0781}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &834230976
 GameObject:
   m_ObjectHideFlags: 0
@@ -815,7 +858,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prefab: {fileID: 7664075518144573563, guid: 07ca0a8be92b79743b0afc11aa16b2b5, type: 3}
   cam: {fileID: 834230978}
-  fade: {fileID: 834230983}
   textNotifier: {fileID: 1788352440}
   start: {fileID: 8300000, guid: e74ed26258e46384bafecc1eabee7c1d, type: 3}
   loopAudio: {fileID: 834230980}
@@ -847,6 +889,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: GameManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 2487297875709227581, guid: 7e248d8a2a0df654d8fe0b3c27c1b80d,
+        type: 3}
+      propertyPath: RandomSeed
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2487297875709227582, guid: 7e248d8a2a0df654d8fe0b3c27c1b80d,
         type: 3}

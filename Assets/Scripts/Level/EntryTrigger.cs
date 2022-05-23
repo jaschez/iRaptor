@@ -15,22 +15,9 @@ public class EntryTrigger : MonoBehaviour
     
     static int currentEntryCode = -1;
 
-    delegate void EnterEvent();
-    event EnterEvent OnEnter;
-
     int hash;
 
     bool entered = false;
-
-    private void OnEnable()
-    {
-        OnEnter += CheckState;
-    }
-
-    private void OnDisable()
-    {
-        OnEnter -= CheckState;
-    }
 
     public void Initialize(RoomNode associated, GameObject obj)
     {
@@ -81,7 +68,7 @@ public class EntryTrigger : MonoBehaviour
                 collidingEntries.Push(hash);
             }
 
-            OnEnter();
+            CheckState();
 
         }
     }

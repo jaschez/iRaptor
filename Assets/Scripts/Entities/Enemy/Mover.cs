@@ -7,6 +7,8 @@ public class Mover:MonoBehaviour
 
     Rigidbody2D rb;
     float velocity;
+
+    public Vector2 Direction { get; private set; }
     
     public void InitMover(float vel)
     {
@@ -16,6 +18,7 @@ public class Mover:MonoBehaviour
 
     public void Move(Vector2 dir)
     {
+        Direction = dir;
         rb.velocity = Vector2.Lerp(rb.velocity, dir*velocity, Time.deltaTime * 10);
     }
 
