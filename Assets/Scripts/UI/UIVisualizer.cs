@@ -13,6 +13,8 @@ public class UIVisualizer : MonoBehaviour
 
     public InventoryUIManager UIItemManager;
 
+    public LevelPresentator levelPresentator;
+
     public TextMeshModifier textNotifier;
 
     public UIGadgetVisualizer gadgetVisualizer;
@@ -80,6 +82,11 @@ public class UIVisualizer : MonoBehaviour
 
         TransitionSystem.GetInstance().SetTransitionColor(Color.black);
         TransitionSystem.GetInstance().Apply(TransitionSystem.Transition.FadeIn, .3f);
+    }
+
+    public void PresentLevel(int levelNumber, string levelName)
+    {
+        levelPresentator.Initialize(levelNumber + 1, levelName);
     }
 
     void OnPlayerEvent(Entity sender, Entity.EntityEvent eventType, object param)

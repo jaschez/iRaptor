@@ -11,11 +11,8 @@ public class LevelManager : MonoBehaviour
     System.Random random;
 
     [Space]
-    
-    public GameObject lootPrefab;
     public GameObject npcPrefab;
     public GameObject lightPrefab;
-    public GameObject chestPrefab;
     public GameObject barrierPrefab;
     public GameObject exitPrefab;
     public GameObject summonPrefab;
@@ -23,8 +20,10 @@ public class LevelManager : MonoBehaviour
     [Space]
 
     public DropObject[] DropObjects;
+    public DropObject[] ChestObjects;
 
     public Dictionary<DropType, GameObject> Drops { get; private set; }
+    public Dictionary<DropType, GameObject> Chests { get; private set; }
 
     GameManagerModule gameManager;
 
@@ -48,6 +47,7 @@ public class LevelManager : MonoBehaviour
         }
 
         Drops = new Dictionary<DropType, GameObject>();
+        Chests = new Dictionary<DropType, GameObject>();
 
         foreach (DropObject drop in DropObjects)
         {
@@ -56,6 +56,24 @@ public class LevelManager : MonoBehaviour
                 Drops.Add(drop.Type, drop.Object);
             }
         }
+
+        foreach (DropObject drop in ChestObjects)
+        {
+            if (!Chests.ContainsKey(drop.Type))
+            {
+                Chests.Add(drop.Type, drop.Object);
+            }
+        }
+    }
+
+    private void OnEnable()
+    {
+        ExitHole.OnExitEnter += AdvanceLevel;
+    }
+
+    private void OnDisable()
+    {
+        ExitHole.OnExitEnter -= AdvanceLevel;
     }
 
     public void Initialize(WorldGenerator output)
@@ -81,6 +99,13 @@ public class LevelManager : MonoBehaviour
 
         Debug.Log("Unsuccessful links: " + output.UnsuccessfulLinks);
         Debug.Log(output.ToString());
+
+        Invoke("Present", .5f);
+    }
+
+    void Present()
+    {
+        uiVisualizer.PresentLevel(gameManager.CurrentLevel, GameManagerModule.LevelNames[gameManager.CurrentLevel]);
     }
 
     void Generate()
@@ -149,14 +174,26 @@ public class LevelManager : MonoBehaviour
                     RewardRoom rewardRoom = (RewardRoom)room;
 
                     Vector3 rewardPos = CoordToVect(rewardRoom.Reward.Item2, room.Position);
-                    Loot chest = Instantiate(lootPrefab, rewardPos, Quaternion.identity).GetComponent<Loot>();
+                    ModuleChest chest = Instantiate(Chests[DropType.Item], rewardPos, Quaternion.identity).GetComponent<ModuleChest>();
 
                     chest.SetItem(rewardRoom.Reward.Item1);
                 }
                 else if(room.Type == RoomType.Shop)
                 {
-                    Vector3 rewardPos = CoordToVect(((ShopRoom)room).NPC, room.Position);
+                    ShopRoom shopRoom = (ShopRoom)room;
+                    Vector3 rewardPos = CoordToVect(shopRoom.NPC, room.Position);
                     Instantiate(npcPrefab, rewardPos, Quaternion.identity, lootParent.transform);
+
+                    foreach (Tuple<DropType, Coord> item in shopRoom.Items)
+                    {
+                        Vector3 itemPos = CoordToVect(item.Item2, room.Position);
+                        Chest chest = Instantiate(Chests[item.Item1], rewardPos, Quaternion.identity, lootParent.transform).GetComponent<Chest>();
+                        chest.SetPrice(shopRoom.Prices[item.Item1]);
+                    }
+                }else if(room.Type == RoomType.Boss)
+                {
+                    Vector3 exitPos = CoordToVect(((BossRoom)room).Exit, room.Position);
+                    Instantiate(exitPrefab, exitPos, Quaternion.identity);
                 }
 
                 InstantiateLights(room, lightsParent);
@@ -228,8 +265,6 @@ public class LevelManager : MonoBehaviour
                 waveManager.AddBarrierToRoom(connection.RoomBID, barrierObj);
             }
         }
-
-        //Instantiate(exitPrefab, new Vector3(mapInfo.ExitPos.x + 0.5f, mapInfo.ExitPos.y + 0.5f, 1) * 16, Quaternion.identity);
     }
 
     public void InstantiateObjectList(List<Coord> objList, Coord origin, GameObject instantiable, GameObject parentTo = null)

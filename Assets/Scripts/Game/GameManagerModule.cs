@@ -8,6 +8,13 @@ public class GameManagerModule : MonoBehaviour
 {
     static GameManagerModule instance;
 
+    public static string[] LevelNames = new string[]
+    {
+        "Through the crust",
+        "Dormant mantle",
+        "The core"
+    };
+
     public ItemDataDictionary itemDictionary;
 
     public List<ItemData> AvailableItems { get; private set; }

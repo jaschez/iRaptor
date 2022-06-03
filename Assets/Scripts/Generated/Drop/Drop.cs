@@ -84,8 +84,6 @@ public abstract class Drop : MonoBehaviour
     {
         return dropType;
     }
-
-
 }
 
 public enum DropType
@@ -93,5 +91,5 @@ public enum DropType
     HP,
     CarbonUnit,
     Item,
-    DashUnit
+    ChargeUnit
 }

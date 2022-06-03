@@ -9647,8 +9647,8 @@ MonoBehaviour:
   onLineUpdate:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 431400859}
-        m_MethodName: set_text
+      - m_Target: {fileID: 1831539710}
+        m_MethodName: UpdateText
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -9732,7 +9732,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speakerNameText: {fileID: 1021183342}
-  dialogText: {fileID: 0}
+  dialogText: {fileID: 431400859}
   speakerImage: {fileID: 1035867796}
 --- !u!1 &1846836559
 GameObject:

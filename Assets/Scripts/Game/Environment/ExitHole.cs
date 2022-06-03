@@ -7,9 +7,6 @@ public class ExitHole : MonoBehaviour, Interactable
 
     SpriteRenderer sr;
 
-    bool levelCleared = false;
-    bool canExit = false;
-
     public delegate void EnteredExit();
     public static event EnteredExit OnExitEnter;
 
@@ -20,19 +17,8 @@ public class ExitHole : MonoBehaviour, Interactable
         AllowExit();
     }
 
-    private void OnEnable()
-    {
-        //LevelManager.OnLevelClear += AllowExit;
-    }
-
-    private void OnDestroy()
-    {
-        //LevelManager.OnLevelClear -= AllowExit;
-    }
-
     void AllowExit()
     {
-        levelCleared = true;
         sr.color = new Color(sr.color.r, sr.color.g, sr.color.b, 1f);
     }
 

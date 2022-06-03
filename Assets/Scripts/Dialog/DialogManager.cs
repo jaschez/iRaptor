@@ -41,6 +41,7 @@ public class DialogManager : MonoBehaviour
         dialogueRunner.AddCommandHandler("ShowConsole", ShowConsole);
         dialogueRunner.AddCommandHandler("SetSpeed", SetSpeed);
         dialogueRunner.AddCommandHandler("SkipLines", SkipLines);
+        dialogueRunner.AddCommandHandler("SwitchScene", SwitchScene);
     }
 
     public void StartDialogue(string startNode)
@@ -102,6 +103,13 @@ public class DialogManager : MonoBehaviour
     void ShowConsole(string[] param)
     {
         MenuInteraction.GetInstance()?.ShowConsole();
+    }
+
+    void SwitchScene(string[] param)
+    {
+        int sceneNumber = int.Parse(param[0]);
+        TransitionSystem.GetInstance().SetTransitionColor(Color.black);
+        TransitionSystem.GetInstance().SwitchToScene((SceneSystem.GameScenes)sceneNumber, TransitionSystem.Transition.FadeOut, 1f);
     }
 
     void SetSpeed(string[] param)

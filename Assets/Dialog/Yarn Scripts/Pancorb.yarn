@@ -4,20 +4,14 @@ colorID: 0
 position: 189,-1037
 ---
 <<SetSpeaker Pancorb>>
-
-<<if $fiesta neq 1>>
-Ey, ¿Que tal {$name}?
-Hoy hacemos una fiesta, ¿Vas a venir?
-->Si
-    <<set $fiesta to 1>>
-    <<SetSpeaker John happy>>
-    Genial, te añadire a la lista de invitados.
-->No
-    Ohhh, que pena...
-    Si cambias de opinion estare por aqui.
+<<SetSpeed 100>>
+<<SkipLines 2>>
+<<if $met neq 1>>
+It's a good rotating planet cycle to be desintegrated by numbrians,
+Isn't it?
+<<set $met to 1>>
 <<else>>
-¡Hola {$name}!
-<<SetSpeaker John happy>>
-Estoy deseando de que vengas.
+I don't really know what is making people search in the inners of this astral body
+But trust me, that is no good for them
 <<endif>>
 ===

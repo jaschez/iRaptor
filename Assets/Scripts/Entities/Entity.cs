@@ -299,6 +299,6 @@ public enum EntityType
 {
     Player,
     Enemy,
-    Loot,
+    Chest,
     Barrier
 }

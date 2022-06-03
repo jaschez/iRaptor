@@ -971,6 +971,7 @@ public class WorldGenerator
         return false;
     }
 
+    //Where every generator is assigned and the magic happens
     RoomGeneration CreateRoomGenerator(RoomNode room)
     {
         RoomGeneration generator;
@@ -993,6 +994,10 @@ public class WorldGenerator
 
             case RoomType.Shop:
                 generator = new ShopRoomGenerator(room, generationSeed, generationParameters.Level);
+                break;
+
+            case RoomType.Boss:
+                generator = new BossRoomGenerator(room, generationSeed, generationParameters.Level);
                 break;
 
             default:

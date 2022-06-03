@@ -7,7 +7,7 @@ public class DashDrop : Drop
 
     protected override void InitDrop()
     {
-        dropType = DropType.DashUnit;
+        dropType = DropType.ChargeUnit;
     }
 
     protected override void ActivateDrop()

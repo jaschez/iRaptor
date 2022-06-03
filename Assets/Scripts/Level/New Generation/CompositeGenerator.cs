@@ -161,6 +161,10 @@ public class CompositeGenerator
                     newRoom = new ShopRoom(newRoom);
                     break;
 
+                case RoomType.Boss:
+                    newRoom = new BossRoom(newRoom);
+                    break;
+
                 default:
                     break;
             }

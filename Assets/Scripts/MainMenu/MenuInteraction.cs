@@ -122,12 +122,8 @@ public class MenuInteraction : MonoBehaviour
         {
             DialogManager.GetInstance().StartDialogue("Console.Start");
         });
-    }
 
-    public void NewGame()
-    {
         SavingSystem.NewSave();
-        TransitionToLobby();
     }
 
     public void LoadGame()

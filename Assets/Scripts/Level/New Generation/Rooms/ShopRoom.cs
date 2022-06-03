@@ -3,7 +3,8 @@ using System.Collections.Generic;
 
 public class ShopRoom : RoomNode
 {
-    public List<Tuple<int, Coord>> Items;
+    public List<Tuple<DropType, Coord>> Items;
+    public Dictionary<DropType, int> Prices;
     public Coord NPC;
 
     public ShopRoom(RoomNode room) : base(room)
@@ -14,6 +15,10 @@ public class ShopRoom : RoomNode
     public override void Generate(RoomGeneration generator)
     {
         base.Generate(generator);
-        NPC = ((ShopRoomGenerator)generator).NPC;
+        ShopRoomGenerator shopRoomGenerator = (ShopRoomGenerator)generator;
+
+        NPC = shopRoomGenerator.NPC;
+        Items = shopRoomGenerator.Items;
+        Prices = shopRoomGenerator.Prices;
     }
 }

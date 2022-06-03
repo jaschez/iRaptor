@@ -1,32 +1,83 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
-public class Chest : MonoBehaviour, Interactable
+public abstract class Chest : Entity
 {
-    int cost = 20;
-
     PlayerModule player;
 
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField] GameObject particles;
+
+    [SerializeField] GameObject priceText;
+
+    GameObject priceInstance;
+
+    public int Price { get; protected set; } = 3;
+
+    protected override void InitEntity()
     {
+        SetEntityType(EntityType.Chest);
+        InitHealth(1);
+
         player = (PlayerModule)PlayerModule.GetInstance();
     }
 
-    // Update is called once per frame
-    void Update()
+    public void SetPrice(int price)
     {
-        
+        Price = price;
     }
 
-    public void Interact()
+    protected override void Start()
     {
-        bool result = player.SpendCarbonUnits(cost);
+        base.Start();
 
-        if (result) {
-            //Dar objeto a jugador
-            gameObject.SetActive(false);
+        transform.Rotate(Vector3.forward, Random.Range(-180, 180));
+        priceInstance = Instantiate(priceText, transform.position + Vector3.down * 10, Quaternion.identity);
+        priceInstance.GetComponent<TextMeshPro>().text = "Price: " + Price + " C";
+    }
+
+    private void FixedUpdate()
+    {
+        if (priceInstance != null)
+        {
+            priceInstance.transform.position = transform.position + Vector3.down * 10;
         }
     }
+
+    bool CanPurchase()
+    {
+        return player.GetCarbonUnits() >= Price;
+    }
+
+    protected override void Die()
+    {
+        if (CanPurchase())
+        {
+            SoundManager.Play(Sound.Break, transform.position);
+            base.Die();
+            player.SpendCarbonUnits(Price);
+
+            Instantiate(particles, player.transform.position, Quaternion.identity);
+
+            priceInstance.SetActive(false);
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Bullet"))
+        {
+            Vector2 direction = other.transform.rotation * Vector2.up;
+
+            GetComponent<Rigidbody2D>().AddForce(direction.normalized * 200, ForceMode2D.Impulse);
+        }
+    }
+}
+
+public enum ChestType
+{
+    Module,
+    Unit,
+    Weapon
 }

@@ -17,5 +17,8 @@ Adjusting propulsors...
 
 <<SetSpeaker Console>>
 <<ShowConsole>>
-Funciona
+<<SkipLines 1>>
+Displaying visual sample
+System ready for operation...
+<<SwitchScene 1>>
 ===
