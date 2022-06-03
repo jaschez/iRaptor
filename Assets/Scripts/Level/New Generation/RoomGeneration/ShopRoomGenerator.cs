@@ -25,7 +25,6 @@ public class ShopRoomGenerator : RoomGeneration
     void GenerateShop()
     {
         Items = new List<Tuple<DropType, Coord>>();
-        NPC = new Coord(Width / 2, Height / 2);
         Prices = new Dictionary<DropType, int>();
 
         //Calculate prices for this level
@@ -34,12 +33,14 @@ public class ShopRoomGenerator : RoomGeneration
         Prices.Add(DropType.Item, 30 + Level * 20);
 
         DropType[] neededChests = new DropType[] { DropType.HP, DropType.ChargeUnit, DropType.HP};
-        Coord placementStart = InterestingPoints[random.Next(0, InterestingPoints.Count)];
+        Coord placementStart = FloorCoords[random.Next(0, InterestingPoints.Count)];
         ObjectPlacement chestPlacement = new ObjectPlacement(random.Next(), Map, FloorCoords, placementStart);
+
+        NPC = chestPlacement.GenerateNextPoint(3);
 
         for (int i = 0; i < neededChests.Length; i++)
         {
-            Tuple<DropType, Coord> item = new Tuple<DropType, Coord>(neededChests[i], chestPlacement.GenerateNextPoint(3));
+            Tuple<DropType, Coord> item = new Tuple<DropType, Coord>(neededChests[i], chestPlacement.GenerateNextPoint(5));
             Items.Add(item);
         }
     }

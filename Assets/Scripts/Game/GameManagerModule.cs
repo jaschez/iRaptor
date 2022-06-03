@@ -225,6 +225,6 @@ public class GameManagerModule : MonoBehaviour
             yield return null;
         }
 
-        levelManager.Initialize(generator);
+        levelManager.Initialize(generator, storedPlayerState);
     }
 }

@@ -44,9 +44,9 @@ public class ObjectPlacement
 		spawnPoints.Add(origin);
 	}
 
-	public Coord GenerateNextPoint(int radius, int numSamplesBeforeRejection = 30)
+	public Coord GenerateNextPoint(int radius, int numSamplesBeforeRejection = 50)
 	{	
-		Coord candidate = new Coord(-1, -1);
+		Coord candidate = new Coord(0, 0);
 
 		if (spawnPoints.Count > 0)
 		{

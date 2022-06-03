@@ -10052,51 +10052,13 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5502033643283223097, guid: 7ee0567c291d0404c84c7f03c63c843c,
-        type: 3}
-      propertyPath: ChestObjects.Array.size
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 5502033643283223097, guid: 7ee0567c291d0404c84c7f03c63c843c,
-        type: 3}
-      propertyPath: summonPrefab
-      value: 
-      objectReference: {fileID: 2500553542046514500, guid: 801caa46d91bca74abac87d240bc506c,
-        type: 3}
-    - target: {fileID: 5502033643283223097, guid: 7ee0567c291d0404c84c7f03c63c843c,
-        type: 3}
-      propertyPath: ChestObjects.Array.data[0].Object
-      value: 
-      objectReference: {fileID: 6635085742792130267, guid: 34d237c13df68f74197b1671ee6056b7,
-        type: 3}
-    - target: {fileID: 5502033643283223097, guid: 7ee0567c291d0404c84c7f03c63c843c,
-        type: 3}
-      propertyPath: ChestObjects.Array.data[1].Type
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 5502033643283223097, guid: 7ee0567c291d0404c84c7f03c63c843c,
-        type: 3}
-      propertyPath: ChestObjects.Array.data[1].Object
-      value: 
-      objectReference: {fileID: 6708489913163776927, guid: 61e8669a76e9bbb48876ba6958ac8285,
-        type: 3}
-    - target: {fileID: 5502033643283223097, guid: 7ee0567c291d0404c84c7f03c63c843c,
-        type: 3}
-      propertyPath: ChestObjects.Array.data[2].Type
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 5502033643283223097, guid: 7ee0567c291d0404c84c7f03c63c843c,
-        type: 3}
-      propertyPath: ChestObjects.Array.data[2].Object
-      value: 
-      objectReference: {fileID: 1396650462001427531, guid: e25d9b66e13715c4b87b6024e93ba57a,
-        type: 3}
     - target: {fileID: 5502033643283223098, guid: 7ee0567c291d0404c84c7f03c63c843c,
         type: 3}
       propertyPath: m_Name
       value: LevelManager
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5502033643283223099, guid: 7ee0567c291d0404c84c7f03c63c843c, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 7ee0567c291d0404c84c7f03c63c843c, type: 3}
 --- !u!1001 &5620744548111874118
 PrefabInstance:

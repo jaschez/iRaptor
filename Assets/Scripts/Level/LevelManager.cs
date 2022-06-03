@@ -76,7 +76,7 @@ public class LevelManager : MonoBehaviour
         ExitHole.OnExitEnter -= AdvanceLevel;
     }
 
-    public void Initialize(WorldGenerator output)
+    public void Initialize(WorldGenerator output, PlayerState playerState)
     {
         this.output = output;
 
@@ -90,7 +90,11 @@ public class LevelManager : MonoBehaviour
 
         random = new System.Random(new System.Random(output.GraphInfo.GraphInfo.Seed).Next());
 
-        //LoadPlayerState(playerState);
+        if (gameManager.CurrentLevel != 0)
+        {
+            LoadPlayerState(playerState);
+        }
+    
         Generate();
 
         movManager.SetStartMode();
@@ -187,7 +191,7 @@ public class LevelManager : MonoBehaviour
                     foreach (Tuple<DropType, Coord> item in shopRoom.Items)
                     {
                         Vector3 itemPos = CoordToVect(item.Item2, room.Position);
-                        Chest chest = Instantiate(Chests[item.Item1], rewardPos, Quaternion.identity, lootParent.transform).GetComponent<Chest>();
+                        Chest chest = Instantiate(Chests[item.Item1], itemPos, Quaternion.identity, lootParent.transform).GetComponent<Chest>();
                         chest.SetPrice(shopRoom.Prices[item.Item1]);
                     }
                 }else if(room.Type == RoomType.Boss)

@@ -92,7 +92,7 @@ GameObject:
   - component: {fileID: 6708489913163776922}
   - component: {fileID: 6708489913163776921}
   - component: {fileID: 6708489913163776920}
-  - component: {fileID: 9143892252599627910}
+  - component: {fileID: 6357810577276397553}
   m_Layer: 11
   m_Name: ChargeChest
   m_TagString: Untagged
@@ -162,7 +162,7 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 28, y: 28}
   m_EdgeRadius: 0
---- !u!114 &9143892252599627910
+--- !u!114 &6357810577276397553
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -171,7 +171,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6708489913163776927}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0326bc95b5577ee48af6f45d057d2766, type: 3}
+  m_Script: {fileID: 11500000, guid: d5845a336819d8743b0e276c477e0309, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   particles: {fileID: 5152572285271017435, guid: 24e800f6776939c40a5257705e6ff448,
