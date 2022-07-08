@@ -65,22 +65,7 @@ public abstract class Gun : Shooter
 
         foreach (Projectile.Effect effect in ProjectileEffects)
         {
-            switch (effect)
-            {
-                case Projectile.Effect.Perforing:
-                    if (Random.Range(0, 10) < 2)
-                    {
-                        effects.Add(effect);
-                    }
-                    break;
-
-                case Projectile.Effect.Burning:
-                    if (Random.Range(0, 10) < 2)
-                    {
-                        effects.Add(effect);
-                    }
-                    break;
-            }
+            effects.Add(effect);
         }
 
         return effects.ToArray();

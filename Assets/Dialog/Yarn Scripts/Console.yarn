@@ -1,24 +1,32 @@
 title: Console.Start
 tags: 
 colorID: 0
-position: 390,-626
+position: 388,-628
 ---
 <<SetSpeed 100>>
-<<SkipLines 5>>
-System initializing XIRAPTOR registry
+<<SkipLines 8>>
+System initializing XIRAPTOR registry......|/-\|/-\|
 <<wait 1>>
-..
-..
-..
+--------------------------------------------
+Introducing startup sequence code
+TmV3IGJpb2xvZ2ljYWwgYXN0cm8gZGlzY292ZXJlZA==
+<<wait 1>>
+--------------------------------------------
+New wandering planet discovered
 <<wait 0.2>>
-Landing sequence initiaded...
-<<wait 1>>
+Biological activity detected
+<<wait 0.8>>
 Adjusting propulsors...
-
-<<SetSpeaker Console>>
-<<ShowConsole>>
-<<SkipLines 1>>
+<<wait 1>>
+<<SkipLines 2>>
 Displaying visual sample
-System ready for operation...
-<<SwitchScene 1>>
+System ready for new planetary research operation...
+<<wait 1>>
+<<SkipLines 4>>
+New objective saved in memory:
+<<wait 3>>
+<<ShowConsole>>
+--reach the core--
+<<wait 2>>
+<<SwitchScene 2>>
 ===

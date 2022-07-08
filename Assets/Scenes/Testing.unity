@@ -455,7 +455,7 @@ MonoBehaviour:
   height: 20
   time: 2
   fill: 56
-  seed: 73345295
+  seed: 62148573
   hasSeed: 1
 --- !u!4 &434656213
 Transform:

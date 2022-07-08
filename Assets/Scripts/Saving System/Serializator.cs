@@ -48,4 +48,11 @@ public static class Serializator<T>
             return default(T);
         }
     }
+
+    public static bool ExistsPath(string localPath)
+    {
+        string path = ABSOLUTE_PATH + localPath;
+
+        return File.Exists(path);
+    }
 }

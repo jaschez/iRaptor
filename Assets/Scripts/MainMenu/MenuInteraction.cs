@@ -28,6 +28,8 @@ public class MenuInteraction : MonoBehaviour
 
     public GameObject firstMenu;
 
+    public AudioSource introductionMusic;
+
     GameObject currentMenu;
     TextAnimator[] currentMenuAnimators;
 
@@ -71,6 +73,9 @@ public class MenuInteraction : MonoBehaviour
         IntegrateMatMenu.SetFloat("_Fade", 0);
 
         camPos.z = transform.position.z;
+
+        Cursor.lockState = CursorLockMode.Confined;
+        Cursor.visible = true;
     }
 
     // Update is called once per frame
@@ -116,20 +121,25 @@ public class MenuInteraction : MonoBehaviour
         shake.Goto(6f);
         shake.PlayBackwards();
 
-        SoundManager.FadeMixerVolume(AudioMixerType.None, 0, 3f);
+        SoundManager.FadeMixerVolume(AudioMixerType.GameMusic, 0, 3f);
+        //SoundManager.FadeMixerVolume(AudioMixerType.GameSound, 0, 3f);
 
         blackBg.DOFade(1, 2).SetDelay(3).OnComplete(()=>
         {
             DialogManager.GetInstance().StartDialogue("Console.Start");
         });
 
+        introductionMusic.Play();
+
         SavingSystem.NewSave();
     }
 
     public void LoadGame()
     {
-        SavingSystem.Initialize();
-        TransitionToLobby();
+        if (SavingSystem.ExistsData()) {
+            SavingSystem.Initialize();
+            TransitionToLobby();
+        }
     }
 
     void TransitionToLobby()

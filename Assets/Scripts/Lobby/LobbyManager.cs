@@ -42,7 +42,7 @@ public class LobbyManager : MonoBehaviour
     {
         transitionSystem = TransitionSystem.GetInstance();
         transitionSystem.SetTransitionColor(Color.black);
-        transitionSystem.Apply(TransitionSystem.Transition.FadeIn, 1);
+        transitionSystem.Apply(TransitionSystem.Transition.FadeIn, 1f);
 
         //Link each itemID to an item object
         List<ItemID> stockIDs = SavingSystem.CurrentState.StockItems;
@@ -55,6 +55,11 @@ public class LobbyManager : MonoBehaviour
         UIManager.GetInstance().Initialize();
 
         UpdateOrbsCounter();
+    }
+
+    void Update()
+    {
+
     }
 
     public bool UnlockItem(ItemData item)
@@ -72,6 +77,12 @@ public class LobbyManager : MonoBehaviour
                 SavingSystem.Save();
 
                 return true;
+            }
+            else
+            {
+                Debug.Log("Warning: object already bought");
+                SavingSystem.CurrentState.RemoveStockItem(item.ID);
+                SavingSystem.Save();
             }
         }
 

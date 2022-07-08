@@ -12,6 +12,8 @@ public class ObjectPlacement
 	List<Coord> points;
 	List<Coord> spawnPoints;
 
+	List<Coord> validPoints;
+
 	List<int> validCoordsID;
 
 	int[,] flagGrid;
@@ -33,6 +35,8 @@ public class ObjectPlacement
 		points = new List<Coord>();
 		spawnPoints = new List<Coord>();
 
+		validPoints = validCoords;
+
 		validCoordsID = new List<int>();
 
         foreach (Coord c in validCoords)
@@ -45,8 +49,9 @@ public class ObjectPlacement
 	}
 
 	public Coord GenerateNextPoint(int radius, int numSamplesBeforeRejection = 50)
-	{	
-		Coord candidate = new Coord(0, 0);
+	{
+		Coord result = validPoints[random.Next() % validPoints.Count];
+		Coord candidate;
 
 		if (spawnPoints.Count > 0)
 		{
@@ -72,6 +77,9 @@ public class ObjectPlacement
 					spawnPoints.Add(candidate);
 					flagGrid[candidate.x, candidate.y] = radius;
 					candidateAccepted = true;
+
+					result = candidate;
+
 					break;
 				}
 			}
@@ -82,12 +90,14 @@ public class ObjectPlacement
 			}
 		}
 
-		return candidate;
+		result.y -= 1;
+
+		return result;
 	}
 
 	bool IsValid(Coord candidate, int radius)
 	{
-		if (candidate.x >= 0 && candidate.x < width && candidate.y >= 0 && candidate.y < height)
+		if (candidate.x > 0 && candidate.x < width - 1 && candidate.y > 0 && candidate.y < height - 1)
 		{
 			int coordID = GetCoordID(candidate.x, candidate.y);
 			int neighbourID;
@@ -121,6 +131,26 @@ public class ObjectPlacement
 		}
 		return false;
 	}
+
+	public List<Coord> GetValidCoords()
+    {
+		List<Coord> valid = new List<Coord>();
+
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++)
+            {
+				Coord c = new Coord(i, j);
+
+				if (IsValid(c, 3))
+                {
+					valid.Add(c);
+                }
+            }
+        }
+
+		return valid;
+    }
 
 	public int GetCoordID(int x, int y)
 	{

@@ -236,7 +236,14 @@ public class WorldGenerator
                             roomCollided = CheckRoomCollision(room, locatedRooms);
                         }
 
-                        spaceness++;
+                        if (spaceness == 0)
+                        {
+                            spaceness = 3;
+                        }
+                        else
+                        {
+                            spaceness++;
+                        }
                     }
 
                     float distance = RoomDistance(room, startRoom);
@@ -778,7 +785,13 @@ public class WorldGenerator
                     }
                 }
 
-                spaceness++;
+                if (spaceness == 0) {
+                    spaceness = 3;
+                }
+                else
+                {
+                    spaceness++;
+                }
             }
 
             //Add entries in room local positions, betwen previous and current room

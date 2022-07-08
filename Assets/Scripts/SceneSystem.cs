@@ -14,9 +14,10 @@ public static class SceneSystem
 
     public enum GameScenes
     {
-        MainMenu = 0,
-        Lobby = 1,
-        Level = 2,
-        LoadedLevel = 3
+        Intro,
+        MainMenu,
+        Lobby,
+        Level,
+        LoadedLevel
     }
 }

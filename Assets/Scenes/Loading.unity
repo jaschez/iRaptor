@@ -892,14 +892,31 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2487297875709227581, guid: 7e248d8a2a0df654d8fe0b3c27c1b80d,
         type: 3}
+      propertyPath: enemyRoomSettings.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2487297875709227581, guid: 7e248d8a2a0df654d8fe0b3c27c1b80d,
+        type: 3}
       propertyPath: RandomSeed
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2487297875709227581, guid: 7e248d8a2a0df654d8fe0b3c27c1b80d,
         type: 3}
       propertyPath: UniversalSeed
       value: 1330296229
       objectReference: {fileID: 0}
+    - target: {fileID: 2487297875709227581, guid: 7e248d8a2a0df654d8fe0b3c27c1b80d,
+        type: 3}
+      propertyPath: enemyRoomSettings.Array.data[2]
+      value: 
+      objectReference: {fileID: 11400000, guid: 248456ff87878cf409ec6db40fb376b1,
+        type: 2}
+    - target: {fileID: 2487297875709227581, guid: 7e248d8a2a0df654d8fe0b3c27c1b80d,
+        type: 3}
+      propertyPath: enemyRoomSettings.Array.data[1]
+      value: 
+      objectReference: {fileID: 11400000, guid: 248456ff87878cf409ec6db40fb376b1,
+        type: 2}
     - target: {fileID: 2487297875709227582, guid: 7e248d8a2a0df654d8fe0b3c27c1b80d,
         type: 3}
       propertyPath: m_LocalPosition.x

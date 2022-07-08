@@ -9,7 +9,7 @@ public abstract class Projectile : MonoBehaviour, IPooledObject
 
     protected Rigidbody2D rb;
 
-    public Vector2 Orientation { get; private set; }
+    public Vector2 Orientation { get; protected set; }
     public int Damage { get; private set; }
     public int MaxBounces { get; protected set; }
     public int CurrentBounces { get; protected set; }
@@ -19,7 +19,7 @@ public abstract class Projectile : MonoBehaviour, IPooledObject
 
     public bool EnemyBullet { get; private set; } = false;
 
-    Effect[] effects;
+    protected Effect[] effects;
 
     void Awake()
     {
@@ -214,7 +214,9 @@ public abstract class Projectile : MonoBehaviour, IPooledObject
     public enum Effect
     {
         Burning,
-        Perforing
+        Perforing,
+        Attraction,
+        Reflective
     }
 }
 

@@ -17,6 +17,8 @@ public class DialogManager : MonoBehaviour
     DialogueRunner dialogueRunner;
     DialogueUI dialogueUI;
 
+    InMemoryVariableStorage variableStorage;
+
     Dictionary<string, SpeakerData> speakers;
 
     Sound talkingSound = Sound.None;
@@ -36,12 +38,16 @@ public class DialogManager : MonoBehaviour
 
         dialogueRunner = GetComponent<DialogueRunner>();
         dialogueUI = GetComponent<DialogueUI>();
+        variableStorage = GetComponent<InMemoryVariableStorage>();
 
         dialogueRunner.AddCommandHandler("SetSpeaker", SetSpeaker);
         dialogueRunner.AddCommandHandler("ShowConsole", ShowConsole);
         dialogueRunner.AddCommandHandler("SetSpeed", SetSpeed);
         dialogueRunner.AddCommandHandler("SkipLines", SkipLines);
+        dialogueRunner.AddCommandHandler("Random", RandomValue);
         dialogueRunner.AddCommandHandler("SwitchScene", SwitchScene);
+
+        variableStorage.SetValue("random",1);
     }
 
     public void StartDialogue(string startNode)
@@ -108,8 +114,17 @@ public class DialogManager : MonoBehaviour
     void SwitchScene(string[] param)
     {
         int sceneNumber = int.Parse(param[0]);
+
+        SoundManager.FadeMixerVolume(AudioMixerType.None, 0, 1);
         TransitionSystem.GetInstance().SetTransitionColor(Color.black);
         TransitionSystem.GetInstance().SwitchToScene((SceneSystem.GameScenes)sceneNumber, TransitionSystem.Transition.FadeOut, 1f);
+    }
+
+    void RandomValue(string[] param)
+    {
+        int maxValue = int.Parse(param[0]);
+
+        variableStorage.SetValue("random", Random.Range(0, 3));
     }
 
     void SetSpeed(string[] param)

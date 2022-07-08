@@ -84,9 +84,11 @@ public class SoundManager : MonoBehaviour
         {
             if (mixer != AudioMixerType.None)
             {
-                if (audio.outputAudioMixerGroup.GetHashCode() == instance.mixerDictionary[mixer].GetHashCode())
-                {
-                    FadeVolume(audio, endValue, time);
+                if (audio.outputAudioMixerGroup != null) {
+                    if (audio.outputAudioMixerGroup.GetHashCode() == instance.mixerDictionary[mixer].GetHashCode())
+                    {
+                        FadeVolume(audio, endValue, time);
+                    }
                 }
             }
             else

@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a734034badcbd9644b310b32f387fee0, type: 3}
+  m_Name: ReflectiveShell
+  m_EditorClassIdentifier: 
+  Name: Reflective shell
+  Description: Bounce off the wall
+  Price: 3
+  Level: 0
+  Image: {fileID: -2097714645771690852, guid: cc31ff96a47ccc646a432f449f7396af, type: 3}
+  ID: 3

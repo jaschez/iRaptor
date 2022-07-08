@@ -16,5 +16,7 @@ public class ItemData : ScriptableObject
 public enum ItemID
 {
     Drill,
-    Molotovic
+    Molotovic,
+    Biodetector,
+    ReflectiveShell
 }

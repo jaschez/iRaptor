@@ -15,6 +15,12 @@
 
         CurrentState.AddStockItem(ItemID.Drill);
         CurrentState.AddStockItem(ItemID.Molotovic);
+        CurrentState.AddStockItem(ItemID.Biodetector);
+        CurrentState.AddStockItem(ItemID.ReflectiveShell);
+
+        CurrentState.AddUnlockedItem(ItemID.Biodetector);
+        CurrentState.AddUnlockedItem(ItemID.ReflectiveShell);
+        CurrentState.AddUnlockedItem(ItemID.Molotovic);
 
         CurrentState.AddOrbs(10);
 
@@ -34,5 +40,10 @@
     public static void Save()
     {
         Serializator<GameState>.Save(CurrentState, DATAFILE);
+    }
+
+    public static bool ExistsData()
+    {
+        return Serializator<GameState>.ExistsPath(DATAFILE);
     }
 }

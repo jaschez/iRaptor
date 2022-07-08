@@ -1,17 +1,44 @@
 title: Pancorb.Start
 tags: 
 colorID: 0
-position: 189,-1037
+position: 188,-1039
 ---
 <<SetSpeaker Pancorb>>
 <<SetSpeed 100>>
-<<SkipLines 2>>
-<<if $met neq 1>>
-It's a good rotating planet cycle to be desintegrated by numbrians,
-Isn't it?
-<<set $met to 1>>
-<<else>>
-I don't really know what is making people search in the inners of this astral body
-But trust me, that is no good for them
+<<if $met eq 0>>
+    G'day stranger!
+    I'm not sure about what are you really looking for down here.
+    I mean, all the floors are filled with great danger,
+    (Lots of dumb creatures defending their territory)
+    There's no way you can get out of there alive. Unless well... 
+    You know, you can close the game, which is the most logical thing to do so far.
+    Anyway, the rumours say that the very inner of this planet is full of surprises.
+    Might be worth to take a look? I dunno mate, you're talking with a biped frog after all.
+    I don't seek for bounties, just came here to rest and grab some tasty slimes in the way.
+    *Burp*
+    <<set $met to 1>>
+<<elseif $met eq 1>>
+    You may be wondering what is that sparky thing in front of me...
+    Well, don't ask me why, but this is not a normal planet.
+    There is some kind of magical field surrounding this whole wasteland
+    And this is one of the many representations of magical accumulations, 
+    Might be interesting if it could be used as some sort of power source...
+    <<set $met to 2>>
+<<elseif $met eq 2>>
+    I don't really know what is making so many intergalactic forces search inside this astral body...
+    But trust me, that is no good for them.
+    <<set $met to 3>>
+<<elseif $met eq 3>>
+    Have you ever thought about where do we come from?
+    ...
+    Well, it's pretty easy to say for you.
+    But you have to think a bit more outside of the box.
+    <<set $met to 4>>
+<<elseif $met eq 4>>
+    Are you looking for some conversation or something?
+    I can tell you the names of all my baby tadpoles, but you may suffer from memory overloading.
+    <<set $met to 5>>
+<<elseif $met eq 5>>
+    Croac.
 <<endif>>
 ===

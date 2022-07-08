@@ -6,7 +6,7 @@ public class TransitionSystem : MonoBehaviour
 {
 	private static TransitionSystem instance;
 
-	private Texture2D texture;
+	private static Texture2D texture;
 
 	private Color guiColor;
 
@@ -46,13 +46,21 @@ public class TransitionSystem : MonoBehaviour
 		guiColor.a = alpha;
 	}
 
-	public void SetTransitionTexture(Texture2D texture)
+	public void SetTransitionTexture(Texture2D newTexture)
 	{
-		this.texture = texture;
+		texture = newTexture;
+	}
+
+	public void Clear()
+    {
+		guiColor.a = 0;
 	}
 
 	public void Apply(Transition transitionType, float time)
     {
+		StopAllCoroutines();
+		DOTween.KillAll();
+
         switch (transitionType)
         {
 			case Transition.FadeIn:

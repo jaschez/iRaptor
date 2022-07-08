@@ -42,6 +42,8 @@ public class ForceField : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        TransitionSystem.GetInstance().Clear();
+
         forceObjs = new GameObject[size, size];
         xOffset = new int[size];
         yOffset = new int[size];
@@ -100,7 +102,7 @@ public class ForceField : MonoBehaviour
 
     void PreFade()
     {
-        Invoke("StartFade", 2f);
+        StartFade();
     }
 
     void StartFade()

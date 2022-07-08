@@ -18,6 +18,8 @@ public class DashModule : MonoBehaviour
 
     bool locked = false;
 
+    bool dashing = false;
+
     private void Start()
     {
         movement = GetComponent<Movement>();
@@ -42,6 +44,11 @@ public class DashModule : MonoBehaviour
     public void Unlock()
     {
         locked = false;
+    }
+
+    public bool IsDashing()
+    {
+        return dashing;
     }
 
     private void Use()
@@ -135,6 +142,8 @@ public class DashModule : MonoBehaviour
 
         ResizeAnimation();
 
+        dashing = true;
+
         transform.DOPath(path, finalDuration, PathType.Linear).SetEase(Ease.Linear)
             .OnComplete(()=>
             {
@@ -147,8 +156,8 @@ public class DashModule : MonoBehaviour
                 renderObj.DOScaleY(1.5f, .08f).OnComplete(() =>
                 {
                     renderObj.DOScaleY(1f, .3f).SetEase(Ease.OutElastic);
+                    dashing = false;
                 });
-
             });
     }
 

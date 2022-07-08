@@ -14,6 +14,17 @@ public class EnemyBullet : Projectile
         SetEnemyBullet(true);
     }
 
+    protected override void OnEntityImpact(Entity entity)
+    {
+        if (entity.GetEntityType() == EntityType.Player)
+        {
+            if (!entity.GetComponent<DashModule>().IsDashing())
+            {
+                ImpactEntity(entity);
+            }
+        }
+    }
+
     protected override void MovementUpdate()
     {
 

@@ -35,6 +35,11 @@ public class AttackModule : Gun
         player.OnEntityEvent += OnPlayerEvent;
 
         movementManager = Movement.GetInstance();
+
+        /*
+        AddEffectFromItem(ItemID.Biodetector);
+        AddEffectFromItem(ItemID.ReflectiveShell);
+        */
     }
 
     void Update()
@@ -66,7 +71,7 @@ public class AttackModule : Gun
         }
     }
 
-    void AddEffectFromItem(ItemID itemID)
+    public void AddEffectFromItem(ItemID itemID)
     {
         switch (itemID)
         {
@@ -76,6 +81,14 @@ public class AttackModule : Gun
 
             case ItemID.Molotovic:
                 AddEffect(Projectile.Effect.Burning);
+                break;
+
+            case ItemID.Biodetector:
+                AddEffect(Projectile.Effect.Attraction);
+                break;
+
+            case ItemID.ReflectiveShell:
+                AddEffect(Projectile.Effect.Reflective);
                 break;
 
             default:

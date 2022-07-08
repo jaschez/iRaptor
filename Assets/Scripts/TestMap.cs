@@ -78,9 +78,19 @@ public class TestMap : MonoBehaviour
 
         ObjectPlacement placer = new ObjectPlacement(Random.Range(-99999, 99999), new TileType[width, height], floor, floor[Random.Range(0, floor.Count)]);
 
+        List<Coord> valid = placer.GetValidCoords();
+
+        foreach (Coord c in valid)
+        {
+            Vector3 pos = CoordToVect(c, new Coord(0, 0));
+
+            //Instantiate(placeholder, pos, Quaternion.identity, parent.transform);
+        }
+
         for (int i = 0; i < 10; i++)
         {
             Coord place = placer.GenerateNextPoint(3);
+            Debug.Log(place.x + "," + place.y);
 
             Vector3 pos = CoordToVect(place, new Coord(0, 0));
 
@@ -149,7 +159,7 @@ public class TestMap : MonoBehaviour
             {
                 if (xOff != x || yOff != y)
                 {
-                    if (xOff < width && xOff >= 0 && yOff < height && yOff >= 0)
+                    if (xOff < width - 1 && xOff > 0 && yOff < height - 1 && yOff > 0)
                     {
                         if (map[xOff, yOff])
                         {

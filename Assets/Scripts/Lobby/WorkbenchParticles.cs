@@ -171,11 +171,11 @@ public class WorkbenchParticles : MonoBehaviour, Interactable
     {
         bool result = LobbyManager.GetInstance().UnlockItem(lobbyItem.itemData);
         
-        if (result)
-        {
-            lobbyItem.gameObject.SetActive(false);
-            totalAvailable--;
-        }
+        //if (result)
+        //{
+        lobbyItem.gameObject.SetActive(false);
+        totalAvailable--;
+        //}
     }
 
     public void Interact()

@@ -44,8 +44,7 @@ public class PauseMenu : MonoBehaviour
     {
         if (paused)
         {
-            Cursor.visible = true;
-
+            Movement.GetInstance().Lock();
             Controls.AllowControls(false);
 
             pauseMenu.SetActive(true);
@@ -54,9 +53,8 @@ public class PauseMenu : MonoBehaviour
         }
         else
         {
-            Cursor.visible = false;
-
             Controls.AllowControls(true);
+            Movement.GetInstance().Unlock();
 
             pauseMenu.SetActive(false);
 

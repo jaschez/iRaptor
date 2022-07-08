@@ -33,6 +33,7 @@ public class GameOverUI : MonoBehaviour
     public void Return()
     {
         if (canInteract) {
+            GameManagerModule.GetInstance().Reset();
             TransitionSystem.GetInstance().SwitchToScene(SceneSystem.GameScenes.Lobby, TransitionSystem.Transition.FadeOut, .4f);
             canInteract = false;
         }
@@ -42,6 +43,7 @@ public class GameOverUI : MonoBehaviour
     {
         if (canInteract)
         {
+            GameManagerModule.GetInstance().Reset();
             TransitionSystem.GetInstance().SwitchToScene(SceneSystem.GameScenes.Level, TransitionSystem.Transition.FadeOut, .4f);
             canInteract = false;
         }

@@ -58,6 +58,11 @@ public class GameManagerModule : MonoBehaviour
             Destroy(this);
         }
 
+        Initialize();
+    }
+
+    void Initialize()
+    {
         if (RandomSeed)
         {
             UniversalSeed = new System.Random().Next();
@@ -147,9 +152,8 @@ public class GameManagerModule : MonoBehaviour
         switch (scene.name)
         {
             case "Loading":
-                OnLoadingSceneFade();
-                //Invoke("StartGeneration", 3f);
-                StartGeneration();
+                Invoke("StartGeneration", 2f);
+                //StartGeneration();
                 break;
 
             case "Game":
@@ -185,6 +189,7 @@ public class GameManagerModule : MonoBehaviour
     void FinishLevelGeneration(WorldGenerator output)
     {
         generator = output;
+        OnLoadingSceneFade();
 
         //Do something
 
@@ -200,6 +205,11 @@ public class GameManagerModule : MonoBehaviour
         CurrentLevel++;
 
         SceneManager.LoadScene("Loading");
+    }
+
+    public void Reset()
+    {
+        Initialize();
     }
 
     void CreateSeeds()

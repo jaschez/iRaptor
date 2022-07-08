@@ -119,6 +119,7 @@ public class PlayerModule : Entity
             for (int replica = 0; replica < items[item]; replica++)
             {
                 inventory.AddItem(item.ID);
+                AttackModule.GetInstance().AddEffectFromItem(item.ID);
             }
         }
     }
