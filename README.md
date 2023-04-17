@@ -1,4 +1,4 @@
-#iRaptor: Development of a space-themed roguelite with procedural generated levels
+# iRaptor: Development of a space-themed roguelite with procedural generated levels
 
 In this work it is shown, through different phases, a complete videoga-
 me development process, inspired by many current roguelikes, with levels
